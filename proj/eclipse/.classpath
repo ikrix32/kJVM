@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="java/graphics/|platform/arduinomega/|platform/avr8/|platform/avr32-linux/|platform/avr32-linux/|platform/charon/|platform/evk1100/|platform/evk1104/|platform/linux/|platform/ngw100/|platform/stk1000/" kind="src" path="JAVABOOTCLASSES/sources"/>
+	<classpathentry excluding="A.java|AM.java|Aparent.java|B.java|C.java|Charon.java|D.java|EVK1100.java|EVK1104a.java|EVK1104b.java|InterruptTest.java|STK1000.java|XM.java|XP.java" kind="src" path="JAVATESTS"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

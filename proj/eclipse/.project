@@ -20,5 +20,10 @@
 			<type>2</type>
 			<location>/Volumes/DataHDD/work/git/kJVM/JAVABOOTCLASSES</location>
 		</link>
+		<link>
+			<name>JAVATESTS</name>
+			<type>2</type>
+			<location>/Volumes/DataHDD/work/git/kJVM/JAVATESTS</location>
+		</link>
 	</linkedResources>
 </projectDescription>
