@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="platform/arduinomega/|platform/avr8/|platform/charon/|platform/evk1100/|platform/evk1104/|platform/linux/|platform/ngw100/|platform/stk1000/|java/graphics/" kind="src" path="JAVABOOTCLASSES/sources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
