@@ -59,119 +59,119 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Object.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Object.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/platform/PlatForm.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/platform/PlatForm.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/io/InStream.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/io/InStream.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/io/OutStream.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/io/OutStream.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Boolean.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Boolean.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Byte.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Byte.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Float.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Float.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Character.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Character.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Integer.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Integer.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Short.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Short.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/String.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/String.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/StringBuffer.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/StringBuffer.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/StringBuilder.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/StringBuilder.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Error.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Error.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Exception.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Exception.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/RuntimeException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/RuntimeException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/ArithmeticException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/ArithmeticException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/ArrayIndexOutOfBoundsException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/ArrayIndexOutOfBoundsException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/CharSequence.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/CharSequence.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/ClassCastException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/ClassCastException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/IllegalArgumentException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/IllegalArgumentException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/InterruptedException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/InterruptedException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Math.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Math.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/NullPointerException.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/NullPointerException.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Runtime.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Runtime.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Thread.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Thread.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/Throwable.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Throwable.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/java/lang/System.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/System.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/java/bajos08/bin/HelloWorld.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld.class"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

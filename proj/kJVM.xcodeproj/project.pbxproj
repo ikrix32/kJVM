@@ -37,6 +37,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4E9A38321A91400C00665CC3 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4EB8F7481A8FD0E3001C885A /* kJVM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kJVM; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EB8F7B31A9128E6001C885A /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
 		4EB8F7B51A9128E6001C885A /* native.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = native.c; sourceTree = "<group>"; };
@@ -137,6 +138,7 @@
 				4EB8F7B51A9128E6001C885A /* native.c */,
 				4EB8F7B61A9128E6001C885A /* native.h */,
 				4EB8F7B71A9128E6001C885A /* platform.h */,
+				4E9A38321A91400C00665CC3 /* config.h */,
 			);
 			name = LINUX;
 			path = ../PLATFORMS/LINUX;

@@ -5,9 +5,7 @@
 #ifndef __LIMITS__
 #define __LIMITS__
 
-#define LINUX 1//krix
-#define __i386__ 1
-#undef DEBUG
+#include "config.h"
 
 #ifdef AVR8
 #define MAXCLASSES          20
