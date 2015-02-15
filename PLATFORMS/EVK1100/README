@@ -1,0 +1,2 @@
+do not use board.h!!!
+there are conflicts with norwegian preprocessor directives

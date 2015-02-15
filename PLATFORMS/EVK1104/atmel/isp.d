@@ -1,0 +1,1 @@
+-ffunction-sections: PLATFORMS/EVK1104/atmel/isp.c

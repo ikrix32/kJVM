@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="java/graphics/|platform/arduinomega/|platform/avr8/|platform/evk1104/|platform/charon/|platform/evk1100/|platform/ngw100/|platform/stk1000/|platform/xmega/|platform/linux/|platform/avr32-linux/|platform/avr32-linux/" kind="src" path="JAVABOOTCLASSES/sources"/>
+	<classpathentry excluding="A.java|AM.java|Aparent.java|B.java|Breed.java|C.java|Charon.java|D.java|EEE.java|EVK1100.java|EVK1104.java|EVK1104a.java|EVK1104b.java|FFF.java|GGG.java|HHH.java|LockSimple.java|LockTest.java|My.java|NGW100.java|ProducerConsumer.java|SchedulerTest.java|SpinLockTest.java|STK1000.java|XM.java|InterruptTest.java" kind="src" path="JAVATESTS"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
