@@ -1,5 +1,4 @@
 package java.lang;
 
-public class ArrayIndexOutOfBoundsException extends RuntimeException
-{
+public class ArrayIndexOutOfBoundsException extends RuntimeException {
 }

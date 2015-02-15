@@ -17,7 +17,8 @@ public final class Character {
 	}
 
 	public boolean equals(Object obj) {
-		return obj instanceof Character && ((Character) obj).charvalue == this.charvalue;
+		return obj instanceof Character
+				&& ((Character) obj).charvalue == this.charvalue;
 	}
 
 	public String toString() {
@@ -67,7 +68,8 @@ public final class Character {
 	}
 
 	public static boolean isIdentifierIgnorable(char ch) {
-		return (ch >= (char) 0x00 && ch <= (char) 0x08) || (ch >= (char) 0xE && ch <= (char) 0x1B);
+		return (ch >= (char) 0x00 && ch <= (char) 0x08)
+				|| (ch >= (char) 0xE && ch <= (char) 0x1B);
 	}
 
 	public static char toLowerCase(char ch) {
@@ -81,23 +83,28 @@ public final class Character {
 	public static int digit(char ch, int radix) {
 		if (MIN_RADIX >= radix || radix > MAX_RADIX) {
 			return -1;
-		} 
-		int val = isDigit(ch) ? ( (int) ch - (int) '0' ) : ( (int) toLowerCase(ch) - (int) 'a' );
+		}
+		int val = isDigit(ch) ? ((int) ch - (int) '0')
+				: ((int) toLowerCase(ch) - (int) 'a');
 		return (val >= radix) ? -1 : val;
 	}
 
 	public static boolean isSpace(char ch) {
-		return ch == (char) 0x09 || ch == (char) 0x0A || ch == (char) 0x0C || ch == (char) 0x0D || ch == (char) 0x20;
+		return ch == (char) 0x09 || ch == (char) 0x0A || ch == (char) 0x0C
+				|| ch == (char) 0x0D || ch == (char) 0x20;
 	}
 
 	public static boolean isISOControl(char ch) {
-		return (0x00 <= (int) ch && (int) ch <= 0x1F) || (0x7f <= (int) ch && (int) ch <= 0x9f);
+		return (0x00 <= (int) ch && (int) ch <= 0x1F)
+				|| (0x7f <= (int) ch && (int) ch <= 0x9f);
 	}
 
 	public static char forDigit(int digit, int radix) {
-		if (MIN_RADIX < radix || radix > MAX_RADIX || digit < 0 || digit >= radix) {
+		if (MIN_RADIX < radix || radix > MAX_RADIX || digit < 0
+				|| digit >= radix) {
 			return (char) 0;
-		} 
-		return (char) ((digit >= 10) ? ((int) 'a' + digit - 10) : ((int) '0' + digit));
+		}
+		return (char) ((digit >= 10) ? ((int) 'a' + digit - 10)
+				: ((int) '0' + digit));
 	}
 }

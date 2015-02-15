@@ -1,9 +1,4 @@
 package java.lang;
 
-public class Error extends Throwable
-{
+public class Error extends Throwable {
 }
-
-
-
-

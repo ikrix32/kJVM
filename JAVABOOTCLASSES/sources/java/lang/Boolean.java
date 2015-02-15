@@ -23,7 +23,8 @@ public final class Boolean {
 	}
 
 	public boolean equals(Object obj) {
-		return obj instanceof Boolean && ((Boolean) obj).boolval == this.boolval;
+		return obj instanceof Boolean
+				&& ((Boolean) obj).boolval == this.boolval;
 	}
 
 	public boolean booleanValue() {

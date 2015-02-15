@@ -1,4 +1,5 @@
 package java.io;
+
 import platform.PlatForm;
 import java.lang.*;
 
@@ -14,7 +15,7 @@ public class OutStream {
 	}
 
 	public synchronized void print(String s) {
-		for (int i = 0 ; i < s.length() ; i++) {
+		for (int i = 0; i < s.length(); i++) {
 			print(s.charAt(i));
 		}
 	}
@@ -26,7 +27,6 @@ public class OutStream {
 	public synchronized void print(float f) {
 		print(Float.toString(f));
 	}
-
 
 	public synchronized void print(boolean b) {
 		print(Boolean.toString(b));
