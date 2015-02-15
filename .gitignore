@@ -6,3 +6,5 @@
 .settings/org.eclipse.ltk.core.refactoring.prefs
 
 .cproject
+
+proj/kJVM.xcodeproj/project.xcworkspace/xcshareddata/kJVM.xccheckout
