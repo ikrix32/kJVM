@@ -108,14 +108,14 @@ void run()                                        /* in: classNumber,  methodNum
             case ICONST_5:
             {
                 DEBUGPRINTLN("ICONST_%4x -> push\t...,=> %4x",code-ICONST_0,code - ICONST_0);
-                opStackPush((slot)(s4)(code - ICONST_0));
+                opStackPush(toSlot((s4)(code - ICONST_0)));
             }break;
             case FCONST_0:
             case FCONST_1:
             case FCONST_2:
             {
                 DEBUGPRINTLN("FCONST_%d  -> push\t...,=> %f",code - FCONST_0,(f4)(code - FCONST_0));
-                opStackPush((slot)(f4)(code - FCONST_0));
+                opStackPush(toSlot((f4)(code - FCONST_0)));
             }break;
             case BIPUSH:
             {
@@ -124,13 +124,13 @@ void run()                                        /* in: classNumber,  methodNum
                 /* reads a signed 8 bit constant from byte1,*/
                 /* extends it to int signed (32bit)*/
                 /* and saves it on stack*/
-                opStackPush((slot)(((getU1(pc) & 0x80) >> 7) * 0xffffff80 | (getU1(0)
+                opStackPush(toSlot(((getU1(pc) & 0x80) >> 7) * 0xffffff80 | (getU1(0)
                                                                              & 0x7f)));
             }break;
             case SIPUSH:
             {
                 DEBUGPRINTLN("SIPUSH  -> push\t...,=> %x",(s2)BYTECODEREF);
-                opStackPush((slot)((s4)((s2) getU2(0))));
+                opStackPush(toSlot((s4)((s2) getU2(0))));
             }break;
             case LDC:
             {
@@ -143,7 +143,7 @@ void run()                                        /* in: classNumber,  methodNum
                     opStackPush(first);
                 } else
                 /* int or float const value on stack*/
-                    opStackPush((slot) getU4(CP(cN, byte1) + 1));
+                    opStackPush(toSlot( getU4(CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN(",=> x%x", opStackPeek().UInt);
             }break;
             case LDC_W:
@@ -389,34 +389,34 @@ void run()                                        /* in: classNumber,  methodNum
             case IADD:
             {
                 DEBUGPRINTLN("IADD");
-                opStackPoke((slot)(opStackPop().Int + opStackPeek().Int));
+                opStackPoke(toSlot((opStackPop().Int + opStackPeek().Int)));
             }break;
             case FADD:
             {
                 DEBUGPRINTLN("FADD");
-                opStackPoke((slot)(opStackPop().Float + opStackPeek().Float));
+                opStackPoke(toSlot((opStackPop().Float + opStackPeek().Float)));
             }break;
             case ISUB:
             {
                 DEBUGPRINTLN("ISUB");
                 first = opStackPop();             /*mb fj changed substraction order*/
-                opStackPoke((slot)(opStackPeek().Int - first.Int));
+                opStackPoke(toSlot((opStackPeek().Int - first.Int)));
             }break;
             case FSUB:
             {
                 DEBUGPRINTLN("Fsub");
                 first = opStackPop();             /*mb fj changed substraction order*/
-                opStackPoke((slot)(opStackPeek().Float - first.Float));
+                opStackPoke(toSlot((opStackPeek().Float - first.Float)));
             }break;
             case IMUL:
             {
                 DEBUGPRINTLN("IMUL");
-                opStackPoke((slot)(opStackPop().Int * opStackPeek().Int));
+                opStackPoke(toSlot((opStackPop().Int * opStackPeek().Int)));
             }break;
             case FMUL:
             {
                 DEBUGPRINTLN("FMUL");
-                opStackPoke((slot)(opStackPop().Float * opStackPeek().Float));
+                opStackPoke(toSlot((opStackPop().Float * opStackPeek().Float)));
             }break;
             case IDIV:
             {
@@ -425,7 +425,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (first.Int == 0)
                     ARITHMETICEXCEPTION;
                 else
-                    opStackPush((slot)(opStackPop().Int / first.Int));
+                    opStackPush(toSlot((opStackPop().Int / first.Int)));
             }break;
             case FDIV:
             {
@@ -434,7 +434,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (first.Float == 0.0)
                     ARITHMETICEXCEPTION;
                 else
-                    opStackPoke((slot)(opStackPeek().Float / first.Float));
+                    opStackPoke(toSlot((opStackPeek().Float / first.Float)));
             }break;
             case IREM:
             {
@@ -442,7 +442,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (((first = opStackPop()).Int) == 0)
                     ARITHMETICEXCEPTION;
                 else
-                    opStackPoke((slot)(opStackPeek().Int % first.Int));
+                    opStackPoke(toSlot((opStackPeek().Int % first.Int)));
             }break;
             case FREM:
             {
@@ -450,52 +450,52 @@ void run()                                        /* in: classNumber,  methodNum
                 float divisor = opStackPop().Float;
                 float dividend = opStackPop().Float;
                 int q = dividend / divisor;
-                opStackPush((slot)(f4)(dividend - (divisor * q)));
+                opStackPush(toSlot((f4)(dividend - (divisor * q))));
             }break;
             case INEG:
             {
                 DEBUGPRINTLN("INEG");
-                opStackPoke((slot)(-opStackPeek().Int));
+                opStackPoke(toSlot(-opStackPeek().Int));
             }break;
             case FNEG:
             {
                 DEBUGPRINTLN("FNEG");
-                opStackPoke((slot)(-opStackPeek().Float));
+                opStackPoke(toSlot(-opStackPeek().Float));
             }break;
             case ISHL:
             {
                 DEBUGPRINTLN("ISHL");
-                opStackPoke((slot)(opStackPop().UInt << opStackPeek().UInt));
+                opStackPoke(toSlot(opStackPop().UInt << opStackPeek().UInt));
             }break;
             case ISHR:
             {
                 DEBUGPRINTLN("ISHR");
-                opStackPoke((slot)(opStackPop().Int >> opStackPeek().Int));
+                opStackPoke(toSlot(opStackPop().Int >> opStackPeek().Int));
             }break;
             case IUSHR:
             {
                 DEBUGPRINTLN("IUSHR");
-                first = (slot)(opStackPop().Int & 0x0000001f);
+                first = toSlot(opStackPop().Int & 0x0000001f);
                 second = opStackPop();
                 if (second.Int < 0)
-                    opStackPush((slot)((second.Int >> first.Int) + (2 << ~first.Int)));
+                    opStackPush(toSlot((second.Int >> first.Int) + (2 << ~first.Int)));
                 else
-                    opStackPush((slot)(second.Int >> first.Int));
+                    opStackPush(toSlot(second.Int >> first.Int));
             }break;
             case IAND:
             {
                 DEBUGPRINTLN("IAND");
-                opStackPoke((slot)(opStackPop().UInt & opStackPeek().UInt));
+                opStackPoke(toSlot(opStackPop().UInt & opStackPeek().UInt));
             }break;
             case IOR:
             {
                 DEBUGPRINTLN("IOR");
-                opStackPoke((slot)(opStackPop().UInt | opStackPeek().UInt));
+                opStackPoke(toSlot(opStackPop().UInt | opStackPeek().UInt));
             }break;
             case IXOR:
             {
                 DEBUGPRINTLN("IXOR");
-                opStackPoke((slot)(opStackPop().UInt ^ opStackPeek().UInt));
+                opStackPoke(toSlot(opStackPop().UInt ^ opStackPeek().UInt));
             }break;
             case IINC:
             {
@@ -503,7 +503,7 @@ void run()                                        /* in: classNumber,  methodNum
                 /* position*/
                 opStackSetValue((u2)(local + byte1),
                                 /* old value*/
-                                (slot)((s4)(opStackGetValue(local + byte1).Int
+                                toSlot((s4)(opStackGetValue(local + byte1).Int
                                             + (s4) (s1) byte2)));         /* add const*/
                 pc += 2;                          /* to skip the index + const*/
 
@@ -511,27 +511,27 @@ void run()                                        /* in: classNumber,  methodNum
             case I2F:
             {
                 DEBUGPRINTLN("I2F");
-                opStackPoke((slot) (f4) opStackPeek().Int);
+                opStackPoke(toSlot((f4) opStackPeek().Int));
             }break;
             case F2I:
             {
                 DEBUGPRINTLN("F2I");
-                opStackPoke((slot)(s4)(opStackPeek().Float));
+                opStackPoke(toSlot((s4)(opStackPeek().Float)));
             }break;
             case I2C:
             {
                 DEBUGPRINTLN("I2C");
-                opStackPoke((slot)(opStackPeek().UInt & 0x0000ffff));
+                opStackPoke(toSlot((opStackPeek().UInt & 0x0000ffff)));
             }break;
             case I2B:
             {
                 DEBUGPRINTLN("I2B");
-                opStackPoke((slot)(opStackPeek().UInt & 0x000000ff));
+                opStackPoke(toSlot(opStackPeek().UInt & 0x000000ff));
             }break;
             case I2S:
             {
                 DEBUGPRINTLN("I2S");
-                opStackPoke((slot)(s4)((s2) opStackPeek().Int));
+                opStackPoke(toSlot((s4)((s2) opStackPeek().Int)));
             }break;
             case FCMPL:
             case FCMPG:
@@ -541,19 +541,19 @@ void run()                                        /* in: classNumber,  methodNum
                 first = opStackPop();
                 if (first.Float == 0x7fc00000 || second.Float == 0x7fc00000)
                 {
-                    opStackPush((slot)(s4)(code == FCMPG ? 1 : -1));
+                    opStackPush(toSlot((s4)(code == FCMPG ? 1 : -1)));
                 }
                 else if (first.Float > second.Float)
                 {
-                    opStackPush((slot) (s4) 1);
+                    opStackPush(toSlot((s4) 1));
                 }                                 /* corrected by al june 08*/
                 else if (first.Float == second.Float)
                 {
-                    opStackPush((slot) (s4) 0);
+                    opStackPush(toSlot((s4) 0));
                 }
                 else
                 {
-                    opStackPush((slot)(s4) - 1);
+                    opStackPush(toSlot((s4) - 1));
                 }
             }break;
             case IFEQ:
@@ -679,7 +679,7 @@ void run()                                        /* in: classNumber,  methodNum
             case JSR:
             {
                 DEBUGPRINTLN("jsr");              /* mb, jf*/
-                opStackPush((slot)(u4)(pc + 2));
+                opStackPush(toSlot((u4)(pc + 2)));
                 pc += (s2) BYTECODEREF - 1;
             }break;
             case RET:
@@ -872,7 +872,7 @@ void run()                                        /* in: classNumber,  methodNum
                     FIELDNOTFOUNDERR(fieldName,
                                      getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
                 }
-                opStackPush((slot) heapGetElement(first.stackObj.pos + fN+ 1).Int);
+                opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN+ 1).Int));
                 pc += 2;
                 cN = methodStackPop();
                 // end GETFIELD
@@ -1351,7 +1351,7 @@ void run()                                        /* in: classNumber,  methodNum
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
                 for (i=0; i< fN; i++)        /* initialize the heap elements*/
-                    heapSetElement((slot)(u4)0, heapPos+i+1);
+                    heapSetElement(toSlot((u4)0), heapPos+i+1);
 
                 mN = methodStackPop();
                 cN = methodStackPop();
@@ -1388,17 +1388,17 @@ void run()                                        /* in: classNumber,  methodNum
                     case T_BOOLEAN:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)(u4)0,heapPos++);
+                            heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_CHAR:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)(u4)0,heapPos++);
+                            heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_FLOAT:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)0.f,heapPos++);
+                            heapSetElement(toSlot(0.f),heapPos++);
                     }break;
                     case T_DOUBLE:
                     {
@@ -1407,17 +1407,17 @@ void run()                                        /* in: classNumber,  methodNum
                     case T_BYTE:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)(u4)0,heapPos++);
+                            heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_SHORT:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)(u4)0,heapPos++);
+                            heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_INT:
                     {
                         for (i=0; i<count; i++)
-                            heapSetElement(( slot)(u4)0,heapPos++);
+                            heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_LONG:
                     {
@@ -1445,7 +1445,7 @@ void run()                                        /* in: classNumber,  methodNum
                 }
                 else
                 {
-                    opStackPush((slot) (u4)first.stackObj.arrayLength);
+                    opStackPush(toSlot((u4)first.stackObj.arrayLength));
                 }
 
             }break;
@@ -1654,7 +1654,7 @@ void run()                                        /* in: classNumber,  methodNum
                             if (first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt || HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
                             {
                                 performcheck = 0;
-                                opStackPush((slot) (u4)0);
+                                opStackPush(toSlot((u4)0));
                                 break;
                             }
                             first = heapGetElement(first.stackObj.pos + 1);
@@ -1665,7 +1665,7 @@ void run()                                        /* in: classNumber,  methodNum
                         if (first.UInt == NULLOBJECT.UInt)
                         {
                             performcheck = 0;
-                            opStackPush((slot) (u4)1);
+                            opStackPush(toSlot((u4)1));
                         }
                         /* A class identifier is Lclassname; */
                         if (
@@ -1680,7 +1680,7 @@ void run()                                        /* in: classNumber,  methodNum
                         {
                             /* a primitive type */
                             performcheck = 0;
-                            opStackPush((slot) (u4)1);
+                            opStackPush(toSlot((u4)1));
                         }
                     }
 
@@ -1696,23 +1696,23 @@ void run()                                        /* in: classNumber,  methodNum
                         cN = first.stackObj.classNumber;
                         if (checkInstance(target))
                         {
-                            opStackPush((slot) (u4)1);
+                            opStackPush(toSlot((u4)1));
                         }
                         else
                         {
-                            opStackPush((slot) (u4)0);
+                            opStackPush(toSlot((u4)0));
                         }
                         mN=methodStackPop();
                         cN=methodStackPop();
                     }
                     else
                     {
-                        opStackPush((slot) (u4)0);
+                        opStackPush(toSlot((u4)0));
                     }
                 }
                 else
                 {
-                    opStackPush((slot) (u4)0);
+                    opStackPush(toSlot((u4)0));
                 }
             }break;
             case WIDE:
@@ -1750,8 +1750,8 @@ void run()                                        /* in: classNumber,  methodNum
                     /* position*/
                     opStackSetValue((u2)(local + count),
                                     /* old value*/
-                                    ( slot)(u4)(opStackGetValue(local + count).Int
-                                                + constB));               /* add const*/
+                                    toSlot((u4)(opStackGetValue(local + count).Int
+                                                + constB)));               /* add const*/
                 }
             }break;
             case MULTIANEWARRAY:
@@ -1780,7 +1780,7 @@ void run()                                        /* in: classNumber,  methodNum
                 /* not tested because no exceptions implemented yet 14.12.2006*/
                 /* the opcode of athrow is required*/
                 u4 my_addr = getU4(0);
-                opStackPush((slot)my_addr);
+                opStackPush(toSlot(my_addr));
             }break;
             case LCONST_0:
             case LCONST_1:
@@ -1977,7 +1977,7 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
     j = getU2(cs[cN].fields_count);
     for (i = 0; i < j; i++)
     {
-        heapSetElement((slot) (u4) 0, heapPos + i + 1);
+        heapSetElement(toSlot((u4) 0), heapPos + i + 1);
     }
 
     /*	if (!findMethodByName("<init>", 6, "()V", 3)) {

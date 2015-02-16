@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef NRF51
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#endif
 #include "../../JVM/definitions.h"
 #include "../../JVM/bajvm.h"
 #include "../../JVM/classfile.h"
@@ -51,12 +53,16 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
 u2 readClassFile(char* fileName, char* addr)
 {
 #if LINUX||AVR32LINUX
+#ifndef NRF51
     int fd;
     u2 classFileLength=-(u2)((long)addr%(1<<16))-1;
     if ((fd=open(fileName,O_RDONLY))==-1)
         perror(fileName);
     while (read(fd,addr++,1));
     return classFileLength+=(long)addr;
+#else
+		return 0;
+#endif
 #endif
 }
 

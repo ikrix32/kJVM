@@ -46,6 +46,7 @@ scheduler
 /*AVR8(arduinoMega and CharonII) EVK1100 EVK1104 NGW100 STK1000 LINUX AVR32-LINUX XMEGA -> Target Systems*/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef AVR8
 #include <avr/io.h>
@@ -119,7 +120,7 @@ void main()
 
             PRINTF("  -> run <main> :\n");
 
-            opStackPush((slot) (u4) 0);           /* args parameter to main (should be a string array)*/
+            opStackPush(toSlot((u4) 0));           /* args parameter to main (should be a string array)*/
             opStackSetSpPos(findMaxLocals());
             run();                                /*  run main*/
 #ifndef TINYBAJOS
@@ -134,7 +135,7 @@ void main()
     }
 
 #ifndef TINYBAJOS_ERROREXIT
-    void errorExitFunction(char nr, const char *format, ...)
+    void errorExitFunction(int nr, const char *format, ...)
     {
         va_list list;
         va_start(list, format);

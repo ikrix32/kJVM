@@ -67,6 +67,8 @@ typedef union
     heapObjectMarker heapObjMarker;
 } slot;
 
+#define toSlot(x) (slot){x}
+
 #ifndef TINYBAJOS_MULTITASKING
 typedef struct ThreadControlBlock
 {

@@ -42,7 +42,7 @@ char yield()                                      //by ceh
 
 char currentThread()
 {
-    opStackPush((slot) (currentThreadCB->obj));
+    opStackPush(currentThreadCB->obj);
     return 1;
 }
 

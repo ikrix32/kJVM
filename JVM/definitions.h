@@ -112,9 +112,9 @@
 #endif
 
 #if (AVR32UC3A || AVR32AP7000)
-#define NULLOBJECT          ((slot) (0xfffff000 |  ((u4)OBJECTMAGIC<<8)|((u4)OBJECTMAGIC<<4)|((u4)OBJECTMAGIC)))
+#define NULLOBJECT          (toSlot(0xfffff000 |  ((u4)OBJECTMAGIC<<8)|((u4)OBJECTMAGIC<<4)|((u4)OBJECTMAGIC)))
 #else
-#define NULLOBJECT          ((slot) (0x000fffff |  ((u4)OBJECTMAGIC<<28)|((u4)OBJECTMAGIC<<24)|((u4)OBJECTMAGIC<<20)))
+#define NULLOBJECT          (toSlot(0x000fffff |  ((u4)OBJECTMAGIC<<28)|((u4)OBJECTMAGIC<<24)|((u4)OBJECTMAGIC<<20)))
 #endif
 
 //mb jf

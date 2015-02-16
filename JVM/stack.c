@@ -47,7 +47,7 @@ void opStackInit(slot** m)                        /* per thread, fixed size */
 
 //all these functions are rewritten in assembler to increase speed => routin es_stack.asm
 #ifndef AVR8
-void opStackPush(slot val)
+void opStackPush(const slot val)
 {
     *(opSp++) = val;
 #ifdef DEBUGOPSTACK
@@ -72,19 +72,19 @@ slot opStackPeek()
 }
 
 
-void    opStackPoke(slot val)
+void    opStackPoke(const slot val)
 {
     *(opSp - 1) = val;
 }
 
 
-void opStackSetValue(u2 pos, slot val)
+void opStackSetValue(const u2 pos,const slot val)
 {
     *(opStackBase + pos) = val;
 }
 
 
-slot opStackGetValue(u2 pos)
+slot opStackGetValue(const u2 pos)
 {
     return*( opStackBase + pos);
 }
@@ -97,7 +97,7 @@ u2 opStackGetSpPos()
 
 
 /* relat ive to actual base*/
-void opStackSetSpPos(u2 pos)
+void opStackSetSpPos(const u2 pos)
 {
     opSp = pos + opStackBase;
 #ifdef DEBUGOPSTACK
@@ -120,7 +120,7 @@ void methodStackInit(u2** m)
 
 
 #ifndef AVR8                                      //all these functions are rewritten in assembler toincrease speed => routines_stack.asm
-void methodStackPush(u2 val)
+void methodStackPush(const u2 val)
 {
     *(methodSp++) = val;
 #ifdef DEBUGMETHODSTACK
@@ -148,7 +148,7 @@ u2 methodStackGetSpPos()
 
 
 /* relative to actual base*/
-void methodStackSetSpPos(u2 pos)
+void methodStackSetSpPos(const u2 pos)
 {
     methodSp = pos + methodStackBase;
 #ifdef DEBUGMETHODSTACK

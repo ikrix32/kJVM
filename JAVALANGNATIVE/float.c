@@ -48,7 +48,7 @@ char floatToCharArray()
     HEAPOBJECTMARKER(heapPos++).mutex = MUTEXNOTBLOCKED;
     for (i = 0; i < 8; i++)
     {
-        heapSetElement((slot) (u4)(*(buf + i)), heapPos++);
+        heapSetElement(toSlot((u4)(*(buf + i))), heapPos++);
     }
     return 1;
 }
@@ -76,6 +76,6 @@ char nativeParseFloat()
 #else
     sscanf(buf, "%f", &f);
 #endif
-    opStackPush((slot) f);
+    opStackPush(toSlot( f ));
     return 1;
 }

@@ -17,7 +17,7 @@
 #include "scheduler.h"
 
 #ifndef TINYBAJOS_ERROREXIT
-void errorExitFunction(char nr, const char *format, ...);
+void errorExitFunction(int nr, const char *format, ...);
 #endif
 void initHW(void);
 #ifdef LINUX

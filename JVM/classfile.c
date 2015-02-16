@@ -777,7 +777,7 @@ void analyzeFields()
     }                                             // numfields
     u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
     for (n=0; n < fN;n++)                         /* initialize the heap elements*/
-                    heapSetElement((slot) (u4) 0, heapPos+n+1);
+                    heapSetElement(toSlot( (u4) 0), heapPos+n+1);
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDSTATICCLASSOBJECT;	    
     HEAPOBJECTMARKER(heapPos).mutex=MUTEXNOTBLOCKED;
     HEAPOBJECTMARKER(heapPos).rootCheck=1;

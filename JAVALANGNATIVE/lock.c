@@ -43,12 +43,12 @@ char tryLock()
     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
         == MUTEXBLOCKED)
     {
-        opStackPush((slot) (u4) 0);
+        opStackPush(toSlot((u4) 0));
     }
     else
     {
         lock();
-        opStackPush((slot) (u4) 1);
+        opStackPush(toSlot((u4) 1));
     }
     return 1;
 }

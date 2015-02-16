@@ -13,10 +13,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef NRF51
 #include <termios.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#endif
 #include <string.h>
 #include "../../JVM/typedefinitions.h"
 #include "../../JVM/definitions.h"
@@ -39,6 +41,7 @@ void conOut(char val)
 
 char conIn()
 {
+#ifndef NRF51
     struct termios oldt, newt;
     int ch;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -48,6 +51,9 @@ char conIn()
     ch = getchar();
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     return ch;
+#else
+		return 0;
+#endif
 }
 
 
@@ -61,6 +67,7 @@ char nativeCharOut()
 
 char nativeCharIn()
 {
+#ifndef NRF51
     struct termios oldt, newt;
     int ch;
     tcgetattr(STDIN_FILENO, &oldt);
@@ -69,8 +76,11 @@ char nativeCharIn()
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
     ch = getchar();
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    opStackPush((slot) (u4) ch);
+    opStackPush(toSlot((u4) ch));
     return 1;
+#else
+		return 0;
+#endif
 }
 
 
@@ -83,11 +93,12 @@ char nativeExit()
 
 char currentTimeMillis()
 {
+#ifndef NRF51
     struct timeval timerstart;
     gettimeofday(&timerstart, NULL);
-    opStackPush(
-        (slot)(u4)(
-        (timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000)
-        & 0x7FFFFFFF));
+    opStackPush(toSlot((u4)((timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000) & 0x7FFFFFFF)));
     return 1;
+#else
+		return 1;
+#endif
 }

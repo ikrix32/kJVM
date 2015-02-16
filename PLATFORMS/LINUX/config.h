@@ -13,4 +13,8 @@
 #define __i386__ 1
 #undef DEBUG
 
+#ifdef NRF51
+#define exit(x)
+#endif
+
 #endif

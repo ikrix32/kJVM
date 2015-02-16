@@ -54,7 +54,7 @@ char initInterrupt()
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;
 
-    interruptVectors[vectorNr] = findThreadCB((slot) opStackGetValue(local));
+    interruptVectors[vectorNr] = findThreadCB(opStackGetValue(local));
 
     return 0;
 }
