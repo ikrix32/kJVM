@@ -60,3 +60,15 @@ proj/uvision/s110/arm5/RTE/nRF_SoftDevice/nRF51422_xxAC/softdevice_handler.c
 proj/kJVM.xcodeproj/project.xcworkspace/xcuserdata/florin.xcuserdatad/UserInterfaceState.xcuserstate
 
 proj/uvision/s110/arm5/kJVM.uvguix.Florin
+
+*.d
+
+*.lst
+
+*.o
+
+*.crf
+
+proj/uvision/s110/arm5/_build/kJVM_nrf51422_xxac.dep
+
+proj/uvision/s110/arm5/_build/nrf51422_xxac.sct
