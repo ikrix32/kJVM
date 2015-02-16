@@ -37,10 +37,10 @@ void opStackInit(slot** m)                        /* per thread, fixed size */
     if ((*m= (slot*) calloc((size_t)OPSTACKSIZE,sizeof(slot))) == NULL)
         MALLOCERR(OPSTACKSIZE * sizeof(slot), "op stack");
 #else
-/* classfiles - heap - (opstack methodstack)/ per thread*/
-/*make it better*/
+    /* classfiles - heap - (opstack methodstack)/ per thread*/
+    /*make it better*/
     *m = (slot*) ((u4) appClassFileBase + MAXBYTECODE + 4 * MAXHEAP
-        + numThreads * (4 * OPSTACKSIZE + 2 * METHODSTACKSIZE));
+                  + numThreads * (4 * OPSTACKSIZE + 2 * METHODSTACKSIZE));
 #endif
 }
 
@@ -113,8 +113,8 @@ void methodStackInit(u2** m)
         MALLOCERR(METHODSTACKSIZE * sizeof(u2), "method stack");
 #else
     *m = (u2*) ((u4)(
-        appClassFileBase + MAXBYTECODE + 4 * MAXHEAP + 4 * OPSTACKSIZE
-        + numThreads * (4 * OPSTACKSIZE + 2 * METHODSTACKSIZE)));
+                     appClassFileBase + MAXBYTECODE + 4 * MAXHEAP + 4 * OPSTACKSIZE
+                     + numThreads * (4 * OPSTACKSIZE + 2 * METHODSTACKSIZE)));
 #endif
 }
 
@@ -166,7 +166,7 @@ u1 methodStackEmpty()
 /*//BH
  void dummy(void)	{
  char* s1,*s2;
-char n;
-strncmpFlashFlash(s1,(const char*) s2, n);
-}
-*/
+ char n;
+ strncmpFlashFlash(s1,(const char*) s2, n);
+ }
+ */

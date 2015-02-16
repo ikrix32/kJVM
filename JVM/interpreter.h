@@ -196,10 +196,10 @@
 /*
  186 (0xba) xxxunusedxxx
  Reserved opcodes:
-202 (0xca) breakpoint
-254 (0xfe) impdep1
-255 (0xff) impdep2
-*/
+ 202 (0xca) breakpoint
+ 254 (0xfe) impdep1
+ 255 (0xff) impdep2
+ */
 #define     NEW         0xbb                      // modified by mb jf
 #define     NEWARRAY    0xbc                      //mb jf
 #define     ANEWARRAY   0xbd                      //mb jf
@@ -217,7 +217,7 @@
 #define     GOTO_W      0xc8                      //mb jf
 #define     JSR_W       0xc9                      //mb jf
 void run(void);
-u1 checkInstance(const u2 target);
+u1  checkInstance(const u2 target);
 void raiseExceptionFromIdentifier(const char identifier[], const u1 length);
 void handleException(void);
 void subCheck(u2 target, u2 addr);

@@ -52,7 +52,7 @@ char conIn()
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     return ch;
 #else
-		return 0;
+    return 0;
 #endif
 }
 
@@ -79,7 +79,7 @@ char nativeCharIn()
     opStackPush(toSlot((u4) ch));
     return 1;
 #else
-		return 0;
+    return 0;
 #endif
 }
 
@@ -99,6 +99,6 @@ char currentTimeMillis()
     opStackPush(toSlot((u4)((timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000) & 0x7FFFFFFF)));
     return 1;
 #else
-		return 1;
+    return 1;
 #endif
 }

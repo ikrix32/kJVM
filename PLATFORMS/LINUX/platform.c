@@ -28,6 +28,7 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
     if (classFileBase==NULL)
         errorExit(-1,"malloc error while trying to allocate %d bytes for class files.\n", MAXBYTECODE);
 #endif
+
     heapInit();                                   /* linux avr8 malloc , others hard coded!*/
     length = 0;
 #if LINUX|| AVR32LINUX
@@ -35,15 +36,15 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
         errorExit(-1,"ERROR: trying to load %d classes, MAXCLASSES is %d\n", argc, MAXCLASSES);
     for (cN=0; cN < argc; cN++)
     {
-        cs[cN].classFileStartAddress=classFileBase+length;
-        cs[cN].classFileLength=readClassFile(argv[cN+1], cs[cN].classFileStartAddress);
-        analyzeClass(&cs[cN]);
-        length+=cs[cN].classFileLength;
+        cs[cN].classFileStartAddress = classFileBase + length;
+        cs[cN].classFileLength=readClassFile(argv[cN + 1], cs[cN].classFileStartAddress);
+        analyzeClass( &cs[cN]);
+        length += cs[cN].classFileLength;
         if (length > MAXBYTECODE)
         {
             printf("MAXBYTECODE reached!\n"); exit(-1);
         }
-        numClasses=cN+1;
+        numClasses = cN + 1;
     }
 #endif
     DEBUGPRINTHEAP;
@@ -61,7 +62,7 @@ u2 readClassFile(char* fileName, char* addr)
     while (read(fd,addr++,1));
     return classFileLength+=(long)addr;
 #else
-		return 0;
+    return 0;
 #endif
 #endif
 }

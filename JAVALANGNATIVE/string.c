@@ -33,7 +33,7 @@ char nativeStringLength()
         opStackPush( toSlot( (u4) getU2( CP( cN, getU2( CP( cN, mySlot.stackObj.pos) + 1)) + 1)));
         cN = methodStackPop();
     } else
-    opStackPush(toSlot((u4) 0xffff));
+        opStackPush(toSlot((u4) 0xffff));
     return 1;
 }
 
@@ -49,6 +49,6 @@ char nativeCharAt()
                                       + 3 + (u2) opStackGetValue(local + 1).UInt)));
         cN = methodStackPop();
     } else
-    opStackPush(toSlot((u4) 0));
+        opStackPush(toSlot((u4) 0));
     return 1;
 }

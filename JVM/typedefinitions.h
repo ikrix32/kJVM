@@ -34,6 +34,7 @@ typedef signed int s2;                            //mb added "int"
 typedef signed long s4;
 #endif
 
+
 typedef struct
 {
     u4 status :2;                                 // 0 -> free for further use; 1 -> allcated static class object; 2-> allocated other object; 3-> allocated arrays

@@ -34,7 +34,7 @@ char start()
 
 char yield()                                      //by ceh
 {
-//force scheduling!
+    //force scheduling!
     currentThreadCB->numTicks = 0;
     return 0;
 }
@@ -49,8 +49,8 @@ char currentThread()
 
 char nativeSetPriority()                          //by ceh
 {
-// thread is alive -> thread control block exists
-// cN -> of method (Thread)
+    // thread is alive -> thread control block exists
+    // cN -> of method (Thread)
     u1 newPrio = opStackGetValue(local + 1).UInt;
     u4* pCurrentPrio;
     slot soi = opStackGetValue(local);
@@ -60,11 +60,11 @@ char nativeSetPriority()                          //by ceh
         errorExit(78,"field priority not found\n");
     }
 
-                                                  // position of int field priority of the thread creating object
+    // position of int field priority of the thread creating object
     pCurrentPrio = (u4*) (heapBase + soi.stackObj.pos + fN + 1);
     if (newPrio == (*pCurrentPrio))
         return 0;                                 // nothing to do
-// search thread control block af calling object
+                                                  // search thread control block af calling object
     ThreadControlBlock* found = findThreadCB(soi);
 
     removeThreadFromPriorityList(found);

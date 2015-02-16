@@ -50,7 +50,7 @@ char initInterrupt()
 
     u1 vectorNr = opStackGetValue(local + 1).UInt;
 
-//interruptNr not valid
+    //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;
 
@@ -63,7 +63,7 @@ char initInterrupt()
 char removeInterrupt()
 {
     u1 vectorNr = opStackGetValue(local).UInt;
-//interruptNr not valid
+    //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;
     deleteNotCurrentThread(&(interruptVectors[vectorNr]));
@@ -74,7 +74,7 @@ char removeInterrupt()
 char forceInterrupt()
 {
     u1 vectorNr = opStackGetValue(local).UInt;
-//interruptNr not valid
+    //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;
     interruptThread(interruptVectors[vectorNr]);

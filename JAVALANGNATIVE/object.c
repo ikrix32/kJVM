@@ -46,7 +46,7 @@ char notifyAll()
     {
         exit(249);
     }
-/*can not be ->IllegalMonitorStateException*/
+    /*can not be ->IllegalMonitorStateException*/
     for (i = 0; i < (MAXPRIORITY); i++)
     {
         max = (threadPriorities[i].count);
@@ -55,7 +55,7 @@ char notifyAll()
         {
             if ((cb->state == THREADWAITBLOCKED)
                 && ((cb->isMutexBlockedOrWaitingForObject).UInt
-                == opStackGetValue(local).UInt))
+                    == opStackGetValue(local).UInt))
                 cb->state = THREADWAITAWAKENED;
             cb = cb->succ;
         }
@@ -73,7 +73,7 @@ char nativeWait()
         exit(254);
     }
     /*can not be ->IllegalMonitorStateException*/HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-        = MUTEXNOTBLOCKED;                        /* free lock for another thread and lock this */
+    = MUTEXNOTBLOCKED;                        /* free lock for another thread and lock this */
 
     ThreadControlBlock* myTCB;
     for (i = 0; i < (MAXPRIORITY); i++)
@@ -82,10 +82,10 @@ char nativeWait()
         myTCB = threadPriorities[i].cb;
         for (k = 0; k < max; k++)
         {
-//alle blocked for object wecken!
+            //alle blocked for object wecken!
             if ((myTCB->isMutexBlockedOrWaitingForObject.UInt
-                == opStackGetValue(local).UInt) && (myTCB->state
-                == THREADMUTEXBLOCKED))
+                 == opStackGetValue(local).UInt) && (myTCB->state
+                                                     == THREADMUTEXBLOCKED))
             {
                 myTCB->state = THREADNOTBLOCKED;  //!!
                 myTCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
@@ -94,7 +94,7 @@ char nativeWait()
             myTCB = myTCB->succ;
         }
     }
-//its better to change own state after notify, to avoid cycles
+    //its better to change own state after notify, to avoid cycles
     currentThreadCB->isMutexBlockedOrWaitingForObject = opStackGetValue(local);
     currentThreadCB->state = THREADWAITBLOCKED;
     return 0;

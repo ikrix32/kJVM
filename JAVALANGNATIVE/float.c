@@ -40,7 +40,7 @@ char floatToCharArray()
     u2 heapPos = getFreeHeapSpace(8 + 1);         /* char arr length + marker*/
     mySlot.stackObj.pos = heapPos;
     mySlot.stackObj.magic = OBJECTMAGIC;
-/*mySlot.stackObj.type=STACKNEWARRAYOBJECT;*/
+    /*mySlot.stackObj.type=STACKNEWARRAYOBJECT;*/
     mySlot.stackObj.arrayLength = (u1) 8;         /* char array length*/
     opStackPush(mySlot);
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;

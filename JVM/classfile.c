@@ -30,7 +30,7 @@ extern functionForNativeMethodType functionForNativePlatFormMethod[];
 /* address of classfile byte in flash 0x0000 to 0xffff */
 /* eg. address 0x2345 means byte in flash at address (binary):1001000110100101 */
 extern u1 getU1Flash(u1* pos);
-u1 getU1(u2 pos)
+u1 getU1(const u2 pos)
 {
     return getU1Flash((u1*)(CLASSSTA + ((pos==0) ? (pc++) : pos)));
 }
@@ -40,41 +40,41 @@ u1 getU1(u2 pos)
 /* classSTA and pc are global variables for actual class and method*/
 /* parameter != 0 -> value at parameter-pos*/
 /* parameter ==0 -> value at global var pc and automatic increment */
-u1 getU1(u2 pos)
+u1 getU1(const u2 pos)
 {
     return *(CLASSSTA + ((pos == 0) ? (pc++) : pos));
 }
 #endif
 
-u2 getU2(u2 pos)
+u2 getU2(const u2 pos)
 {
-//if (pos==0) {pc+=2;return (*(CLASSSTA + pc-2))*256+*(CLASSSTA + pc-1);}
-//else return (*(CLASSSTA + pos)*256)+*(CLASSSTA + pos+1);
-//}
+    //if (pos==0) {pc+=2;return (*(CLASSSTA + pc-2))*256+*(CLASSSTA + pc-1);}
+    //else return (*(CLASSSTA + pos)*256)+*(CLASSSTA + pos+1);
+    //}
     return (((u2) getU1(pos) << 8) | (u2) getU1((pos == 0) ? 0 : pos + 1));
 }
 
 
-u4 getU4(u2 pos)
+u4 getU4(const u2 pos)
 {
     return (((u4) getU2(pos) << 16) | (u4) getU2((pos == 0) ? 0 : pos + 2));
 }
 
 
-f4 getFloat(u2 pos)
+f4 getFloat(const u2 pos)
 {
     return getU4(pos);
 }
 
 
 //BH#define	getAddr(m)	(CLASSSTA+m)
-void* getAddr(u2 pos)
+void* getAddr(const u2 pos)
 {
     return CLASSSTA + pos;
 }
 
 
-u1 findNumArgs(u2 methodRef)                      /*  count BCDFIJLSZ in runden Klammern!!*/
+u1 findNumArgs(const u2 methodRef)                      /*  count BCDFIJLSZ in runden Klammern!!*/
 {
     u2 i;
     u2 n = 0;
@@ -96,7 +96,7 @@ u1 findNumArgs(u2 methodRef)                      /*  count BCDFIJLSZ in runden 
                 object = 1;
                 n++;
             } else if ((c == 'B') || (c == 'C') || (c == 'F') || (c == 'I')
-                || (c == 'S') || (c == 'Z'))
+                       || (c == 'S') || (c == 'Z'))
             {
                 n++;
             }
@@ -115,8 +115,8 @@ u2 findMaxLocals()                                /*cN,mN*/
 /* in cN fieldName fieldDescr*/
 /* out cN, fN of normal field in object (non static, non final primitive fields)*/
 /* return 1 -> found */
-u1 findFieldByName(const char* fieldName, u1 fieldNameLength,
-const char* fieldDescr, u1 fieldDescrLength)
+u1 findFieldByName(const char* fieldName,const u1 fieldNameLength,
+                   const char* fieldDescr, const u1 fieldDescrLength)
 {
     u1	i;
     u1	found = 0;
@@ -125,34 +125,34 @@ const char* fieldDescr, u1 fieldDescrLength)
     {
         u1 numFields = getU2(cs[cN].fields_count);
         for (i = 0; i < numFields; ++i)
-        {   
-	    u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
-	    u1 isNotObject =  	STRNCMPRAMFLASH ("L",(const char*) getAddr(fielddescr + 3), 1);	    
-	    if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL) && isNotObject) continue; // ignore static and non static primitive finals
-	    if ( getU2(cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
+        {
+            u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
+            u1 isNotObject =  	STRNCMPRAMFLASH ("L",(const char*) getAddr(fielddescr + 3), 1);
+            if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL) && isNotObject) continue; // ignore static and non static primitive finals
+            if ( getU2(cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
             u2 fieldname = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 2)];
-	
+
             if (fieldNameLength == getU2(fieldname + 1) &&
-		    STRNCMPFLASHFLASH
-                (fieldName, (const char*) getAddr(fieldname + 3),getU2(fieldname + 1)) == 0 && 
-                 fieldDescrLength == getU2(fielddescr + 1) &&
-		    STRNCMPFLASHFLASH
+                STRNCMPFLASHFLASH
+                (fieldName, (const char*) getAddr(fieldname + 3),getU2(fieldname + 1)) == 0 &&
+                fieldDescrLength == getU2(fielddescr + 1) &&
+                STRNCMPFLASHFLASH
                 (fieldDescr, (const char*) getAddr(fielddescr + 3),
-                getU2(fielddescr + 1)) == 0)
+                 getU2(fielddescr + 1)) == 0)
             {
-                found=1; break; 
-            } 
-        
-	    	    fN++;
-	}
+                found=1; break;
+            }
+
+            fN++;
+        }
         if (found )            return 1;
     } while (findSuperClass());
     return 0;
 }
 
 
-u1 findFieldByRamName(const char* fieldName, u1 fieldNameLength, // for normal fields
-			const char* fieldDescr, u1 fieldDescrLength) // only use in scheduler
+u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength, // for normal fields
+                      const char* fieldDescr,const u1 fieldDescrLength) // only use in scheduler
 {
     u1 i;
     u1 found = 0;
@@ -161,163 +161,163 @@ u1 findFieldByRamName(const char* fieldName, u1 fieldNameLength, // for normal f
     {
         u1 numFields = getU2(cs[cN].fields_count);
         for (i = 0; i < numFields; ++i)
-        {	    
-	    u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
-	    u1 isNotObject =  STRNCMPRAMFLASH ("L",(const char*) getAddr(fielddescr + 3), 1);	    
-	    if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL)&& isNotObject) continue; // ignore static and non static primitive finals
-	    if ( getU2(cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
+        {
+            u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
+            u1 isNotObject =  STRNCMPRAMFLASH ("L",(const char*) getAddr(fielddescr + 3), 1);
+            if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL)&& isNotObject) continue; // ignore static and non static primitive finals
+            if ( getU2(cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
             u2 fieldname = cs[cN].constant_pool[getU2(
-                cs[cN].field_info[i] + 2)];
+                                                      cs[cN].field_info[i] + 2)];
             if (fieldNameLength == getU2(fieldname + 1) &&
-		STRNCMPRAMFLASH
-                 (fieldName, (const char*) getAddr(fieldname + 3),
-                getU2(fieldname + 1)) == 0 && fieldDescrLength
+                STRNCMPRAMFLASH
+                (fieldName, (const char*) getAddr(fieldname + 3),
+                 getU2(fieldname + 1)) == 0 && fieldDescrLength
                 == getU2(fielddescr + 1) &&
-		    STRNCMPRAMFLASH
+                STRNCMPRAMFLASH
                 (fieldDescr, (const char*) getAddr(fielddescr + 3),
-                getU2(fielddescr + 1)) == 0)
-             {
-                found=1; break; 
-            } 
-            	    fN++;
+                 getU2(fielddescr + 1)) == 0)
+            {
+                found=1; break;
+            }
+            fN++;
         }
-	if (found )            return 1;
+        if (found )            return 1;
     } while (findSuperClass());
     return 0;
 }
 
-u1 findStaticFieldByName(const char* fieldName, u1 fieldNameLength,
-const char* fieldDescr, u1 fieldDescrLength)	{
-  u1	i;
+u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
+                         const char* fieldDescr,const u1 fieldDescrLength)	{
+    u1	i;
     u1	found = 0;
     fN = 0;
-        u1 numFields = getU2(cs[cN].fields_count);
-        for (i = 0; i < numFields; ++i)
+    u1 numFields = getU2(cs[cN].fields_count);
+    for (i = 0; i < numFields; ++i)
+    {
+        u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
+        u1 isNotObject =  STRNCMPRAMFLASH  ("L",(const char*) getAddr(fielddescr + 3), 1);
+        if (! ( getU2(cs[cN].field_info[i]) & ACC_STATIC)) continue; // ignore non static
+        if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL) &&  isNotObject) continue; // non object finals
+        u2 fieldname = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 2)];
+        if (fieldNameLength == getU2(fieldname + 1) &&
+            STRNCMPFLASHFLASH
+            (fieldName, (const char*) getAddr(fieldname + 3),
+             getU2(fieldname + 1)) == 0 && fieldDescrLength
+            == getU2(fielddescr + 1) &&
+            STRNCMPFLASHFLASH
+            (fieldDescr, (const char*) getAddr(fielddescr + 3),
+             getU2(fielddescr + 1)) == 0)
         {
-	    u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
-	    u1 isNotObject =  STRNCMPRAMFLASH  ("L",(const char*) getAddr(fielddescr + 3), 1);	
-	    if (! ( getU2(cs[cN].field_info[i]) & ACC_STATIC)) continue; // ignore non static
-	    if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL) &&  isNotObject) continue; // non object finals  
-            u2 fieldname = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 2)];
-            if (fieldNameLength == getU2(fieldname + 1) &&
-		STRNCMPFLASHFLASH
-                (fieldName, (const char*) getAddr(fieldname + 3),
-                getU2(fieldname + 1)) == 0 && fieldDescrLength
-                == getU2(fielddescr + 1) &&
-		STRNCMPFLASHFLASH
-                (fieldDescr, (const char*) getAddr(fielddescr + 3),
-                getU2(fielddescr + 1)) == 0)
-            {
-                found=1; break; 
-            } 
-            	    fN++;
+            found=1; break;
         }
-        if (found )            return 1;
+        fN++;
+    }
+    if (found )            return 1;
     return 0;
-    
+
 }
 
 
 u1 findMethod(const char* className, const u1 classNameLength,
-const char* methodName, const u1 methodNameLength,
-const char* methodDescr, const u1 methodDescrLength)
+              const char* methodName, const u1 methodNameLength,
+              const char* methodDescr, const u1 methodDescrLength)
 {
-// all args in flash for arduinomega
-/*in cN, out: cN, mN*/
-/* recursive down to object*/
-//printf("%4x %4x %4x %4x\n", 0x8000+(unsigned int)className/2,classNameLength,0x8000+ (unsigned int)methodName/2,methodNameLength);
+    // all args in flash for arduinomega
+    /*in cN, out: cN, mN*/
+    /* recursive down to object*/
+    //printf("%4x %4x %4x %4x\n", 0x8000+(unsigned int)className/2,classNameLength,0x8000+ (unsigned int)methodName/2,methodNameLength);
     if (!FIND_CLASS(className, classNameLength))
     {
         CLASSNOTFOUNDERR((const char*) className, classNameLength);
     }                                             /* out: cN*/
     if (
-    #ifdef AVR8
+#ifdef AVR8
         findMethodByNameFlash
-    #else
+#else
         findMethodByName
-    #endif
+#endif
         (methodName, methodNameLength, methodDescr, methodDescrLength))
         return 1;
     else if (classNameLength == 16 &&
-	    STRNCMPRAMFLASH
-        ("java/lang/Object", className, classNameLength) == 0)
+             STRNCMPRAMFLASH
+             ("java/lang/Object", className, classNameLength) == 0)
     {
         return 0;                                 /* not found*/
     } else
-    return findMethod(
-            getAddr(
-            CP(cN, getU2(CP(cN, getU2(cs[cN].super_class)) + 1))
-            + 3),
-            getU2(CP(cN, getU2(CP(cN, getU2(cs[cN].super_class)) + 1)) + 1),
-            methodName, methodNameLength, methodDescr, methodDescrLength);
+        return findMethod(
+                          getAddr(
+                                  CP(cN, getU2(CP(cN, getU2(cs[cN].super_class)) + 1))
+                                  + 3),
+                          getU2(CP(cN, getU2(CP(cN, getU2(cs[cN].super_class)) + 1)) + 1),
+                          methodName, methodNameLength, methodDescr, methodDescrLength);
 }
 
 
 #ifdef AVR8
 u1 findMethodByNameFlash(const char* name, const u1 len, const char* methodDescr, const u1 methodDescrLength)
 {
-/*  in: classNumber cN, out: methodNumber mN*/
-/* non recursive */
+    /*  in: classNumber cN, out: methodNumber mN*/
+    /* non recursive */
     for (mN=0; mN < getU2(cs[cN].methods_count); mN++)
         if (len==getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+2)]+1))
             if(strncmpFlashFlash(name,(char*)getAddr(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+2)]+3),
-        getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+2)]+1))==0)
-    {
-        if (methodDescr!=NULL)
-        {
-            if (methodDescrLength==getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+1))
-                if(strncmpFlashFlash(methodDescr,(char*)getAddr(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+3),
-                getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+1))==0) return 1;
-        }
-        else return 1;
-    }
+                                 getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+2)]+1))==0)
+            {
+                if (methodDescr!=NULL)
+                {
+                    if (methodDescrLength==getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+1))
+                        if(strncmpFlashFlash(methodDescr,(char*)getAddr(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+3),
+                                             getU2(cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+4)]+1))==0) return 1;
+                }
+                else return 1;
+            }
     return 0;
 }
 #endif
 
 u1 findMethodByName(const char* name, const u1 len, const char* methodDescr,
-const u1 methodDescrLength)
+                    const u1 methodDescrLength)
 {
-/*  in: classNumber cN, out: methodNumber mN*/
-/* non recursiv*/
+    /*  in: classNumber cN, out: methodNumber mN*/
+    /* non recursiv*/
     for (mN = 0; mN < getU2(cs[cN].methods_count); mN++)
         if (len == getU2(
-        cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)] + 1))
+                         cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)] + 1))
             if (
-    #ifdef AVR8
-        strncmpRamFlash
-    #else
-        strncmp
-    #endif
-        (
-        name,
-        (char*) getAddr(
-        cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)]
-        + 3),
-        getU2(
-        cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)]
-        + 1)) == 0)
-    {
-        if (methodDescr != NULL)
-        {
-            if (methodDescrLength == getU2(
-                cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 4)]
-                + 1))
-                if (
-	    STRNCMPRAMFLASH
+#ifdef AVR8
+                strncmpRamFlash
+#else
+                strncmp
+#endif
                 (
-                methodDescr,
-                (char*) getAddr(
-                cs[cN].constant_pool[getU2(
-                METHODBASE(cN, mN) + 4)] + 3),
-                getU2(
-                cs[cN].constant_pool[getU2(
-                METHODBASE(cN, mN) + 4)] + 1))
-                == 0)
+                 name,
+                 (char*) getAddr(
+                                 cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)]
+                                 + 3),
+                 getU2(
+                       cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 2)]
+                       + 1)) == 0)
+            {
+                if (methodDescr != NULL)
+                {
+                    if (methodDescrLength == getU2(
+                                                   cs[cN].constant_pool[getU2(METHODBASE(cN, mN) + 4)]
+                                                   + 1))
+                        if (
+                            STRNCMPRAMFLASH
+                            (
+                             methodDescr,
+                             (char*) getAddr(
+                                             cs[cN].constant_pool[getU2(
+                                                                        METHODBASE(cN, mN) + 4)] + 3),
+                             getU2(
+                                   cs[cN].constant_pool[getU2(
+                                                              METHODBASE(cN, mN) + 4)] + 1))
+                            == 0)
+                            return 1;
+                } else
                     return 1;
-        } else
-        return 1;
-    }
+            }
     return 0;
 }
 
@@ -335,49 +335,49 @@ u1* findMethodByMethodNumber()                    /*mb jf  in: methodNumber, out
 u1 findSuperClass()
 {
     if (16 == getU2(
-        cs[cN].constant_pool[getU2(
-        cs[cN].constant_pool[getU2(cs[cN].this_class)] + 1)] + 1) &&
-	    STRNCMPRAMFLASH
+                    cs[cN].constant_pool[getU2(
+                                               cs[cN].constant_pool[getU2(cs[cN].this_class)] + 1)] + 1) &&
+        STRNCMPRAMFLASH
         (
-        "java/lang/Object",
-        getAddr(
-        cs[cN].constant_pool[getU2(
-        cs[cN].constant_pool[getU2(
-        cs[cN].this_class)] + 1)] + 3), 16)
+         "java/lang/Object",
+         getAddr(
+                 cs[cN].constant_pool[getU2(
+                                            cs[cN].constant_pool[getU2(
+                                                                       cs[cN].this_class)] + 1)] + 3), 16)
         == 0)
         return 0;                                 /* cN is class Object */
-FIND_CLASS(
-        getAddr(
-        cs[cN].constant_pool[getU2(
-        cs[cN].constant_pool[getU2(cs[cN].super_class)] + 1)]
-        + 3),
-        getU2(
-        cs[cN].constant_pool[getU2(
-        cs[cN].constant_pool[getU2(cs[cN].super_class)] + 1)]
-        + 1));
+    FIND_CLASS(
+               getAddr(
+                       cs[cN].constant_pool[getU2(
+                                                  cs[cN].constant_pool[getU2(cs[cN].super_class)] + 1)]
+                       + 3),
+               getU2(
+                     cs[cN].constant_pool[getU2(
+                                                cs[cN].constant_pool[getU2(cs[cN].super_class)] + 1)]
+                     + 1));
     return 1;
 }
 
 
 #ifdef AVR8
-                                                  /* out: cN*/
-u1 findClassFlash(const char* className,u1 classNameLength)
+/* out: cN*/
+u1 findClassFlash(const char* className,const u1 classNameLength)
 {
     for (cN=0; cN < numClasses;cN++)
     {
         if (classNameLength !=(u2)getU2(
-            cs[cN].constant_pool[
-            getU2(cs[cN].constant_pool[
-            getU2(cs[cN].this_class)]+1
-            )]+1))
+                                        cs[cN].constant_pool[
+                                                             getU2(cs[cN].constant_pool[
+                                                                                        getU2(cs[cN].this_class)]+1
+                                                                   )]+1))
         {
             continue;
         }
         if (strncmpFlashFlash(className,(const char*)getAddr(cs[cN].constant_pool[
-            getU2( cs[cN].constant_pool[
-            getU2(cs[cN].this_class)]+1
-            )
-            ]+3),classNameLength)==0)
+                                                                                  getU2( cs[cN].constant_pool[
+                                                                                                              getU2(cs[cN].this_class)]+1
+                                                                                        )
+                                                                                  ]+3),classNameLength)==0)
         {
             return 1;
         }
@@ -386,17 +386,17 @@ u1 findClassFlash(const char* className,u1 classNameLength)
 }
 #endif
 
-                                                  /* out: cN*/
+/* out: cN*/
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (cN = 0; cN < numClasses; cN++)
     {
-        
+
         const u2 c_pool = cs[cN].constant_pool[getU2(cs[cN].constant_pool[getU2(cs[cN].this_class)]+ 1)];
         const u1    cclassnameLength=getU2(c_pool + 1);
 
         //printf("Searching: %s,%d - crt %s,%d\n",className,classNameLength,cclassName,cclassnameLength);
-        
+
         if (classNameLength != (u2) cclassnameLength)
         {
             continue;
@@ -424,17 +424,17 @@ void analyzeClass()	// input: cN
     cs[cN].major_version = ++pc;                      /* 6*/
     if (getU2(cs[cN].major_version) > 52)
         ERROREXIT( 1,
-            "this java version is not supported yet: cs[cN].major_version %d\n",
-            getU2(cs[cN].major_version));
+                  "this java version is not supported yet: cs[cN].major_version %d\n",
+                  getU2(cs[cN].major_version));
     DEBUGPRINTF("version:\t%d.%d\n", getU2(pc),getU2(pc-2));
     pc += 2;
     cs[cN].constant_pool_count = pc;
     DEBUGPRINTF("cf\tconstant_pool_count:\t%d\n", getU2(pc));
     pc += 2;
     if ((cs[cN].constant_pool = (u2*) malloc(
-                                                  /* -2 möglich wegen 0!!*/
-        sizeof(u2) * getU2(cs[cN].constant_pool_count))) == NULL)
-	ERROREXIT(2,"malloc error\n");
+                                             /* -2 möglich wegen 0!!*/
+                                             sizeof(u2) * getU2(cs[cN].constant_pool_count))) == NULL)
+        ERROREXIT(2,"malloc error\n");
 
     analyzeConstantPool();
     cs[cN].access_flags = pc;
@@ -458,7 +458,7 @@ void analyzeClass()	// input: cN
     if (getU2(cs[cN].fields_count) != 0)
     {
         if ((cs[cN].field_info = (u2*) malloc(sizeof(u2) * getU2(cs[cN].fields_count))) == NULL)
-	ERROREXIT(3,"malloc error");
+            ERROREXIT(3,"malloc error");
         analyzeFields();
     }
     cs[cN].methods_count = pc;
@@ -468,13 +468,13 @@ void analyzeClass()	// input: cN
     if (getU2(cs[cN].methods_count) != 0)
     {
         if ((cs[cN].method_info = (u2*) malloc(
-            2 * sizeof(u2) * getU2(cs[cN].methods_count))) == NULL)
-	    ERROREXIT(4,"malloc error");
+                                               2 * sizeof(u2) * getU2(cs[cN].methods_count))) == NULL)
+            ERROREXIT(4,"malloc error");
         analyzeMethods();
     }
     ln = getU2(0);                                // class file attribute count
     DEBUGPRINTF("cf-attributes: count: %d ",ln);
- 	// SourceFile (6), Deprecated (4),InnerClasses,EnclosingMethod,Synthetic,Signature
+    // SourceFile (6), Deprecated (4),InnerClasses,EnclosingMethod,Synthetic,Signature
 }
 
 
@@ -531,7 +531,7 @@ void analyzeConstantPool()
 #ifdef DEBUG
 #ifdef AVR8                           // change all avr8 string to flash strings gives more data ram space for java!!
                 {
-                	u1 float_str[7];
+                    u1 float_str[7];
                     dtostrf( getFloat(pc), 7, 3, float_str );
                     printf_P(PSTR("\tcp %d\t:Float:\t%s  \n"),n,float_str);
                 }
@@ -575,94 +575,86 @@ void analyzeMethods()            /* jan 08 not good tested*/
     {
         cs[cN].method_info[n] = pc;                   /* absolute in classfile*/
         DEBUGPRINTF("\tmethod %d\taccess_flags: %04x",n,getU2(pc));
-	DEBUGPRINTF(" name: %04x ",getU2(pc+2));
-	DEBUGPRINTF(" descriptor: %04x ",getU2(pc+4));
-	DEBUGPRINTF(" \tattribute_count: %04x\n",a=getU2(pc+6));
-	/*Signature*/
-//BHDEBUGPRINTSTRING(METHODDESCRSTR(cN,n),METHODDESCRSTRLENGTH(cN,n));
+        DEBUGPRINTF(" name: %04x ",getU2(pc+2));
+        DEBUGPRINTF(" descriptor: %04x ",getU2(pc+4));
+        DEBUGPRINTF(" \tattribute_count: %04x\n",a=getU2(pc+6));
+        /*Signature*/
+        //BHDEBUGPRINTSTRING(METHODDESCRSTR(cN,n),METHODDESCRSTRLENGTH(cN,n));
         a = getU2(pc + 6);
         pc += 8;
         if (a == 0)
         {
             for (i = 0; i
-                < (/*sizeof(nativeClassNames)/sizeof(char*)*/numNativeClassNames); i++)
+                 < (/*sizeof(nativeClassNames)/sizeof(char*)*/numNativeClassNames); i++)
                 if (!
-                STRNCMPRAMFLASH
-                (
-                nativeClassNames[i],
-                (char*) getAddr(
-                cs[cN].constant_pool[getU2(
-                cs[cN].constant_pool[getU2(cs[cN].this_class)]
-                + 1)] + 3),
-                getU2(
-                cs[cN].constant_pool[getU2(
-                cs[cN].constant_pool[getU2(cs[cN].this_class)]
-                + 1)] + 1)))
-            {
-                cs[cN].nativeFunction
+                    STRNCMPRAMFLASH
+                    (
+                     nativeClassNames[i],
+                     (char*) getAddr(
+                                     cs[cN].constant_pool[getU2(
+                                                                cs[cN].constant_pool[getU2(cs[cN].this_class)]
+                                                                + 1)] + 3),
+                     getU2(
+                           cs[cN].constant_pool[getU2(
+                                                      cs[cN].constant_pool[getU2(cs[cN].this_class)]
+                                                      + 1)] + 1)))
+                {
+                    cs[cN].nativeFunction
                     = (functionForNativeMethodType*) funcArray[i];
-                break;
-            }
+                    break;
+                }
             continue;                             /* native method*/
         }
-//Code(var), Exception(var),Synthetic (4),Signature,Deprecated(4)
+        //Code(var), Exception(var),Synthetic (4),Signature,Deprecated(4)
         for (m = 0; m < a; m++)                   /* attributes of method*/
         {
             const char* adr = getAddr(cs[cN].constant_pool[getU2(0)] + 1 + 2);
-            if (
-		STRNCMPRAMFLASH
-                ("Code", adr, 4) == 0)
+            if (STRNCMPRAMFLASH("Code", adr, 4) == 0)
             {
-		DEBUGPRINTF("\t\tCode: attribute_length: %d\n",getU4(pc));
-		DEBUGPRINTF("\t\tCode: max_stack: %d\n", getU2(pc+4));
-		DEBUGPRINTF("\t\tCode: max_locals: %d\n",getU2(pc+6));
-		DEBUGPRINTF("\t\tCode: code_length: %d pc: %d\n\t\t",getU4(pc+8),pc);
+                DEBUGPRINTF("\t\tCode: attribute_length: %d\n",getU4(pc));
+                DEBUGPRINTF("\t\tCode: max_stack: %d\n", getU2(pc+4));
+                DEBUGPRINTF("\t\tCode: max_locals: %d\n",getU2(pc+6));
+                DEBUGPRINTF("\t\tCode: code_length: %d pc: %d\n\t\t",getU4(pc+8),pc);
                 pc += 12;
 #ifdef DEBUG
-                for (i=0;i <getU4(pc-4);i++)
-		    DEBUGPRINTF("%2x ",getU1(pc+i));
-/*length*/
+                for (i = 0; i < getU4( pc - 4); i++)
+                    DEBUGPRINTF("%2x ",getU1(pc + i));
+                /*length*/
 #endif
                 pc += getU4(pc - 4);
                 etl = getU2(0);
-		DEBUGPRINTF("\n\t\tCode: exception_table_length: %d\n",etl);
+                DEBUGPRINTF("\n\t\tCode: exception_table_length: %d\n",etl);
 #ifdef DEBUG
-/* exception_table	*/
+                /* exception_table	*/
 
-                for (i=0;i <etl;i++)
+                for (i = 0;i < etl;i++)
                 {
-		    DEBUGPRINTF("\t\t\texception: nr: %d startPC: %d\n",i,getU2(pc+8*i));
-		    DEBUGPRINTF("\t\t\texception: nr: %d endPC: %d\n",i,getU2(8*i+2));
-		    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(8*i+6));
-		    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(8*i+6));
+                    DEBUGPRINTF("\t\t\texception: nr: %d startPC: %d\n",i,getU2(pc+8*i));
+                    DEBUGPRINTF("\t\t\texception: nr: %d endPC: %d\n",i,getU2(8*i+2));
+                    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(8*i+6));
+                    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(8*i+6));
                 }
 #endif
                 pc += etl * 8;
                 u2 h = getU2(0);
-		DEBUGPRINTF("\t\tCode: attributes_count: %d\n", h);
-//LineNumberTable(var),LocalVariableTable(var),StackMapTable
+                DEBUGPRINTF("\t\tCode: attributes_count: %d\n", h);
+                //LineNumberTable(var),LocalVariableTable(var),StackMapTable
                 for (i = 0; i < h; i++)
                 {
                     const char*addr = getAddr(cs[cN].constant_pool[getU2(0)] + 3);
-                    if (
-			STRNCMPRAMFLASH
-                        ("LineNumberTable", addr, 15) == 0)
+                    if (STRNCMPRAMFLASH("LineNumberTable", addr, 15) == 0)
                     {
                         pc = getU4(0) + pc;
                         continue;
                     }
 
-                    if (
-			    STRNCMPRAMFLASH
-                        ("StackMapTable", addr, 13) == 0)
+                    if (STRNCMPRAMFLASH("StackMapTable", addr, 13) == 0)
                     {
                         pc = getU4(0) + pc;
                         continue;
                     }
 
-                    if (
-			STRNCMPRAMFLASH
-                        ("LocalVariableTable", addr, 18) == 0)
+                    if (STRNCMPRAMFLASH("LocalVariableTable", addr, 18) == 0)
                     {
                         pc = getU4(0) + pc;
                         continue;
@@ -671,39 +663,31 @@ void analyzeMethods()            /* jan 08 not good tested*/
                 }                                 // code attributes
                 continue;
             }                                     // code
-            if (
-		    STRNCMPRAMFLASH
-                ("Exceptions", adr, 10) == 0)
+            if (STRNCMPRAMFLASH("Exceptions", adr, 10) == 0)
             {
-		DEBUGPRINTF("exception object\n");
+                DEBUGPRINTF("exception object\n");
                 mN = n;
                 u4 n2 = getU4(0);                 /*attribute_length. don't need that.*/
                 n2 = getU2(0);
 #ifdef DEBUG
                 for (i=0;i<n2;i++)
-		    DEBUGPRINTF("\t\t\texception: nr: %d class: %d\n",i,getU2(pc+2*i));
+                    DEBUGPRINTF("\t\t\texception: nr: %d class: %d\n",i,getU2(pc+2*i));
 #endif
                 pc += 2 * n2;
-/*pc=(u2)getU4(0)+pc;*/
+                /*pc=(u2)getU4(0)+pc;*/
                 continue;
             }                                     //Exceptions
-            if (
-		STRNCMPRAMFLASH
-                ("Synthetic", adr, 9) == 0)
+            if (STRNCMPRAMFLASH("Synthetic", adr, 9) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (
-		STRNCMPRAMFLASH
-                ("Deprecated", adr, 10) == 0)
+            if (STRNCMPRAMFLASH("Deprecated", adr, 10) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (
-		STRNCMPRAMFLASH
-                ("Signature", adr, 9) == 0)
+            if (STRNCMPRAMFLASH("Signature", adr, 9) == 0)
             {
                 pc = (u2) getU4(0) + pc;
                 continue;
@@ -722,22 +706,22 @@ void analyzeFields()
     {
         cs[cN].field_info[n] = pc;                    /* absolute in classfile*/
         DEBUGPRINTF("\tfield %x\taccess_flags: %d\n",n,getU2(pc));
-	DEBUGPRINTF("\tfield %d\tname: %d\n",n,getU2(pc+2));
-	DEBUGPRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(pc+4));
-	DEBUGPRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(pc+6));
-	    u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[n] + 4)];
-	    u1 isNotObject =  
-		STRNCMPRAMFLASH
-		("L",(const char*) getAddr(fielddescr + 3), 1);
-					
-	//printf("cN %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(fielddescr + 3),fN);
-	if ((ACC_STATIC & getU2(pc)) && !((ACC_FINAL & getU2(pc)) && isNotObject)) 
-		    // count only normal static fields and final static fields in  class object
-	            fN++;
+        DEBUGPRINTF("\tfield %d\tname: %d\n",n,getU2(pc+2));
+        DEBUGPRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(pc+4));
+        DEBUGPRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(pc+6));
+        u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[n] + 4)];
+        u1 isNotObject =
+        STRNCMPRAMFLASH
+        ("L",(const char*) getAddr(fielddescr + 3), 1);
+
+        //printf("cN %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(fielddescr + 3),fN);
+        if ((ACC_STATIC & getU2(pc)) && !((ACC_FINAL & getU2(pc)) && isNotObject))
+            // count only normal static fields and final static fields in  class object
+            fN++;
         pc += 6;
 
         a = getU2(0);                             // num field attribute
-// ConstantValue(6),Synthetic(4),Signature(6) ,Deprecated(4)
+                                                  // ConstantValue(6),Synthetic(4),Signature(6) ,Deprecated(4)
         for (cur_a = 0; cur_a < a; ++cur_a)  // field attributes
         {
             u2 attribute_name_index = getU2(0);
@@ -745,28 +729,28 @@ void analyzeFields()
             u4 attribute_length = getU4(0);
 
             if (
-		STRNCMPRAMFLASH
+                STRNCMPRAMFLASH
                 ("ConstantValue", getAddr(attribute_name + 3), 13) == 0)	// nothing to do for jvm
-           {
+            {
                 pc += attribute_length;           /* continue*/
                 continue;                         // next attribute test
             }
             if (
-		STRNCMPRAMFLASH
+                STRNCMPRAMFLASH
                 ("Synthetic", getAddr(attribute_name + 3), 9) == 0)
             {
                 pc += 4;
                 continue;
             }
             if (
-		STRNCMPRAMFLASH
+                STRNCMPRAMFLASH
                 ("Deprecated", getAddr(attribute_name + 3), 10) == 0)
             {
                 pc += 4;
                 continue;
             }
             if (
-		STRNCMPRAMFLASH
+                STRNCMPRAMFLASH
                 ("Signature", getAddr(attribute_name + 3), 9) == 0)
             {
                 pc += 6;
@@ -775,13 +759,16 @@ void analyzeFields()
             ERROREXIT(8, "unsupported field attribute");
         }                                         // field attribute count
     }                                             // numfields
-    u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
-    for (n=0; n < fN;n++)                         /* initialize the heap elements*/
-                    heapSetElement(toSlot( (u4) 0), heapPos+n+1);
-    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDSTATICCLASSOBJECT;	    
+
+    u2 heapPos=getFreeHeapSpace(fN + 1);/* allocate on heap places for stackObject fields*/
+    for (n=0; n < fN;n++)               /* initialize the heap elements*/
+        heapSetElement(toSlot( (u4) 0), heapPos+n+1);
+
+    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDSTATICCLASSOBJECT;
     HEAPOBJECTMARKER(heapPos).mutex=MUTEXNOTBLOCKED;
     HEAPOBJECTMARKER(heapPos).rootCheck=1;
     HEAPOBJECTMARKER(heapPos).magic= OBJECTMAGIC;
+
     cs[cN].classInfo.stackObj.pos = heapPos;
     cs[cN].classInfo.stackObj.magic = OBJECTMAGIC;
     cs[cN].classInfo.stackObj.classNumber = cN;
@@ -792,19 +779,19 @@ u2 getStartPC()                                   /*cN,mN*/
 {
     u2 attrLength = 0;                            /* search code-position*/
     u2 i;
-                                                  /* number of attributes*/
+    /* number of attributes*/
     for (i = 0; i < getU2(METHODBASE(cN, mN) + 6); i++)
     {
         if (
-	    STRNCMPRAMFLASH
+            STRNCMPRAMFLASH
             (
-            "Code",
-            getAddr(
-            cs[cN].constant_pool[getU2(
-            METHODBASE(cN, mN) + 8 + attrLength)] + 3), 4)
+             "Code",
+             getAddr(
+                     cs[cN].constant_pool[getU2(
+                                                METHODBASE(cN, mN) + 8 + attrLength)] + 3), 4)
             == 0)
             return (u2) METHODBASE(cN, mN) + 8 + 14 + attrLength;
-                                                  /*+attrLength;		????*/
+        /*+attrLength;		????*/
         attrLength = getU4(METHODBASE(cN, mN) + 8) + 6;
     }                                             /* < 64K	*/
     return -1;

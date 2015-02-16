@@ -8,12 +8,12 @@
 #define __HEAP__
 
 void heapInit(void);
-void heapSetElement(slot e, u2 pos);              // mb jf switched order of arguments
-slot heapGetElement(u2 pos);
-u2 getNextHeapObjectPos(u2 pos);
+void heapSetElement(const slot e,const u2 pos);              // mb jf switched order of arguments
+slot heapGetElement(const u2 pos);
+u2 getNextHeapObjectPos(const u2 pos);
 
 // garbage collection
-u2 getFreeHeapSpace(u2 length);
+u2 getFreeHeapSpace(const u2 length);
 void checkObjects(void);
-u1 canItBeAnObject( u2);
+u1 canItBeAnObject(const u2);
 #endif

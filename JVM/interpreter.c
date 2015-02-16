@@ -60,13 +60,13 @@ static u2 nameLength;
 static char* descr;                               /* field or method*/
 static u2 descrLength;
 /* static u1	numFields; <-- not used?*/
-static u2 i, j, k;
-static s2 count;
+//static u2 i, j, k;
+//static s2 count;
 
 void run()                                        /* in: classNumber,  methodNumber cN, mN*/
 {
     u1 code, byte1, byte2;
-    u2 heapPos;
+    //u2 heapPos;
     pc = getStartPC();
     for (;;)
     {
@@ -198,7 +198,7 @@ void run()                                        /* in: classNumber,  methodNum
             case CALOAD:
             case SALOAD:
             {
-                count = (s2)opStackPop().Int;     /*mb jf*/
+                s2 count = (s2)opStackPop().Int;     /*mb jf*/
                 first = opStackPop();
 #ifdef DEBUG
                 switch (code)
@@ -290,14 +290,13 @@ void run()                                        /* in: classNumber,  methodNum
                 }
 #endif
                 second = opStackPop();
-                count = (s2)(opStackPop().Int);
+                s2 count = (s2)(opStackPop().Int);
                 first = opStackPop();
                 lengthArray = first.stackObj.arrayLength;
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
-                } else if (count < 0 || lengthArray <= count || count
-                           > (MAXHEAPOBJECTLENGTH - 1))
+                } else if (count < 0 || lengthArray <= count || count > (MAXHEAPOBJECTLENGTH - 1))
                 {
                     ARRAYINDEXOUTOFBOUNDSEXCEPTION;
                 }
@@ -966,7 +965,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (code == INVOKEINTERFACE)
                     pc += 2;
                 methodStackPush(pc);
-                k = findNumArgs(BYTECODEREF);
+                int k = findNumArgs(BYTECODEREF);
                 /*(BYTECODEREF)-1));*/
                 methodStackPush((opStackGetSpPos() - k - 1));
                 /* method resolution*/
@@ -974,16 +973,13 @@ void run()                                        /* in: classNumber,  methodNum
                 local = opStackGetSpPos() - findNumArgs(BYTECODEREF) - 1;
                 /* get cN from.stackObjRef*/
                 /*  get method from cN or superclasses*/
-                methodName = (char*) getAddr(
-                                             CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
-                methodNameLength = getU2(
-                                         CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                methodName = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
+                methodNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
-                methodDescr = (char*) getAddr(
-                                              CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
-                methodDescrLength = getU2(
-                                          CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                methodDescr = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
+                methodDescrLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
+
                 className = NULL;
 
                 if(opStackGetValue(local).UInt == NULLOBJECT.UInt)
@@ -1015,8 +1011,7 @@ void run()                                        /* in: classNumber,  methodNum
                     classNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 1);
                 }
                 //bh DEBUGPRINTLNSTRING(className,classNameLength);
-                if (!findMethod(className, classNameLength, methodName,
-                                methodNameLength, methodDescr, methodDescrLength))
+                if (!findMethod(className, classNameLength, methodName,methodNameLength, methodDescr, methodDescrLength))
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }
@@ -1031,6 +1026,7 @@ void run()                                        /* in: classNumber,  methodNum
                         /* mutex is free, I (the thread) have not the mutex and I can get the mutex for the object*/
                         currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
                         HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex = MUTEXBLOCKED;       /* get the lock*/
+                        int i = 0;
                         /* I had not the mutex for this object (but perhaps for others), now I have the look*/
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
@@ -1051,6 +1047,7 @@ void run()                                        /* in: classNumber,  methodNum
                     }                             /* mutex is blocked, is it my mutex ? have I always the lock ?*/
                     else
                     {
+                        int i = 0;
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt == opStackGetValue(local).UInt)
                                 break;
@@ -1104,7 +1101,7 @@ void run()                                        /* in: classNumber,  methodNum
                 methodStackPush(cN);
                 methodStackPush(mN);
                 methodStackPush(pc);
-                k = findNumArgs(BYTECODEREF);
+                int k = findNumArgs(BYTECODEREF);
                 /*(BYTECODEREF));*/
                 methodStackPush(opStackGetSpPos() - k);
                 /* method resolution*/
@@ -1143,6 +1140,7 @@ void run()                                        /* in: classNumber,  methodNum
                     {
                         currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
                         HEAPOBJECTMARKER(cs[cN].classInfo.stackObj.pos).mutex   = MUTEXBLOCKED;       /* get the lock*/
+                        int i = 0;
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
                                 continue;
@@ -1158,6 +1156,7 @@ void run()                                        /* in: classNumber,  methodNum
                     }                             /* mutex ==0*/
                     else
                     {
+                        int i = 0;
                         /* have I always the lock ?*/
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt == cs[cN].classInfo.UInt)
@@ -1241,8 +1240,10 @@ void run()                                        /* in: classNumber,  methodNum
                     if (getU2(METHODBASE(cN,mN))&ACC_STATIC)
                         first=cs[cN].classInfo;
                     else first=opStackGetValue(local);
+
+                    int i = 0;
                     /* must be in*/
-                    for (i=0; i<MAXLOCKEDTHREADOBJECTS;i++)
+                    for ( i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
                         if ((currentThreadCB->hasMutexLockForObject[i]).UInt==first.UInt) break;
                     /* fertig*/
                     if (currentThreadCB->lockCount[i]>1) currentThreadCB->lockCount[i]--;
@@ -1255,13 +1256,13 @@ void run()                                        /* in: classNumber,  methodNum
                         HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXNOTBLOCKED;
                         ThreadControlBlock* myTCB=currentThreadCB;
 
-                        u1 k,max;
+                        int k,max;
 
-                        for(i=0;i<(MAXPRIORITY);i++)
+                        for(i = 0; i < (MAXPRIORITY); i++)
                         {
                             max=(threadPriorities[i].count);
                             myTCB=threadPriorities[i].cb;
-                            for(k=0;k<max;k++)
+                            for(k = 0; k < max; k++)
                             {
                                 if ((myTCB->isMutexBlockedOrWaitingForObject.UInt==first.UInt)&&
                                     (myTCB->state==THREADMUTEXBLOCKED))
@@ -1329,7 +1330,7 @@ void run()                                        /* in: classNumber,  methodNum
                 methodStackPush(cN);
                 fN = 0;
                 do 	{
-                    for (i=0; i < getU2(cs[cN].fields_count); i++)	// count normal fields
+                    for (int i = 0; i < getU2(cs[cN].fields_count); i++)	// count normal fields
                     {
                         u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
                         u1 isNotObject =
@@ -1341,7 +1342,7 @@ void run()                                        /* in: classNumber,  methodNum
 
                 } while (findSuperClass());
                 cN=methodStackPop();
-                heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
+                u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
                 first.stackObj.classNumber=cN;
@@ -1350,20 +1351,20 @@ void run()                                        /* in: classNumber,  methodNum
                 HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-                for (i=0; i< fN; i++)        /* initialize the heap elements*/
-                    heapSetElement(toSlot((u4)0), heapPos+i+1);
+                for (int i = 0; i < fN; i++)        /* initialize the heap elements*/
+                    heapSetElement(toSlot((u4)0), heapPos + i + 1);
 
                 mN = methodStackPop();
                 cN = methodStackPop();
                 /* className*/
-                DEBUGPRINTLNSTRING(getAddr(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+3),
-                                   getU2(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+1));
+                DEBUGPRINTLNSTRING(getAddr(CP(cN, getU2(CP(cN,BYTECODEREF) + 1)) + 3),
+                                   getU2(CP(cN, getU2(CP(cN,BYTECODEREF) + 1 )) + 1));
 
             }break;
             case NEWARRAY:
             {
                 DEBUGPRINTLN("newarray");         /* mb jf*/
-                count = (s2)opStackPop().UInt;
+                s2 count = (s2)opStackPop().UInt;
                 if (count < 0)
                 {
                     NEGATIVEARRAYSIZEEXCEPTION;
@@ -1374,7 +1375,7 @@ void run()                                        /* in: classNumber,  methodNum
                 }
 
                 /* + marker*/
-                heapPos=getFreeHeapSpace(count+ 1);
+                u2 heapPos=getFreeHeapSpace(count + 1);
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
                 first.stackObj.arrayLength=(u1)count;
@@ -1387,17 +1388,17 @@ void run()                                        /* in: classNumber,  methodNum
                 {
                     case T_BOOLEAN:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_CHAR:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_FLOAT:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot(0.f),heapPos++);
                     }break;
                     case T_DOUBLE:
@@ -1406,17 +1407,17 @@ void run()                                        /* in: classNumber,  methodNum
                     }break;
                     case T_BYTE:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_SHORT:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_INT:
                     {
-                        for (i=0; i<count; i++)
+                        for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
                     case T_LONG:
@@ -1455,26 +1456,29 @@ void run()                                        /* in: classNumber,  methodNum
                 first=opStackPop();
                 if ( HEAPOBJECTMARKER(first.stackObj.pos).mutex==MUTEXNOTBLOCKED)
                 {
+                    int i = 0;
                     /* get the lock*/
                     HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXBLOCKED;
-                    for (i=0; i<MAXLOCKEDTHREADOBJECTS;i++)
+                    for (i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
                         if ((currentThreadCB->hasMutexLockForObject[i]).UInt!=NULLOBJECT.UInt)
                             continue;
                         else break;
-                    if (i==MAXLOCKEDTHREADOBJECTS)
+                    if (i == MAXLOCKEDTHREADOBJECTS)
                     {
                         errorExit(-1, "too many locks\n");
                     }
                     /* count*/
-                    currentThreadCB->lockCount[i]=1;
-                    currentThreadCB->hasMutexLockForObject[i]=first;
+                    currentThreadCB->lockCount[i] = 1;
+                    currentThreadCB->hasMutexLockForObject[i] = first;
                 }
                 else                              /* mutex ==0*/
                 {
+                    int i = 0;
                     /* have I always the lock ?*/
-                    for (i=0; i<MAXLOCKEDTHREADOBJECTS;i++)
-                        if (currentThreadCB->hasMutexLockForObject[i].UInt==first.UInt) break;
-                    if (i==MAXLOCKEDTHREADOBJECTS)
+                    for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
+                        if (currentThreadCB->hasMutexLockForObject[i].UInt == first.UInt)
+                            break;
+                    if (i == MAXLOCKEDTHREADOBJECTS)
                     {
                         /*mutex blocked*/
                         currentThreadCB->state=THREADMUTEXBLOCKED;
@@ -1496,31 +1500,34 @@ void run()                                        /* in: classNumber,  methodNum
             {
 #ifndef TINYBAJOS_MULTITASKING
                 first=opStackPop();
+
+                int i = 0;
                 /* must be in*/
-                for (i=0; i<MAXLOCKEDTHREADOBJECTS;i++)
-                    if (currentThreadCB->hasMutexLockForObject[i].UInt==first.UInt) break;
+                for (i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
+                    if (currentThreadCB->hasMutexLockForObject[i].UInt == first.UInt)
+                        break;
+
                 /* fertig*/
-                if (currentThreadCB->lockCount[i]>1) currentThreadCB->lockCount[i]--;
+                if (currentThreadCB->lockCount[i] > 1) currentThreadCB->lockCount[i]--;
                 else
                 {
-                    currentThreadCB->lockCount[i]=0;
+                    currentThreadCB->lockCount[i] = 0;
                     /* give lock free*/
-                    currentThreadCB->hasMutexLockForObject[i]=NULLOBJECT;
-                    HEAPOBJECTMARKER(opStackGetValue(first.stackObj.pos).UInt).mutex=MUTEXNOTBLOCKED;
+                    currentThreadCB->hasMutexLockForObject[i] = NULLOBJECT;
+                    HEAPOBJECTMARKER(opStackGetValue(first.stackObj.pos).UInt).mutex = MUTEXNOTBLOCKED;
 
                     ThreadControlBlock* myTCB;
-                    u2 max,k;
-                    for(i=0;i<(MAXPRIORITY);i++)
+                    for(i = 0; i < MAXPRIORITY;i++)
                     {
-                        max=(threadPriorities[i].count);
-                        myTCB=threadPriorities[i].cb;
-                        for(k=0;k<max;k++)
+                        u2 max = (threadPriorities[i].count);
+                        myTCB = threadPriorities[i].cb;
+                        for(int k = 0;k < max;k++)
                         {
                             if (myTCB->isMutexBlockedOrWaitingForObject.UInt==opStackGetValue(first.stackObj.pos).UInt)
                             {
                                 /*!!*/
-                                myTCB->state=THREADNOTBLOCKED;
-                                /*						myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;*/
+                                myTCB->state = THREADNOTBLOCKED;
+                                /*myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;*/
                             }
                             myTCB=myTCB->succ;
                         }
@@ -1720,7 +1727,7 @@ void run()                                        /* in: classNumber,  methodNum
                 DEBUGPRINTLN("wide");             /* mb jf*/
                 /* not tested because so many locals are hard to implement on purpose  14.12.2006*/
                 u2 nextOp = getU1(0);             /* which operation to extend?*/
-                count = getU2(0);
+                s2 count = getU2(0);
 
                 /* if load operation...*/
                 if (ILOAD <= nextOp && nextOp <= DLOAD)
@@ -1740,7 +1747,7 @@ void run()                                        /* in: classNumber,  methodNum
                     /* embedded op code for ret*/
                     /*not tested because no exceptions implemented yet 14.12.2006*/
                     /* the opcode of athrow is required*/
-                    u2 addr = opStackGetValue(local+count).UInt;
+                    u2 addr = opStackGetValue(local + count).UInt;
                     pc = addr+getStartPC();       /*pcMethodStart;	//assumtion: the address is the relative address, absolute address may be required*/
                 }
                 if (nextOp == IINC)               /* if iinc operation...*/
@@ -1929,8 +1936,7 @@ slot createDims(u4 dimsLeft, s2 *dimSize)
         HEAPOBJECTMARKER(heapPos++).magic = OBJECTMAGIC;
         s2 *cnt = (s2 *) malloc(sizeof(s2));
         *cnt = 0;
-        int i;
-        for (i = 0; i < *dimSize; ++i)
+        for (int i = 0; i < *dimSize; ++i)
         {
             heapSetElement(createDims(dimsLeft - 1, cnt), heapPos++);
         }
@@ -1974,8 +1980,8 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
     HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
     HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-    j = getU2(cs[cN].fields_count);
-    for (i = 0; i < j; i++)
+    int j = getU2(cs[cN].fields_count);
+    for (int i = 0; i < j; i++)
     {
         heapSetElement(toSlot((u4) 0), heapPos + i + 1);
     }
@@ -2015,7 +2021,7 @@ void handleException()
 
     DEBUGPRINTLN("trying to catch class number %d", classNumberFromPushedObject);
     DEBUGPRINTLN("%d catch clauses", n);
-    for (i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i)
     {
         u2 cur_catch = METHODCODEEXCEPTIONBASE(cN, mN) + 8 * i;
 
@@ -2045,9 +2051,9 @@ void handleException()
         u1 classNumberInCodeExceptionTable = cN;
         DEBUGPRINTLN("classNumberInCodeExceptionTable: %d",
                      classNumberInCodeExceptionTable);
-        
+
         cN = classNumberFromPushedObject;
-        
+
         /* start catching */
         if (checkInstance(classNumberInCodeExceptionTable))
         {
