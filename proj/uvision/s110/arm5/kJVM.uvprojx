@@ -365,7 +365,7 @@
               <MiscControls>--c99 --pointer_alignment=1</MiscControls>
               <Define>NRF51 BSP_DEFINES_ONLY BOARD_NRF6310 BLE_STACK_SUPPORT_REQD S110 SOFTDEVICE_PRESENT</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\JVM;..\..\..\..\JAVALANGNATIVE;..\..\..\..\PLATFORMS\LINUX</IncludePath>
+              <IncludePath>..\..\..\..\JVM;..\..\..\..\JAVALANGNATIVE;..\..\..\..\PLATFORMS\LINUX;..\..\..\..\JAVALANGNATIVE\binaries</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -411,16 +411,6 @@
         <Group>
           <GroupName>jvm</GroupName>
           <Files>
-            <File>
-              <FileName>bajvm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\JVM\bajvm.c</FilePath>
-            </File>
-            <File>
-              <FileName>bajvm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\JVM\bajvm.h</FilePath>
-            </File>
             <File>
               <FileName>classfile.c</FileName>
               <FileType>1</FileType>
@@ -490,6 +480,16 @@
               <FileName>typedefinitions.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\JVM\typedefinitions.h</FilePath>
+            </File>
+            <File>
+              <FileName>kjvm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JVM\kjvm.c</FilePath>
+            </File>
+            <File>
+              <FileName>kjvm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JVM\kjvm.h</FilePath>
             </File>
           </Files>
         </Group>
