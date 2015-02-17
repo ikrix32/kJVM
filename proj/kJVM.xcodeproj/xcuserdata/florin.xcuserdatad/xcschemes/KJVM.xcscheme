@@ -59,11 +59,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Object.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/platform/PlatForm.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/platform/PlatForm.class"
+            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/java/lang/Object.class"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

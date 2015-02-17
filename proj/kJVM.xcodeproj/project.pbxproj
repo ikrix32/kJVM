@@ -39,6 +39,35 @@
 /* Begin PBXFileReference section */
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
+		4E86B1FF1A92C58A00B66AF0 /* java_lang_Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Object.h; sourceTree = "<group>"; };
+		4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InStream.h; sourceTree = "<group>"; };
+		4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_OutStream.h; sourceTree = "<group>"; };
+		4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArithmeticException.h; sourceTree = "<group>"; };
+		4E86B2031A92C8DD00B66AF0 /* java_lang_ArrayIndexOutOfBoundsException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArrayIndexOutOfBoundsException.h; sourceTree = "<group>"; };
+		4E86B2041A92C8DD00B66AF0 /* java_lang_Boolean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Boolean.h; sourceTree = "<group>"; };
+		4E86B2051A92C8DD00B66AF0 /* java_lang_Byte.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Byte.h; sourceTree = "<group>"; };
+		4E86B2061A92C8DD00B66AF0 /* java_lang_Character.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Character.h; sourceTree = "<group>"; };
+		4E86B2071A92C8DD00B66AF0 /* java_lang_CharSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_CharSequence.h; sourceTree = "<group>"; };
+		4E86B2081A92C8DD00B66AF0 /* java_lang_ClassCastException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ClassCastException.h; sourceTree = "<group>"; };
+		4E86B2091A92C8DD00B66AF0 /* java_lang_Error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Error.h; sourceTree = "<group>"; };
+		4E86B20A1A92C8DD00B66AF0 /* java_lang_Exception.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Exception.h; sourceTree = "<group>"; };
+		4E86B20B1A92C8DD00B66AF0 /* java_lang_Float.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Float.h; sourceTree = "<group>"; };
+		4E86B20C1A92C8DD00B66AF0 /* java_lang_IllegalArgumentException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_IllegalArgumentException.h; sourceTree = "<group>"; };
+		4E86B20D1A92C8DD00B66AF0 /* java_lang_IllegalMonitorStateException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_IllegalMonitorStateException.h; sourceTree = "<group>"; };
+		4E86B20E1A92C8DD00B66AF0 /* java_lang_Integer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Integer.h; sourceTree = "<group>"; };
+		4E86B20F1A92C8DD00B66AF0 /* java_lang_InterruptedException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_InterruptedException.h; sourceTree = "<group>"; };
+		4E86B2101A92C8DD00B66AF0 /* java_lang_Math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Math.h; sourceTree = "<group>"; };
+		4E86B2111A92C8DD00B66AF0 /* java_lang_NullPointerException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_NullPointerException.h; sourceTree = "<group>"; };
+		4E86B2121A92C8DD00B66AF0 /* java_lang_Runtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Runtime.h; sourceTree = "<group>"; };
+		4E86B2131A92C8DD00B66AF0 /* java_lang_RuntimeException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_RuntimeException.h; sourceTree = "<group>"; };
+		4E86B2141A92C8DD00B66AF0 /* java_lang_Short.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Short.h; sourceTree = "<group>"; };
+		4E86B2151A92C8DD00B66AF0 /* java_lang_String.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_String.h; sourceTree = "<group>"; };
+		4E86B2161A92C8DD00B66AF0 /* java_lang_StringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_StringBuffer.h; sourceTree = "<group>"; };
+		4E86B2171A92C8DD00B66AF0 /* java_lang_StringBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_StringBuilder.h; sourceTree = "<group>"; };
+		4E86B2181A92C8DD00B66AF0 /* java_lang_System.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_System.h; sourceTree = "<group>"; };
+		4E86B2191A92C8DD00B66AF0 /* java_lang_Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Thread.h; sourceTree = "<group>"; };
+		4E86B21A1A92C8DD00B66AF0 /* java_lang_Throwable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Throwable.h; sourceTree = "<group>"; };
+		4E86B21B1A92C8DD00B66AF0 /* java_PlatForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_PlatForm.h; sourceTree = "<group>"; };
 		4E9A38321A91400C00665CC3 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4EB8F7481A8FD0E3001C885A /* kJVM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kJVM; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EB8F7B31A9128E6001C885A /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
@@ -84,6 +113,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
+			isa = PBXGroup;
+			children = (
+				4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */,
+				4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */,
+				4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */,
+				4E86B2031A92C8DD00B66AF0 /* java_lang_ArrayIndexOutOfBoundsException.h */,
+				4E86B2041A92C8DD00B66AF0 /* java_lang_Boolean.h */,
+				4E86B2051A92C8DD00B66AF0 /* java_lang_Byte.h */,
+				4E86B2061A92C8DD00B66AF0 /* java_lang_Character.h */,
+				4E86B2071A92C8DD00B66AF0 /* java_lang_CharSequence.h */,
+				4E86B2081A92C8DD00B66AF0 /* java_lang_ClassCastException.h */,
+				4E86B2091A92C8DD00B66AF0 /* java_lang_Error.h */,
+				4E86B20A1A92C8DD00B66AF0 /* java_lang_Exception.h */,
+				4E86B20B1A92C8DD00B66AF0 /* java_lang_Float.h */,
+				4E86B20C1A92C8DD00B66AF0 /* java_lang_IllegalArgumentException.h */,
+				4E86B20D1A92C8DD00B66AF0 /* java_lang_IllegalMonitorStateException.h */,
+				4E86B20E1A92C8DD00B66AF0 /* java_lang_Integer.h */,
+				4E86B20F1A92C8DD00B66AF0 /* java_lang_InterruptedException.h */,
+				4E86B2101A92C8DD00B66AF0 /* java_lang_Math.h */,
+				4E86B2111A92C8DD00B66AF0 /* java_lang_NullPointerException.h */,
+				4E86B2121A92C8DD00B66AF0 /* java_lang_Runtime.h */,
+				4E86B2131A92C8DD00B66AF0 /* java_lang_RuntimeException.h */,
+				4E86B2141A92C8DD00B66AF0 /* java_lang_Short.h */,
+				4E86B2151A92C8DD00B66AF0 /* java_lang_String.h */,
+				4E86B2161A92C8DD00B66AF0 /* java_lang_StringBuffer.h */,
+				4E86B2171A92C8DD00B66AF0 /* java_lang_StringBuilder.h */,
+				4E86B2181A92C8DD00B66AF0 /* java_lang_System.h */,
+				4E86B2191A92C8DD00B66AF0 /* java_lang_Thread.h */,
+				4E86B21A1A92C8DD00B66AF0 /* java_lang_Throwable.h */,
+				4E86B21B1A92C8DD00B66AF0 /* java_PlatForm.h */,
+				4E86B1FF1A92C58A00B66AF0 /* java_lang_Object.h */,
+			);
+			path = binaries;
+			sourceTree = "<group>";
+		};
 		4EB8F73F1A8FD0E3001C885A = {
 			isa = PBXGroup;
 			children = (
@@ -118,6 +183,7 @@
 		4EB8F7BB1A9128FF001C885A /* JAVALANGNATIVE */ = {
 			isa = PBXGroup;
 			children = (
+				4E86B1E21A92C58A00B66AF0 /* binaries */,
 				4EB8F7BC1A9128FF001C885A /* float.c */,
 				4EB8F7BD1A9128FF001C885A /* float.h */,
 				4EB8F7BF1A9128FF001C885A /* interruptthread.c */,
@@ -321,6 +387,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					JAVALANGNATIVE,
 					JVM,
+					JAVALANGNATIVE/binaries,
 				);
 				PRODUCT_NAME = kJVM;
 			};
@@ -335,6 +402,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					JAVALANGNATIVE,
 					JVM,
+					JAVALANGNATIVE/binaries,
 				);
 				PRODUCT_NAME = kJVM;
 			};
