@@ -17,7 +17,7 @@
 #define PRINTMAXSTACK
 #endif
 
-#include "bajvm.h"
+#include "kjvm.h"
 #include "definitions.h"
 #include "stack.h"
 

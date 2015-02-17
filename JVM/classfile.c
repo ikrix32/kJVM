@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "definitions.h"
-#include "bajvm.h"
+#include "kjvm.h"
 #include "heap.h"
 #include <string.h>
 #ifdef AVR8

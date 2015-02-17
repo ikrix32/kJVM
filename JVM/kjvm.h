@@ -6,8 +6,8 @@
 // a jvm for 8 Bit MC !!, e.g. atmega128 CharonII and linux and avr32
 // version 0.1 vom 1.10.07
 
-#ifndef __BAJVM__
-#define __BAJVM__
+#ifndef __KJVM__
+#define __KJVM__
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>

@@ -20,14 +20,14 @@
 #include <sys/time.h>
 #endif
 #include <string.h>
-#include "../../JVM/typedefinitions.h"
-#include "../../JVM/definitions.h"
-#include "../../JVM/bajvm.h"
-#include "../../JVM/stack.h"
-#include "../../JVM/classfile.h"
-#include "../../JVM/scheduler.h"
-#include "../../JVM/heap.h"
-//#include "native.h"
+#include "typedefinitions.h"
+#include "definitions.h"
+#include "kjvm.h"
+#include "stack.h"
+#include "classfile.h"
+#include "scheduler.h"
+#include "heap.h"
+#include "native.h"
 
 // insert and update here arrays for classes with native methods
 // array length ->  at least up to last native method < methods_count

@@ -15,7 +15,7 @@
 #include "typedefinitions.h"
 #include "classfile.h"
 #include "definitions.h"
-#include "bajvm.h"
+#include "kjvm.h"
 #include "stack.h"
 #include "heap.h"
 #include "interpreter.h"

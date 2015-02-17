@@ -14,14 +14,13 @@
 #ifndef TINYBAJOS_MULTITASKING
 #include <stdio.h>
 #include <stdlib.h>
-#include "../JVM/definitions.h"
-#include "../JVM/typedefinitions.h"
-#include "../JVM/bajvm.h"
-#include "../JVM/classfile.h"
-#include "../JVM/stack.h"
-#include "../JVM/bajvm.h"
-#include "../JVM/scheduler.h"
-#include "../JVM/heap.h"
+#include "definitions.h"
+#include "typedefinitions.h"
+#include "kjvm.h"
+#include "classfile.h"
+#include "stack.h"
+#include "scheduler.h"
+#include "heap.h"
 #include "lock.h"
 
 char lock()
@@ -40,13 +39,9 @@ char unlock()
 
 char tryLock()
 {
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-        == MUTEXBLOCKED)
-    {
+    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex == MUTEXBLOCKED) {
         opStackPush(toSlot((u4) 0));
-    }
-    else
-    {
+    } else {
         lock();
         opStackPush(toSlot((u4) 1));
     }

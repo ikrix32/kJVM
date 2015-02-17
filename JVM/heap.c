@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "definitions.h"
-#include "bajvm.h"
+#include "kjvm.h"
 #include "stack.h"
 #ifdef AVR8
 #include <avr/pgmspace.h>

@@ -56,7 +56,7 @@ scheduler
 #include "definitions.h"
 
 #define __DEF_GLOBALS__
-#include "bajvm.h"
+#include "kjvm.h"
 #include "heap.h"
 #include "stack.h"
 #include "classfile.h"

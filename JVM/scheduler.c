@@ -7,7 +7,7 @@
 #include<stdio.h>
 #include "definitions.h"
 #include "typedefinitions.h"
-#include "bajvm.h"
+#include "kjvm.h"
 #include "classfile.h"
 #include "stack.h"
 #include "scheduler.h"

@@ -6,12 +6,18 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif
-#include "../../JVM/definitions.h"
-#include "../../JVM/bajvm.h"
-#include "../../JVM/classfile.h"
-#include "../../JVM/heap.h"
+#include "definitions.h"
+#include "kjvm.h"
+#include "classfile.h"
+#include "heap.h"
 #include "platform.h"
+/*
+const u1 java_lang_Object[] =
+#include "JVM/bootstrap_classes/Object.h"
 
+const u1 javaobject[] =
+#include "bootstrap_classes/Object.h"
+*/
 void initHW()
 {
 }

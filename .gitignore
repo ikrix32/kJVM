@@ -82,3 +82,5 @@ proj/uvision/s110/arm5/_build/nrf51422_xxac.map
 proj/uvision/s110/arm5/_build/nrf51422_xxac.hex
 
 proj/uvision/s110/arm5/_build/nrf51422_xxac.axf
+
+*.0000

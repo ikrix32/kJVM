@@ -10,16 +10,15 @@
 /* look at methods in the *.java or *.class file in increasing order */
 /* if method is non native -> insert NULL, otherwise pointer to nativce C-function*/
 
-#include "../JAVALANGNATIVE/object.h"
-#include "../JAVALANGNATIVE/string.h"
-#include "../JAVALANGNATIVE/thread.h"
-#include "../JAVALANGNATIVE/interruptthread.h"
-#include "../JAVALANGNATIVE/lock.h"
-#include "../JAVALANGNATIVE/float.h"
+#include "object.h"
+#include "string.h"
+#include "thread.h"
+#include "interruptthread.h"
+#include "lock.h"
+#include "float.h"
 /* fill this array with classes containing native methods*/
 
-const char* nativeClassNames[] =
-{
+const char* nativeClassNames[] = {
     "platform/PlatForm", "java/lang/Object",
     "java/lang/String",
 #ifndef TINYBAJOS_MULTITASKING
@@ -57,10 +56,9 @@ constructor to save ram.
 u2 numNativeClassNames = sizeof(nativeClassNames) / sizeof(char*);
 
 #if (LINUX||AVR32LINUX)
-#include "../PLATFORMS/LINUX/native.h"
+#include "native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
@@ -71,8 +69,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 #ifdef CH
 #include "../PLATFORMS/CHARON/native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
@@ -95,8 +92,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 #ifdef AM
 #include "../PLATFORMS/ARDUINOMEGA/native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
@@ -110,8 +106,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 #ifdef XPLAIN
 #include "../PLATFORMS/XMEGA/native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
@@ -125,8 +120,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 #ifdef EVK1100
 #include "../PLATFORMS/EVK1100/native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,                                 /* for our board only TXD,RXD works correct on UART0*/
     nativeCharOut,
     conStat,
@@ -144,15 +138,14 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
     pwmStart,
     pwmStop,
     adcGetValue
-/* usb, ether, sdcard*/
+    /* usb, ether, sdcard*/
 };
 #endif
 
 #ifdef EVK1104
 #include "../PLATFORMS/EVK1104/native.h"
 
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,                                 /* for our board only TXD,RXD works correct on UART0*/
     nativeCharOut,
     conStat,
@@ -180,8 +173,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 
 #ifdef NGW100
 #include "../PLATFORMS/NGW100/native.h"
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
@@ -191,13 +183,12 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 
 #ifdef STK1000
 #include "../PLATFORMS/STK1000/native.h"
-functionForNativeMethodType functionForNativePlatFormMethod[] =
-{
+functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeCharIn,
     nativeCharOut,
     nativeExit,
     currentTimeMillis,
-/*Grafik-Methoden*/
+    /*Grafik-Methoden*/
     drawPointRGB,
     drawFillRectRGB,
     drawRectangleRGB,
@@ -212,7 +203,7 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
     clearZBuffer,
     drawPointHSBZBuffer,
     drawLineHSBZBuffer,
-/*Schrift-Methoden*/
+    /*Schrift-Methoden*/
     setFont,
     setFontWindow,
     setFontAutoLineFeed,
@@ -225,27 +216,23 @@ functionForNativeMethodType functionForNativePlatFormMethod[] =
 };
 #endif
 
-functionForNativeMethodType functionForNativeStringMethod[] =
-{
+functionForNativeMethodType functionForNativeStringMethod[] = {
     nativeStringLength, nativeCharAt
 };
 
 #ifndef TINYBAJOS_MULTITASKING
-functionForNativeMethodType functionForNativeThreadMethod[] =
-{
+functionForNativeMethodType functionForNativeThreadMethod[] = {
     start, yield,//krix
     ksleep, currentThread, interrupt, interrupted, isInterrupted,
     nativeSetPriority, join
 };
 #endif
 
-functionForNativeMethodType functionForNativeFloatMethod[] =
-{
+functionForNativeMethodType functionForNativeFloatMethod[] = {
     floatToCharArray, nativeParseFloat, typeConvert, typeConvert
 };
 
-functionForNativeMethodType functionForNativeObjectMethod[] =
-{
+functionForNativeMethodType functionForNativeObjectMethod[] = {
 #ifndef TINYBAJOS_MULTITASKING
     notify, notifyAll, nativeWait, waitTime,
 #endif
@@ -253,23 +240,20 @@ functionForNativeMethodType functionForNativeObjectMethod[] =
 };
 
 #ifndef TINYBAJOS_MULTITASKING
-functionForNativeMethodType functionForNativeLockMethod[] =
-{
+functionForNativeMethodType functionForNativeLockMethod[] = {
     lock, unlock,
     tryLock, lock,                                //the cloning is correct!
     unlock                                        //the cloning is correct!
 };
 
-functionForNativeMethodType functionForNativeInterruptThreadMethod[] =
-{
+functionForNativeMethodType functionForNativeInterruptThreadMethod[] = {
     static_sei, static_cli, initInterrupt, removeInterrupt,
     forceInterrupt
 };
 #endif
 
 /* insert array of function pointer*/
-const functionForNativeMethodType* funcArray[] =
-{
+const functionForNativeMethodType* funcArray[] = {
     functionForNativePlatFormMethod, functionForNativeObjectMethod,
     functionForNativeStringMethod,
 #ifndef TINYBAJOS_MULTITASKING

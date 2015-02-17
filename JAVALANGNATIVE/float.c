@@ -13,13 +13,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../JVM/definitions.h"
-#include "../JVM/typedefinitions.h"
-#include "../JVM/bajvm.h"
-#include "../JVM/classfile.h"
-#include "../JVM/stack.h"
-#include "../JVM/bajvm.h"
-#include "../JVM/heap.h"
+#include "definitions.h"
+#include "typedefinitions.h"
+#include "kjvm.h"
+#include "classfile.h"
+#include "stack.h"
+#include "heap.h"
 #include "float.h"
 
 char floatToCharArray()
