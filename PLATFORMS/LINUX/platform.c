@@ -12,6 +12,7 @@
 #include "heap.h"
 #include "platform.h"
 
+#ifdef BOOTSTRAP_BINARIES
 const u1 java_lang_ObjectBin[] =
 #include "java_lang_Object.h"
 
@@ -96,6 +97,9 @@ const u1 java_io_OutStreamBin[] =
 const u1 java_lang_SystemBin[] =
 #include "java_lang_System.h"
 
+const u1 helloWorldBin[] =
+#include "HelloWorld.h"
+
 const u1* bootStrapBinaries[] =
 {   java_lang_ObjectBin,
     platformBin,
@@ -124,8 +128,41 @@ const u1* bootStrapBinaries[] =
     java_lang_mathBin,
     java_io_InStreamBin,
     java_io_OutStreamBin,
-    java_lang_SystemBin
+    java_lang_SystemBin,
+    helloWorldBin
 };
+const u4 bootStrapBinariesSize[] =
+{   sizeof(java_lang_ObjectBin),
+    sizeof(platformBin),
+    sizeof(java_lang_BooleanBin),
+    sizeof(java_lang_ByteBin),
+    sizeof(java_lang_CharacterBin),
+    sizeof(java_lang_ShortBin),
+    sizeof(java_lang_IntegerBin),
+    sizeof(java_lang_FloatBin),
+    sizeof(java_lang_CharSequenceBin),
+    sizeof(java_lang_StringBin),
+    sizeof(java_lang_StringBufferBin),
+    sizeof(java_lang_StringBuilderBin),
+    sizeof(java_lang_ErrorBin),
+    sizeof(java_lang_ThrowableBin),
+    sizeof(java_lang_ExceptionBin),
+    sizeof(java_lang_NullPointerExceptionBin),
+    sizeof(java_lang_ArithmeticExceptionBin),
+    sizeof(java_lang_ArrayIndexOutOfBoundsExceptionBin),
+    sizeof(java_lang_RuntimeExceptionBin),
+    sizeof(java_lang_IllegalArgumentExceptionBin),
+    sizeof(java_lang_ClassCastExceptionBin),
+    sizeof(java_lang_InterruptedExceptionBin),
+    sizeof(java_lang_RuntimeBin),
+    sizeof(java_lang_ThreadBin),
+    sizeof(java_lang_mathBin),
+    sizeof(java_io_InStreamBin),
+    sizeof(java_io_OutStreamBin),
+    sizeof(java_lang_SystemBin),
+    sizeof(helloWorldBin)
+};
+#endif
 
 void initHW()
 {
@@ -136,8 +173,8 @@ void initHW()
 
 void initVM(int argc, char* argv[])               /* read, analyze classfiles and fill structures*/
 {
-    u4 length;
-    printf("Size of java obj %lu\n",sizeof(java_lang_ObjectBin));
+    u4 length = 0;
+
 #if (AVR32LINUX||LINUX)
     classFileBase=(char*)malloc((size_t) MAXBYTECODE);
     if (classFileBase==NULL)
@@ -145,14 +182,31 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
 #endif
 
     heapInit();                                   /* linux avr8 malloc , others hard coded!*/
-    length = 0;
+
+#ifdef BOOTSTRAP_BINARIES
+    const int noBins = sizeof(bootStrapBinariesSize)/sizeof(bootStrapBinariesSize[0]);
+    for (cN = 0; cN < noBins; cN++)
+    {
+        cs[cN].classFileStartAddress = classFileBase + length;
+        cs[cN].classFileLength=readClassBin(bootStrapBinaries[cN],bootStrapBinariesSize[cN],cs[cN].classFileStartAddress);
+        analyzeClass( &cs[cN]);
+        length += cs[cN].classFileLength;
+        if (length > MAXBYTECODE)
+        {
+            printf("MAXBYTECODE reached!\n"); exit(-1);
+        }
+        numClasses = cN + 1;
+    }
+#endif
+
 #if LINUX|| AVR32LINUX
     if (argc > MAXCLASSES)
         errorExit(-1,"ERROR: trying to load %d classes, MAXCLASSES is %d\n", argc, MAXCLASSES);
-    for (cN=0; cN < argc; cN++)
+
+    for (int i = 0; i < argc; i++,cN++)
     {
         cs[cN].classFileStartAddress = classFileBase + length;
-        cs[cN].classFileLength=readClassFile(argv[cN + 1], cs[cN].classFileStartAddress);
+        cs[cN].classFileLength=readClassFile(argv[i + 1], cs[cN].classFileStartAddress);
         analyzeClass( &cs[cN]);
         length += cs[cN].classFileLength;
         if (length > MAXBYTECODE)
@@ -182,6 +236,18 @@ u2 readClassFile(char* fileName, char* addr)
 #endif
 }
 
+u2 readClassBin(const u1* bin,const u4 binSize, char* addr)
+{
+#if LINUX||AVR32LINUX
+    u2 classFileLength=-(u2)((long)addr%(1<<16))-1;
+    for (int i = 0; i < binSize; i++) {
+        addr[0] = (char)bin[0];
+        addr++;bin++;
+    }
+    return classFileLength += (long)addr;
+#endif
+    return 0;
+}
 
 void linuxExit(int n)
 {

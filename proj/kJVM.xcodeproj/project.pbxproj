@@ -68,6 +68,7 @@
 		4E86B2191A92C8DD00B66AF0 /* java_lang_Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Thread.h; sourceTree = "<group>"; };
 		4E86B21A1A92C8DD00B66AF0 /* java_lang_Throwable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Throwable.h; sourceTree = "<group>"; };
 		4E86B21B1A92C8DD00B66AF0 /* java_PlatForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_PlatForm.h; sourceTree = "<group>"; };
+		4E86B21C1A92DA8F00B66AF0 /* HelloWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloWorld.h; sourceTree = "<group>"; };
 		4E9A38321A91400C00665CC3 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4EB8F7481A8FD0E3001C885A /* kJVM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kJVM; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EB8F7B31A9128E6001C885A /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
@@ -116,6 +117,7 @@
 		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				4E86B21C1A92DA8F00B66AF0 /* HelloWorld.h */,
 				4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */,
 				4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */,
 				4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */,
