@@ -100,67 +100,67 @@ const u1 java_lang_SystemBin[] =
 const u1 helloWorldBin[] =
 #include "HelloWorld.h"
 
-const u1* bootStrapBinaries[] =
+const u1* bootstrapBinaries[] =
 {   java_lang_ObjectBin,
     platformBin,
-    java_lang_BooleanBin,
+    //java_lang_BooleanBin,
     java_lang_ByteBin,
     java_lang_CharacterBin,
-    java_lang_ShortBin,
+    //java_lang_ShortBin,
     java_lang_IntegerBin,
-    java_lang_FloatBin,
+    //java_lang_FloatBin,
     java_lang_CharSequenceBin,
     java_lang_StringBin,
     java_lang_StringBufferBin,
     java_lang_StringBuilderBin,
-    java_lang_ErrorBin,
-    java_lang_ThrowableBin,
-    java_lang_ExceptionBin,
-    java_lang_NullPointerExceptionBin,
-    java_lang_ArithmeticExceptionBin,
-    java_lang_ArrayIndexOutOfBoundsExceptionBin,
-    java_lang_RuntimeExceptionBin,
-    java_lang_IllegalArgumentExceptionBin,
-    java_lang_ClassCastExceptionBin,
-    java_lang_InterruptedExceptionBin,
-    java_lang_RuntimeBin,
+    //java_lang_ErrorBin,
+    //java_lang_ThrowableBin,
+    //java_lang_ExceptionBin,
+    //java_lang_NullPointerExceptionBin,
+    //java_lang_ArithmeticExceptionBin,
+    //java_lang_ArrayIndexOutOfBoundsExceptionBin,
+    //java_lang_RuntimeExceptionBin,
+    //java_lang_IllegalArgumentExceptionBin,
+    //java_lang_ClassCastExceptionBin,
+    //java_lang_InterruptedExceptionBin,
+    //java_lang_RuntimeBin,
     java_lang_ThreadBin,
     java_lang_mathBin,
     java_io_InStreamBin,
     java_io_OutStreamBin,
     java_lang_SystemBin,
-    helloWorldBin
+    //helloWorldBin
 };
-const u4 bootStrapBinariesSize[] =
+const u4 bootstrapBinariesSize[] =
 {   sizeof(java_lang_ObjectBin),
     sizeof(platformBin),
-    sizeof(java_lang_BooleanBin),
+    //sizeof(java_lang_BooleanBin),
     sizeof(java_lang_ByteBin),
     sizeof(java_lang_CharacterBin),
-    sizeof(java_lang_ShortBin),
+    //sizeof(java_lang_ShortBin),
     sizeof(java_lang_IntegerBin),
-    sizeof(java_lang_FloatBin),
+    //sizeof(java_lang_FloatBin),
     sizeof(java_lang_CharSequenceBin),
     sizeof(java_lang_StringBin),
     sizeof(java_lang_StringBufferBin),
     sizeof(java_lang_StringBuilderBin),
-    sizeof(java_lang_ErrorBin),
-    sizeof(java_lang_ThrowableBin),
-    sizeof(java_lang_ExceptionBin),
-    sizeof(java_lang_NullPointerExceptionBin),
-    sizeof(java_lang_ArithmeticExceptionBin),
-    sizeof(java_lang_ArrayIndexOutOfBoundsExceptionBin),
-    sizeof(java_lang_RuntimeExceptionBin),
-    sizeof(java_lang_IllegalArgumentExceptionBin),
-    sizeof(java_lang_ClassCastExceptionBin),
-    sizeof(java_lang_InterruptedExceptionBin),
-    sizeof(java_lang_RuntimeBin),
+    //sizeof(java_lang_ErrorBin),
+    //sizeof(java_lang_ThrowableBin),
+    //sizeof(java_lang_ExceptionBin),
+    //sizeof(java_lang_NullPointerExceptionBin),
+    //sizeof(java_lang_ArithmeticExceptionBin),
+    //sizeof(java_lang_ArrayIndexOutOfBoundsExceptionBin),
+    //sizeof(java_lang_RuntimeExceptionBin),
+    //sizeof(java_lang_IllegalArgumentExceptionBin),
+    //sizeof(java_lang_ClassCastExceptionBin),
+    //sizeof(java_lang_InterruptedExceptionBin),
+    //sizeof(java_lang_RuntimeBin),
     sizeof(java_lang_ThreadBin),
     sizeof(java_lang_mathBin),
     sizeof(java_io_InStreamBin),
     sizeof(java_io_OutStreamBin),
     sizeof(java_lang_SystemBin),
-    sizeof(helloWorldBin)
+    //sizeof(helloWorldBin)
 };
 #endif
 
@@ -184,11 +184,11 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
     heapInit();                                   /* linux avr8 malloc , others hard coded!*/
 
 #ifdef BOOTSTRAP_BINARIES
-    const int noBins = sizeof(bootStrapBinariesSize)/sizeof(bootStrapBinariesSize[0]);
+    const int noBins = sizeof(bootstrapBinariesSize)/sizeof(bootstrapBinariesSize[0]);
     for (cN = 0; cN < noBins; cN++)
     {
         cs[cN].classFileStartAddress = classFileBase + length;
-        cs[cN].classFileLength=readClassBin(bootStrapBinaries[cN],bootStrapBinariesSize[cN],cs[cN].classFileStartAddress);
+        cs[cN].classFileLength=readClassBin(bootstrapBinaries[cN],bootstrapBinariesSize[cN],cs[cN].classFileStartAddress);
         analyzeClass( &cs[cN]);
         length += cs[cN].classFileLength;
         if (length > MAXBYTECODE)
@@ -197,6 +197,7 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
         }
         numClasses = cN + 1;
     }
+    printf("Loaded %d classes,bytecode size: %d\n\n",numClasses,length);
 #endif
 
 #if LINUX|| AVR32LINUX

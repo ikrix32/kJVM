@@ -264,16 +264,16 @@ void createThread (void)
     {
         for (;;)
         {
-            if (findMethodByName("run", 3, "()V", 3))
+            if (findMethodByName(cN,"run", 3, "()V", 3))
                 break;
-            if (!findSuperClass())
+            if (!findSuperClass(cN))
                 errorExit(123, "run method not found");
         }
         *(t->methodStackBase + 0) = (u2) 0;
         *(t->methodStackBase + 1) = cN;
         *(t->methodStackBase + 2) = mN;
         *(t->methodStackBase + 3) = getStartPC();
-        *(t->methodStackBase + 4) = findMaxLocals();
+        *(t->methodStackBase + 4) = findMaxLocals(cN);
         /* reference to caller object (from start())*/
         *(t->opStackBase) = opStackGetValue(local);
         //verbosePrintf("cN x%x mN x%x startPC x%x\n", cN, mN, *(t->methodStackBase + 3));

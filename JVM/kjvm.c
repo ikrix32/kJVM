@@ -83,7 +83,7 @@ void main()
         initVM();
 #endif
 
-        PRINTF("Bajos starting\n");
+        PRINTF("kjvm starting\n");
 	
 #ifndef TINYBAJOS_MULTITASKING
         createThread();                           /* for main*/
@@ -108,20 +108,20 @@ void main()
         PRINTF("start clinit");
 
         for (cN = 0; cN < numClasses; cN++)
-            if (findMethodByName("<clinit>", 8, "()V", 3))
+            if (findMethodByName(cN,"<clinit>", 8, "()V", 3))
         {
             opStackPush(cs[cN].classInfo);
-            opStackSetSpPos(findMaxLocals());
+            opStackSetSpPos(findMaxLocals(cN));
             run();
         }
         for (cN = 0; cN < numClasses; cN++)
-            if (findMethodByName("main", 4, "([Ljava/lang/String;)V", 22))
+            if (findMethodByName(cN,"main", 4, "([Ljava/lang/String;)V", 22))
         {
 
             PRINTF("  -> run <main> :\n");
 
             opStackPush(toSlot((u4) 0));           /* args parameter to main (should be a string array)*/
-            opStackSetSpPos(findMaxLocals());
+            opStackSetSpPos(findMaxLocals(cN));
             run();                                /*  run main*/
 #ifndef TINYBAJOS
             return 0;

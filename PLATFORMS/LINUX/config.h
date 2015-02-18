@@ -11,7 +11,7 @@
 
 #define LINUX 1 //krix
 #define __i386__ 1
-//#undef DEBUG
+#undef DEBUG
 
 #ifdef NRF51
 #define exit(x)

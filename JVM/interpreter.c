@@ -26,14 +26,14 @@
 #include <avr/pgmspace.h>
 
 #define GETSTARTPC(offset)  ((strncmpRamFlash(  "Code",\
-getAddr( cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
+getAddr(cN,cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
 4)==0)? (u2)METHODBASE(cN,mN)+8+14+offset :\
 GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
 
 #else
 
 #define GETSTARTPC(offset)  ((strncmp(  "Code",\
-getAddr( cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
+getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
 4)==0)? (u2)METHODBASE(cN,mN)+8+14+offset :\
 GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
 
@@ -70,9 +70,9 @@ void run()                                        /* in: classNumber,  methodNum
     pc = getStartPC();
     for (;;)
     {
-        code = getU1(0);
-        byte1 = getU1(pc);
-        byte2 = getU1(pc + 1);
+        code = getU1(cN,0);
+        byte1 = getU1(cN,pc);
+        byte2 = getU1(cN,pc + 1);
         DEBUGPRINT("-> ");
 
 #ifndef TINYBAJOS_MULTITASKING
@@ -124,18 +124,17 @@ void run()                                        /* in: classNumber,  methodNum
                 /* reads a signed 8 bit constant from byte1,*/
                 /* extends it to int signed (32bit)*/
                 /* and saves it on stack*/
-                opStackPush(toSlot(((getU1(pc) & 0x80) >> 7) * 0xffffff80 | (getU1(0)
-                                                                             & 0x7f)));
+                opStackPush(toSlot(((getU1(cN,pc) & 0x80) >> 7) * 0xffffff80 | (getU1(cN,0) & 0x7f)));
             }break;
             case SIPUSH:
             {
                 DEBUGPRINTLN("SIPUSH  -> push\t...,=> %x",(s2)BYTECODEREF);
-                opStackPush(toSlot((s4)((s2) getU2(0))));
+                opStackPush(toSlot((s4)((s2) getU2(cN,0))));
             }break;
             case LDC:
             {
                 DEBUGPRINT("ldc  push\t...");
-                if (getU1(CP(cN, getU1(0))) == CONSTANT_String)
+                if (getU1(cN,CP(cN, getU1(cN,0))) == CONSTANT_String)
                 {
                     first.stackObj.magic = CPSTRINGMAGIC;
                     first.stackObj.classNumber = cN;
@@ -143,7 +142,7 @@ void run()                                        /* in: classNumber,  methodNum
                     opStackPush(first);
                 } else
                 /* int or float const value on stack*/
-                    opStackPush(toSlot( getU4(CP(cN, byte1) + 1) ));
+                    opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN(",=> x%x", opStackPeek().UInt);
             }break;
             case LDC_W:
@@ -154,18 +153,18 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("ILOAD -> local(%x) -> push\t...,=>",byte1);
                 /*mb jf*/
-                opStackPush(opStackGetValue(local + getU1(0)));
+                opStackPush(opStackGetValue(local + getU1(cN,0)));
             }break;
             case FLOAD:
             {
-                DEBUGPRINTLN("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(byte1));
-                opStackPush(opStackGetValue(local + getU1(0)));
+                DEBUGPRINTLN("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(cN,byte1));
+                opStackPush(opStackGetValue(local + getU1(cN,0)));
             }break;
             case ALOAD:
             {
                 DEBUGPRINTLN("aload -> local(%x) -> push\t,=>",byte1);
                 /*mb jf changed getU1() --> getU1(0)*/
-                opStackPush(opStackGetValue(local + getU1(0)));
+                opStackPush(opStackGetValue(local + getU1(cN,0)));
             }break;
             case ILOAD_0:
             case ILOAD_1:
@@ -238,7 +237,7 @@ void run()                                        /* in: classNumber,  methodNum
                     case ASTORE: DEBUGPRINTLN("ASTORE  pop -> local(%x)=>,\n",byte1);break;
                 }
 #endif
-                opStackSetValue(local+getU1(0),opStackPop());
+                opStackSetValue(local+getU1(cN,0),opStackPop());
 
             }break;
             case ISTORE_0:
@@ -282,7 +281,7 @@ void run()                                        /* in: classNumber,  methodNum
                         /*mb jf		//float*/
                     case AASTORE: DEBUGPRINTLN("fastore");break;
                         /*mb jf		//byte or boolean*/
-                    case BASTORE: DEBUGPRINTLN("bastore");break
+                    case BASTORE: DEBUGPRINTLN("bastore");break;
                         /*mb jf		//char*/
                     case CASTORE: DEBUGPRINTLN("castore");break;
                         /*mb jf		//short*/
@@ -684,7 +683,7 @@ void run()                                        /* in: classNumber,  methodNum
             case RET:
             {
                 DEBUGPRINTLN("ret");              /* mb, jf*/
-                pc = opStackGetValue(local + getU1(0)).UInt;
+                pc = opStackGetValue(local + getU1(cN,0)).UInt;
             }break;
             case TABLESWITCH:
             {
@@ -707,14 +706,14 @@ void run()                                        /* in: classNumber,  methodNum
                     /* next pc as multiple of 4 --> skip padding bytes*/
                     relPc = (u2)((relPc + 4) & 0xfffc);
                     pc = relPc + getStartPC();    /*pcMethodStart;	// set pc to begin of default address*/
-                    u4 offset = getU4(0);         //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));	// default offset
-                    u4 lowbyte = getU4(0);        //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
-                    u4 highbyte = getU4(0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
+                    u4 offset = getU4(cN,0);         //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));	// default offset
+                    u4 lowbyte = getU4(cN,0);        //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
+                    u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
                     if (lowbyte <= windex && windex <= highbyte)
                     {
                         u4 tableoffset = windex - lowbyte;
                         pc += tableoffset * 4;    /* skip 4 byte of previous address(es)*/
-                        offset = getU4(0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
+                        offset = getU4(cN,0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
                     }
                     pc = startPc + offset;
                 }
@@ -740,12 +739,12 @@ void run()                                        /* in: classNumber,  methodNum
                     /* next pc as multiple of 4 from address of 0xab (lookupswitch)*/
                     relPc = (u2)((relPc + 4) & 0xfffc);
                     pc = relPc + getStartPC();    /* pcMethodStart;	// set pc to begin of default address*/
-                    u4 offset = getU4(0);         /* default offset*/
+                    u4 offset = getU4(cN,0);         /* default offset*/
                     u4 matches;
-                    for (matches = getU4(0); matches > 0; --matches)
+                    for (matches = getU4(cN,0); matches > 0; --matches)
                     {
-                        u4 match = getU4(0);
-                        u4 tmpOffset = getU4(0);
+                        u4 match = getU4(cN,0);
+                        u4 tmpOffset = getU4(cN,0);
                         if (key == match)
                         {
                             offset = tmpOffset;
@@ -759,27 +758,26 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("getstatic ");       /*mb jf ... corrected funtion*/
                 methodStackPush(cN);
-                fieldName = (char*) getAddr(CP(cN,/* utf8*/
-                                               getU2(                       /* name-index*/
+                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
+                                               getU2(cN,/* name-index*/
                                                      /* index to name and type*/
-                                                     CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
-                                                     + 1)) + 3);                   /* bytes*/
-                fieldNameLength = getU2(
-                                        /* length*/
-                                        CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);                   /* bytes*/
+                fieldNameLength = getU2(cN,/* length*/
+                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
                 /* utf8*/
-                fieldDescr = (char*) getAddr(CP(cN,
-                                                getU2(                        /* descriptor-index*/
+                fieldDescr = (char*) getAddr(cN,CP(cN,
+                                                getU2(cN,/* descriptor-index*/
                                                       /* index to name and type*/
-                                                      CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
+                                                      CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
                                                       + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(/* length*/
-                                         CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                fieldDescrLength = getU2(cN,/* length*/
+                                         CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
 
-                const char* cclassName = getAddr(CP(cN,getU2( CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
-                const u1 cclassNameLength = getU2(CP(cN,getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1))+ 1)) + 1);
+                const char* cclassName = getAddr(cN, CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
+                const u1 cclassNameLength = getU2(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1))+ 1)) + 1);
                 //printf("Class name: %s,%d\n",cclassName,cclassNameLength);
-                if (!FIND_CLASS(cclassName,cclassNameLength))
+                cN = FIND_CLASS(cclassName,cclassNameLength);
+                if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR(cclassName,cclassNameLength);
                 }
@@ -787,7 +785,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
                 {
                     FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
                 }
                 /* got position in constant pool --> results in position on heap*/
                 DEBUGPRINTLNSTRING(fieldName, fieldNameLength);
@@ -800,33 +798,34 @@ void run()                                        /* in: classNumber,  methodNum
             {   /*mb jf*/
                 DEBUGPRINTLN("putstatic -> stack in static field");
                 methodStackPush(cN);
-                fieldName = (char*) getAddr(CP(cN,/* utf8*/
-                                               getU2(                        /* name-index*/
+                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
+                                               getU2(cN,                        /* name-index*/
                                                      /* index to name and type*/
-                                                     CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
+                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
                                                      + 1)) + 3);                   /* bytes*/
-                fieldNameLength = getU2(
+                fieldNameLength = getU2(cN,
                                         /* length*/
-                                        CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
                 /* utf8*/
-                fieldDescr = (char*) getAddr(CP(cN,
-                                                getU2(                        /* descriptor-index*/
+                fieldDescr = (char*) getAddr(cN,CP(cN,
+                                                getU2(cN,                        /* descriptor-index*/
                                                       /* index to name and type*/
-                                                      CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
+                                                      CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
                                                       + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                fieldDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
 
-                if (!FIND_CLASS(getAddr(CP(cN,getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
-                                getU2(CP(cN,getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 1)))
+                cN = FIND_CLASS(getAddr(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
+                                getU2(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1));
+                if (cN == INVALID_CLASS_ID)
                 {
-                    CLASSNOTFOUNDERR(getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
-                                     getU2(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 1));
+                    CLASSNOTFOUNDERR(getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
+                                     getU2(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1));
                 }
 
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                 {
                     FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
                 }
 
                 heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
@@ -840,20 +839,18 @@ void run()                                        /* in: classNumber,  methodNum
                 DEBUGPRINTLN("getfield ->   heap to stack:");
                 methodStackPush(cN);
                 first = opStackPop();
-                fieldName = (char*) getAddr(CP(cN,/* utf8*/
-                                               getU2(/* name-index*/
+                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
+                                               getU2(cN,/* name-index*/
                                                      /* index to name and type*/
-                                                     CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
-                                                     + 1)) + 3);                   /* bytes*/
-                fieldNameLength = getU2(/* length*/
-                                        CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);/* bytes*/
+                fieldNameLength = getU2(cN,/* length*/
+                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
                 /* utf8*/
-                fieldDescr = (char*) getAddr(CP(cN,getU2(                        /* descriptor-index*/
+                fieldDescr = (char*) getAddr(cN,CP(cN,getU2(cN,/* descriptor-index*/
                                                          /* index to name and type*/
-                                                         CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
-                                                         + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(/* length*/
-                                         CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                                                         CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);                   /* bytes*/
+                fieldDescrLength = getU2(cN,/* length*/
+                                         CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
                 /*
                  #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
                  printf_P(PSTR("GETFIELD popRef %x von findClass %x numfields von dieser kl.%x"),first,cN,numFields);
@@ -869,7 +866,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (!findFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                 {
                     FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
                 }
                 opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN+ 1).Int));
                 pc += 2;
@@ -882,29 +879,24 @@ void run()                                        /* in: classNumber,  methodNum
                 methodStackPush(cN);
                 {
                     /* mb jf print name*/
-                    fieldName = (char*) getAddr(CP(cN, /* utf8*/
-                                                   getU2(                    /* name-index*/
+                    fieldName = (char*) getAddr(cN,CP(cN, /* utf8*/
+                                                   getU2(cN,/* name-index*/
                                                          /* index to name and type*/
-                                                         CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
-                                                         + 1)) + 3);               /* bytes*/
-                    fieldNameLength = getU2(
-                                            CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1))
-                                            + 1);                     /* length*/
-                    fieldDescr = (char*) getAddr(CP(cN, /* utf8*/
-                                                    getU2(                    /* descriptor-index*/
+                                                         CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);               /* bytes*/
+                    fieldNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);                     /* length*/
+                    fieldDescr = (char*) getAddr(cN,CP(cN, /* utf8*/
+                                                    getU2(cN,/* descriptor-index*/
                                                           /* index to name and type*/
-                                                          CP(cN, getU2(CP(cN, BYTECODEREF) + 3))
-                                                          + 3)) + 3);               /* bytes*/
-                    fieldDescrLength = getU2(
-                                             CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3))
-                                             + 1);                     /* length*/
-                    /*kann weg*/
-                    if (!FIND_CLASS(getAddr(CP(cN,getU2(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+1))+3),
-                                    getU2(CP(cN,getU2(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+1))+1)))
+                                                          CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);               /* bytes*/
+                    fieldDescrLength = getU2(cN,
+                                             CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+
+                    cN = FIND_CLASS(getAddr(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+1))+3),
+                                    getU2(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+1))+1));
+                    if (cN == INVALID_CLASS_ID)
                     {
-                        CLASSNOTFOUNDERR(
-                                         getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN,BYTECODEREF) + 1)) + 1)) + 3),
-                                         getU2(CP(cN,getU2(CP(cN,getU2(CP(cN,BYTECODEREF) + 1)) + 1)) + 1));
+                        CLASSNOTFOUNDERR(getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 3),
+                                         getU2(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 1));
                     }
 
                     first = opStackPop();         /*mb jf doesn't work without variable ?!?!*/
@@ -922,9 +914,8 @@ void run()                                        /* in: classNumber,  methodNum
                         cN = second.stackObj.classNumber;
                         if (!findFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                         {
-                            FIELDNOTFOUNDERR(
-                                             fieldName,
-                                             getAddr(CP(cN,getU2(CP(cN,getU2(CP(cN,BYTECODEREF) + 1)) + 1)) + 3));
+                            FIELDNOTFOUNDERR(fieldName,
+                                             getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 3));
                         }
                         /* jetzt hab ich alles*/
                         /* den Typ*/
@@ -965,19 +956,19 @@ void run()                                        /* in: classNumber,  methodNum
                 if (code == INVOKEINTERFACE)
                     pc += 2;
                 methodStackPush(pc);
-                int k = findNumArgs(BYTECODEREF);
+                int k = findNumArgs(cN,BYTECODEREF);
                 /*(BYTECODEREF)-1));*/
                 methodStackPush((opStackGetSpPos() - k - 1));
                 /* method resolution*/
                 /* nachdenken ->mhrmals benutzt*/
-                local = opStackGetSpPos() - findNumArgs(BYTECODEREF) - 1;
+                local = opStackGetSpPos() - findNumArgs(cN,BYTECODEREF) - 1;
                 /* get cN from.stackObjRef*/
                 /*  get method from cN or superclasses*/
-                methodName = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
-                methodNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                methodName = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
+                methodNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
-                methodDescr = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
-                methodDescrLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                methodDescr = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
+                methodDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
                 className = NULL;
@@ -995,20 +986,21 @@ void run()                                        /* in: classNumber,  methodNum
                     /*bh2008*/
                     if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
                     {
-                        if (!findClass("java/lang/String", 16))
+                        cN = FIND_CLASS("java/lang/String", 16);
+                        if (cN == INVALID_CLASS_ID)
                         {
                             CLASSNOTFOUNDERR("java/lang/String", 16);
                         }
                     } else/*bh2007*/
                         cN = opStackGetValue(local).stackObj.classNumber;
 
-                    className = (char*) getAddr( cs[cN].constant_pool[getU2(cs[cN].constant_pool[getU2(cs[cN].this_class)] + 1)] + 3);
-                    classNameLength = getU2(cs[cN].constant_pool[getU2(cs[cN].constant_pool[getU2(cs[cN].this_class)] + 1)] + 1);
+                    className = (char*) getAddr(cN, cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].this_class)] + 1)] + 3);
+                    classNameLength = getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].this_class)] + 1)] + 1);
                 }/*INVOKESPECIAL*/
                 else
                 {
-                    className = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
-                    classNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 1);
+                    className = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
+                    classNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1);
                 }
                 //bh DEBUGPRINTLNSTRING(className,classNameLength);
                 if (!findMethod(className, classNameLength, methodName,methodNameLength, methodDescr, methodDescrLength))
@@ -1016,10 +1008,10 @@ void run()                                        /* in: classNumber,  methodNum
                     METHODNOTFOUNDERR(methodName, className);
                 }
 
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals()));
+                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN)));
 
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
+                if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
                 {
                     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex == MUTEXNOTBLOCKED)
                     {
@@ -1077,7 +1069,7 @@ void run()                                        /* in: classNumber,  methodNum
 #endif
                 /* no synchronized,or I have the lock*/
                 /* now call method*/
-                if (getU2(METHODBASE(cN, mN)) & ACC_NATIVE)
+                if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
                     if ((cs[cN].nativeFunction != NULL) && (cs[cN].nativeFunction[mN]
                                                             != NULL))
@@ -1101,19 +1093,19 @@ void run()                                        /* in: classNumber,  methodNum
                 methodStackPush(cN);
                 methodStackPush(mN);
                 methodStackPush(pc);
-                int k = findNumArgs(BYTECODEREF);
+                int k = findNumArgs(cN,BYTECODEREF);
                 /*(BYTECODEREF));*/
                 methodStackPush(opStackGetSpPos() - k);
                 /* method resolution*/
                 /*bh2007*/
-                local = (u2) opStackGetSpPos() - findNumArgs(BYTECODEREF);
-                className = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
-                classNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 1)) + 1)) + 1);
+                local = (u2) opStackGetSpPos() - findNumArgs(cN,BYTECODEREF);
+                className = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3);
+                classNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1);
 
-                methodName = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
-                methodNameLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
-                methodDescr = (char*) getAddr(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
-                methodDescrLength = getU2(CP(cN, getU2(CP(cN, getU2(CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                methodName = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
+                methodNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                methodDescr = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
+                methodDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
 
                 if (!findMethod(className, classNameLength, methodName,
                                 methodNameLength, methodDescr, methodDescrLength))
@@ -1122,10 +1114,10 @@ void run()                                        /* in: classNumber,  methodNum
                 }
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
                 DEBUGPRINTLNSTRING(className, classNameLength);
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals()));
+                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN)));
 
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
+                if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
                 {
                     /*
                      #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
@@ -1188,7 +1180,7 @@ void run()                                        /* in: classNumber,  methodNum
 #endif
                 /* no synchronized,or I have the lock*/
                 /* now call the method*/
-                if (getU2(METHODBASE(cN, mN)) & ACC_NATIVE)
+                if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
                     if ((cs[cN].nativeFunction != NULL) && (cs[cN].nativeFunction[mN]
                                                             != NULL))
@@ -1234,10 +1226,10 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("return");
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(METHODBASE(cN,mN))&ACC_SYNCHRONIZED)
+                if (getU2(cN,METHODBASE(cN,mN))&ACC_SYNCHRONIZED)
                 {
                     /* have I always the lock ?*/
-                    if (getU2(METHODBASE(cN,mN))&ACC_STATIC)
+                    if (getU2(cN,METHODBASE(cN,mN))&ACC_STATIC)
                         first=cs[cN].classInfo;
                     else first=opStackGetValue(local);
 
@@ -1287,7 +1279,7 @@ void run()                                        /* in: classNumber,  methodNum
                      #endif
                      */
                     /*mb jf if not <clinit> you're done :-D*/
-                    if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(),8) == 0)
+                    if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
                     {
                         DEBUGPRINTLN(" from <clinit>");
 
@@ -1318,29 +1310,29 @@ void run()                                        /* in: classNumber,  methodNum
                 pc += 2;
                 methodStackPush(cN);
                 methodStackPush(mN);
-                if (!FIND_CLASS/* className*/
-                    (getAddr(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+3),
-                     /* classNameLength*/
-                     getU2(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+1)) )
+
+                cN = FIND_CLASS(getAddr(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+3),
+                                getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+1));
+                if (cN == INVALID_CLASS_ID)
                 {
                     mN = methodStackPop();
                     cN = methodStackPop();
-                    CLASSNOTFOUNDERR((char *) getAddr(CP(cN, getU2(CP(cN,BYTECODEREF)+1))+3),getU2(CP(cN,getU2(CP(cN, getU2(CP(cN,BYTECODEREF) + 1)) + 1)) + 1));
+                    CLASSNOTFOUNDERR((char *) getAddr(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+3),getU2(cN,CP(cN,getU2(CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 1));
                 }
                 methodStackPush(cN);
                 fN = 0;
                 do 	{
-                    for (int i = 0; i < getU2(cs[cN].fields_count); i++)	// count normal fields
+                    for (int i = 0; i < getU2(cN,cs[cN].fields_count); i++)	// count normal fields
                     {
-                        u2 fielddescr = cs[cN].constant_pool[getU2(cs[cN].field_info[i] + 4)];
+                        u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
                         u1 isNotObject =
-                        STRNCMPRAMFLASH("L",(const char*) getAddr(fielddescr + 3), 1);
-                        if ( (getU2(cs[cN].field_info[i]) & ACC_FINAL) && isNotObject) continue; // ignore static and non static primitive finals
-                        if ( getU2(cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
+                        STRNCMPRAMFLASH("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+                        if ( (getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject) continue; // ignore static and non static primitive finals
+                        if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC) continue;// ignore static
                         fN++;
                     }
 
-                } while (findSuperClass());
+                } while (findSuperClass(cN));
                 cN=methodStackPop();
                 u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
                 first.stackObj.pos=heapPos;
@@ -1357,8 +1349,8 @@ void run()                                        /* in: classNumber,  methodNum
                 mN = methodStackPop();
                 cN = methodStackPop();
                 /* className*/
-                DEBUGPRINTLNSTRING(getAddr(CP(cN, getU2(CP(cN,BYTECODEREF) + 1)) + 3),
-                                   getU2(CP(cN, getU2(CP(cN,BYTECODEREF) + 1 )) + 1));
+                DEBUGPRINTLNSTRING(getAddr(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1)) + 3),
+                                   getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1 )) + 1));
 
             }break;
             case NEWARRAY:
@@ -1484,7 +1476,7 @@ void run()                                        /* in: classNumber,  methodNum
                         currentThreadCB->state=THREADMUTEXBLOCKED;
                         currentThreadCB->isMutexBlockedOrWaitingForObject=first;
                         /* thread sleeps, try it later*/
-                        opStackSetSpPos(methodStackPop()+findNumArgs(BYTECODEREF)+1);
+                        opStackSetSpPos(methodStackPop() + findNumArgs(cN,BYTECODEREF) + 1);
                         pc = pc-1;                /* before monitorenter*/
                         break;                    /* let the scheduler work*/
                     }
@@ -1559,9 +1551,9 @@ void run()                                        /* in: classNumber,  methodNum
                 if (first.UInt != NULLOBJECT.UInt)
                 {
                     /* the cast's target class */
-                    u2 targetclass = getU2(0);
-                    char *classname = getAddr(CP(cN, getU2(CP(cN,targetclass)+1))+3);
-                    int len = getU2(CP(cN, getU2(CP(cN,targetclass)+1))+1);
+                    u2 targetclass = getU2(cN,0);
+                    char *classname = getAddr(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+3);
+                    int len = getU2(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+1);
 
                     /* we have to make some dirty hacks here
                      since we are not storing typing informations for arrays */
@@ -1609,7 +1601,8 @@ void run()                                        /* in: classNumber,  methodNum
                     {
                         methodStackPush(cN);
                         methodStackPush(mN);
-                        if (!findClass(classname, len))
+                        cN = FIND_CLASS(classname, len);
+                        if (cN == INVALID_CLASS_ID)
                         {
                             CLASSNOTFOUNDERR(classname,len);
                         }
@@ -1637,12 +1630,12 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("instanceof");
                 first = opStackPop();
-                u2 targetclass = getU2(0);
+                u2 targetclass = getU2(cN,0);
                 char performcheck = 1;
                 if (first.UInt != NULLOBJECT.UInt)
                 {
-                    char *classname = getAddr(CP(cN, getU2(CP(cN,targetclass)+1))+3);
-                    int len = getU2(CP(cN, getU2(CP(cN,targetclass)+1))+1);
+                    char *classname = getAddr(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+3);
+                    int len = getU2(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+1);
 
                     /* we have to make some dirty hacks here
                      since we are not storing typing informations for arrays */
@@ -1695,7 +1688,8 @@ void run()                                        /* in: classNumber,  methodNum
                     {
                         methodStackPush(cN);
                         methodStackPush(mN);
-                        if (!findClass(classname, len))
+                        cN = FIND_CLASS(classname, len);
+                        if (cN == INVALID_CLASS_ID)
                         {
                             CLASSNOTFOUNDERR(classname,len);
                         }
@@ -1726,8 +1720,8 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("wide");             /* mb jf*/
                 /* not tested because so many locals are hard to implement on purpose  14.12.2006*/
-                u2 nextOp = getU1(0);             /* which operation to extend?*/
-                s2 count = getU2(0);
+                u2 nextOp = getU1(cN,0);             /* which operation to extend?*/
+                s2 count = getU2(cN,0);
 
                 /* if load operation...*/
                 if (ILOAD <= nextOp && nextOp <= DLOAD)
@@ -1753,7 +1747,7 @@ void run()                                        /* in: classNumber,  methodNum
                 if (nextOp == IINC)               /* if iinc operation...*/
                 {
                     /* embedded op code for load*/
-                    u2 constB = getU2(0);         /* constByte - only available with iinc in wide operation*/
+                    u2 constB = getU2(cN,0);         /* constByte - only available with iinc in wide operation*/
                     /* position*/
                     opStackSetValue((u2)(local + count),
                                     /* old value*/
@@ -1765,7 +1759,7 @@ void run()                                        /* in: classNumber,  methodNum
             {
                 DEBUGPRINTLN("multianewarray");   /* mb jf*/
                 pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
-                u1 dim = getU1(0);                /* dimensions*/
+                u1 dim = getU1(cN,0);                /* dimensions*/
 
                 s2 *local_cnt = (s2 *) malloc(sizeof(s2));
                 *local_cnt = 0;
@@ -1777,7 +1771,7 @@ void run()                                        /* in: classNumber,  methodNum
             {   /* mb jf*/
                 DEBUGPRINTLN("goto_w (not tested)");
                 /* not tested because wide jumps are hard to implement on purpose  14.12.2006*/
-                u4 addr = getU4(0);
+                u4 addr = getU4(cN,0);
                 pc = addr +getStartPC();          /*pcMethodStart; //assumtion: the address is the relative address, absolute address may be required*/
 
             }break;
@@ -1786,7 +1780,7 @@ void run()                                        /* in: classNumber,  methodNum
                 DEBUGPRINTLN("jsr_w (not tested)%d %d",byte1, byte2);
                 /* not tested because no exceptions implemented yet 14.12.2006*/
                 /* the opcode of athrow is required*/
-                u4 my_addr = getU4(0);
+                u4 my_addr = getU4(cN,0);
                 opStackPush(toSlot(my_addr));
             }break;
             case LCONST_0:
@@ -1867,9 +1861,9 @@ void run()                                        /* in: classNumber,  methodNum
 void subCheck(u2 target, u2 addr)
 {
     u2 super_class =
-    cs[cN].constant_pool[getU2(cs[cN].constant_pool[addr] + 1)];
+    cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[addr] + 1)];
     methodStackPush(cN);
-    FIND_CLASS(getAddr(super_class + 3), getU2(super_class + 1));
+    cN = FIND_CLASS(getAddr(cN,super_class + 3), getU2(cN,super_class + 1));
     if (!checkInstance(target))
     {
         cN = methodStackPop();
@@ -1888,17 +1882,17 @@ u1 checkInstance(const u2 target)
     if (cN != 0 && cN != target)
     {
         /* trying the super class.*/
-        if (getU2(cs[cN].super_class) > 0)
+        if (getU2(cN,cs[cN].super_class) > 0)
         {
-            subCheck(target, getU2(cs[cN].super_class));
+            subCheck(target, getU2(cN,cs[cN].super_class));
         }
         /* trying the interfaces.*/
         if (cN != 0 && cN != target)
         {
-            u2 n = getU2(cs[cN].interfaces_count);
+            u2 n = getU2(cN,cs[cN].interfaces_count);
             while (--n && cN != target)
             {
-                subCheck(target, getU2(cs[cN].interfaces + n * 2));
+                subCheck(target, getU2(cN,cs[cN].interfaces + n * 2));
             }
         }
     }
@@ -1965,13 +1959,14 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
 #endif
 
     /* Create a class of the given type*/
-    if (findClass(identifier, length) == 0)
+    cN = FIND_CLASS(identifier, length);
+    if (cN == INVALID_CLASS_ID)
     {
         CLASSNOTFOUNDERR(identifier, length);
     }
 
     /* + marker*/
-    u2 heapPos = getFreeHeapSpace(getU2(cs[cN].fields_count) + 1);
+    u2 heapPos = getFreeHeapSpace(getU2(cN,cs[cN].fields_count) + 1);
     first.stackObj.pos = heapPos;
     first.stackObj.magic = OBJECTMAGIC;
     first.stackObj.classNumber = cN;
@@ -1980,7 +1975,7 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
     HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
     HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-    int j = getU2(cs[cN].fields_count);
+    int j = getU2(cN,cs[cN].fields_count);
     for (int i = 0; i < j; i++)
     {
         heapSetElement(toSlot((u4) 0), heapPos + i + 1);
@@ -2017,7 +2012,7 @@ void handleException()
     u1 classNumberFromPushedObject = opStackPeek().stackObj.classNumber;
 
     /* number of catches the try block has*/
-    u2 n = getU2(METHODCODEEXCEPTIONBASE(cN, mN));
+    u2 n = getU2(cN,METHODCODEEXCEPTIONBASE(cN, mN));
 
     DEBUGPRINTLN("trying to catch class number %d", classNumberFromPushedObject);
     DEBUGPRINTLN("%d catch clauses", n);
@@ -2026,21 +2021,20 @@ void handleException()
         u2 cur_catch = METHODCODEEXCEPTIONBASE(cN, mN) + 8 * i;
 
         /* checking if catch range is usable */
-        if (pc - getStartPC() - 1 < getU2(cur_catch + 2) || pc - getStartPC()
-            - 1 >= getU2(cur_catch + 4))
+        if (pc - getStartPC() - 1 < getU2(cN,cur_catch + 2) || pc - getStartPC() - 1 >= getU2(cN,cur_catch + 4))
         {
             DEBUGPRINTLN("pc: %d", pc - getStartPC() - 1);
-            DEBUGPRINTLN("start: %d", getU2(cur_catch + 2));
-            DEBUGPRINTLN("end: %d", getU2(cur_catch + 4));
+            DEBUGPRINTLN("start: %d", getU2(cN,cur_catch + 2));
+            DEBUGPRINTLN("end: %d", getU2(cN,cur_catch + 4));
             DEBUGPRINTLN("not my range");
             continue;
         }
 
         /* checking whether the catch's catched class is in the code exception table*/
         methodStackPush(cN);
-        if (FIND_CLASS/* className*/(getAddr(CP(cN, getU2(CP(cN, getU2(cur_catch + 8)) + 1)) + 3),
-                                     /* classNameLength*/getU2(CP(cN, getU2(CP(cN, getU2(cur_catch + 8)) + 1)) + 1))
-            == 0)
+        cN = FIND_CLASS(getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,cur_catch + 8)) + 1)) + 3),
+                        getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,cur_catch + 8)) + 1)) + 1));
+        if (cN == INVALID_CLASS_ID)
         {
             DEBUGPRINTLN("Exception class not found:  %d\n", cN);
             cN = methodStackPop();
@@ -2059,7 +2053,7 @@ void handleException()
         {
             DEBUGPRINTLN("catching!");
             cN = methodStackPop();
-            pc = getStartPC() + getU2(cur_catch + 6);
+            pc = getStartPC() + getU2(cN,cur_catch + 6);
             return;
         }
         cN = methodStackPop();
@@ -2070,7 +2064,7 @@ void handleException()
     {
         DEBUGPRINTLN("we are thru, this was the top frame");
         cN = classNumberFromPushedObject;
-        UNHANDLEDEXCEPTIONERR((char *) getAddr(cs[cN].constant_pool[getU2(cs[cN].constant_pool[getU2(cs[cN].this_class)] + 1)] + 3));
+        UNHANDLEDEXCEPTIONERR((char *) getAddr(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].this_class)] + 1)] + 3));
     }
     else
     {

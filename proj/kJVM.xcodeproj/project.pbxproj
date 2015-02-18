@@ -206,14 +206,14 @@
 		4EB8F7CE1A91290B001C885A /* JVM */ = {
 			isa = PBXGroup;
 			children = (
-				4E86B1DF1A92C15800B66AF0 /* kjvm.c */,
 				4E86B1E01A92C15800B66AF0 /* kjvm.h */,
+				4E86B1DF1A92C15800B66AF0 /* kjvm.c */,
+				4EB8F7D51A91290B001C885A /* classfile.h */,
 				4EB8F7CF1A91290B001C885A /* classfile.c */,
 				4EB8F7F81A91290C001C885A /* interpreter.h */,
 				4EB8F7D21A91290B001C885A /* interpreter.c */,
 				4EB8F7D31A91290B001C885A /* definitions.h */,
 				4EB8F7D41A91290B001C885A /* limits.h */,
-				4EB8F7D51A91290B001C885A /* classfile.h */,
 				4EB8F7F41A91290C001C885A /* typedefinitions.h */,
 				4EB8F7F51A91290C001C885A /* stack.c */,
 				4EB8F7F61A91290C001C885A /* heap.c */,

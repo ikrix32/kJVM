@@ -147,29 +147,28 @@
 #define MALLOCERR(count, target) errorExit(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
 #endif
 
-#define DEFAULT             break;default
-#define CLASSSTA            (cs[cN].classFileStartAddress)
+//#define CLASSSTA            (cs[classId].classFileStartAddress)
                                                   // constantpool entry n of class m
 #define CP(m,n)             (cs[m].constant_pool[n])
 #define BYTECODEREF         ((byte1 << 8) | byte2)
 #define HEAPOBJECTMARKER(pos)       ((*(heapBase+(pos))).heapObjMarker)
 #define HEAPOBJECT(pos)         (*(heapBase+pos))
 
-#define METHODBASE(cN,mN)       (cs[cN].method_info[mN])
-#define METHODACCESSFLAG(cN,mN)     getU2(METHODBASE(cN,mN))
-#define METHODNAMESTR(cN,mN)        getAddr(CP(cN,getU2(METHODBASE(cN,mN)+2))  +3)
-#define METHODNAMESTRLENGTH(cN,mN)  getU2(CP(cN,getU2(METHODBASE(cN,mN)+2))  +1)
-#define METHODDESCRSTR(cN,mN)       getAddr(CP(cN,getU2(METHODBASE(cN,mN)+4))  +3)
-#define METHODDESCRSTRLENGTH(cN,mN) getU2(CP(cN,getU2(METHODBASE(cN,mN)+4))  +1)
+#define METHODBASE(classId,methodId)       (cs[classId].method_info[methodId])
+#define METHODACCESSFLAG(classId,methodId)     getU2(METHODBASE(classId,methodId))
+#define METHODNAMESTR(classId,methodId)        getAddr(cN,CP(classId,getU2(METHODBASE(classId,methodId)+2))  +3)
+#define METHODNAMESTRLENGTH(classId,methodId)  getU2(CP(classId,getU2(METHODBASE(classId,methodId)+2))  +1)
+#define METHODDESCRSTR(classId,methodId)       getAddr(cN,CP(classId,getU2(METHODBASE(classId,methodId)+4))  +3)
+#define METHODDESCRSTRLENGTH(classId,methodId) getU2(CP(classId,getU2(METHODBASE(classId,methodId)+4))  +1)
                                                   // at length(u2)
-#define METHODATTRIBUTEBASE(cN,mN)  (METHODBASE(cN,mN)+6)
-#define FIELDBASE(cN,fN)        (cs[cN].field_info[fN])
+#define METHODATTRIBUTEBASE(classId,methodId)  (METHODBASE(classId,methodId)+6)
+#define FIELDBASE(classId,fieldId)        (cs[classId].field_info[fieldId])
 
 // change pc
-#define METHODCODEBASE(cN,mN)       (getStartPC()-14)
+#define METHODCODEBASE(classId,methodId)       (getStartPC() - 14)
                                                   //start at length(u2)
-#define METHODCODEEXCEPTIONBASE(cN,mN)  (getStartPC()+getU4(getStartPC()-4))
-#define METHODEXCEPTIONBASE(cN,mN)  (cs[cN].method_info[mN,3])
+#define METHODCODEEXCEPTIONBASE(classId,methodId)  (getStartPC() + getU4(classId,getStartPC() - 4))
+#define METHODEXCEPTIONBASE(classId,methodId)  (cs[classId].method_info[methodId,3])
 
 #define   CONSTANT_Class                    7
 #define   CONSTANT_Fieldref                 9
@@ -266,7 +265,7 @@ avr8Printf(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
 #define PRINTEXITTHREAD(a,b) {avr8Printf(a,b);\
     if (numThreads==1) \
     { \
-        avr8Printf("Bajos terminated\n"); \
+        avr8Printf("kjvm terminated\n"); \
         exit(0); \
     }\
     else {  deleteThread();} \
@@ -289,9 +288,12 @@ avr8Printf(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
 
 #ifdef AVR8
 #define FIND_CLASS findClassFlash
+#define FIND_METHOD_BYNAME findMethodByNameFlash
 #else
 #define FIND_CLASS findClass
+#define FIND_METHOD_BYNAME findMethodByName
 #endif
+#define INVALID_CLASS_ID 0xff
 
 #ifdef AVR8
 #define STRNCMP strncmpRamFlash

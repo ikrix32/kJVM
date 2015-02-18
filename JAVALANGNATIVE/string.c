@@ -29,7 +29,7 @@ char nativeStringLength()
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
-        opStackPush( toSlot( (u4) getU2( CP( cN, getU2( CP( cN, mySlot.stackObj.pos) + 1)) + 1)));
+        opStackPush( toSlot( (u4) getU2(cN, CP( cN, getU2(cN,CP(cN, mySlot.stackObj.pos) + 1)) + 1)));
         cN = methodStackPop();
     } else
         opStackPush(toSlot((u4) 0xffff));
@@ -44,7 +44,7 @@ char nativeCharAt()
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
-        opStackPush(toSlot((u4) getU1(CP(cN,getU2(CP(cN,mySlot.stackObj.pos) + 1))
+        opStackPush(toSlot((u4) getU1(cN,CP(cN,getU2(cN,CP(cN,mySlot.stackObj.pos) + 1))
                                       + 3 + (u2) opStackGetValue(local + 1).UInt)));
         cN = methodStackPop();
     } else
