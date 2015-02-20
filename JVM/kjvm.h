@@ -1,10 +1,10 @@
-/*
- * BAJOS BA-JAVA OPERATING SYSTEM
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-// a jvm for 8 Bit MC !!, e.g. atmega128 CharonII and linux and avr32
-// version 0.1 vom 1.10.07
+//
+//  config.h
+//  kJVM
+//
+//  Created by Florin Cristian on 15/02/15.
+//  Copyright (c) 2015 Florin Cristian. All rights reserved.
+//
 
 #ifndef __KJVM__
 #define __KJVM__
@@ -36,18 +36,20 @@ void initVM(void);
 GLOBAL u2 pc;                                     // active thread
 GLOBAL u1 cN;                                     // class structure Number
 GLOBAL u1 mN;                                     // method Number in class structure
-GLOBAL u1 fN;                       		  // field number in class or object 
+GLOBAL u1 fN;                       		  // field number in class or object
 GLOBAL u1 local INIT__(0);
+
 GLOBAL slot* opStackBase INIT__(NULL);
-GLOBAL u2* methodStackBase INIT__(NULL);
+GLOBAL u2*   methodStackBase INIT__(NULL);
 GLOBAL slot* heapBase INIT__(NULL);
-GLOBAL u2 heapTop INIT__(MAXHEAP);
+GLOBAL u2    heapTop INIT__(MAXHEAP);
 #ifndef AVR8
 GLOBAL char* classFileBase INIT__(NULL);
 #endif
 #if (AVR32UC3A || AVR32AP7000)
 GLOBAL char* appClassFileBase INIT__(NULL);
 #endif
+
 GLOBAL u1 numClasses INIT__(0);
 #ifndef TINYBAJOS_MULTITASKING
 GLOBAL ThreadControlBlock* currentThreadCB INIT__(NULL);
@@ -62,13 +64,13 @@ GLOBAL classStructure cs[MAXCLASSES];	// static allocated !!!
 #ifndef AVR8
 GLOBAL u4 timerMilliSec INIT__(0);
 #else
+
 #ifndef WITHMONGLOBAL
 u4 timerMilliSec INIT__(0);
 #endif
 #endif
 
 GLOBAL u1 timeOut INIT__(0);
-//GLOBAL u2 endBajos INIT__(0);
 #ifdef AVR8
 GLOBAL FILE uartAVR8;
 #endif                                            //AVR8

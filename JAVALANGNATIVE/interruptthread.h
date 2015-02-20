@@ -6,7 +6,7 @@
 #ifndef TINYBAJOS_MULTITASKING
 char static_sei(void);
 char static_cli(void);
-char initInterrupt();
-char removeInterrupt();
-char forceInterrupt();
+char initInterrupt(void);
+char removeInterrupt(void);
+char forceInterrupt(void);
 #endif

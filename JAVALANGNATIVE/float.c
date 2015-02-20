@@ -24,10 +24,10 @@
 char floatToCharArray()
 {
     slot mySlot;
-    f4 f = opStackGetValue(local).Float;          /* the float*/
+    const f4 f = opStackGetValue(local).Float;          /* the float*/
     char buf[8];
-    u1 i;
-    for (i = 0; i < 8; ++i)
+
+    for (u1 i = 0; i < 8; ++i)
     {
         buf[i] = 0;
     }
@@ -45,7 +45,7 @@ char floatToCharArray()
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;
     HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
     HEAPOBJECTMARKER(heapPos++).mutex = MUTEXNOTBLOCKED;
-    for (i = 0; i < 8; i++)
+    for (u1 i = 0; i < 8; i++)
     {
         heapSetElement(toSlot((u4)(*(buf + i))), heapPos++);
     }
@@ -63,11 +63,11 @@ char typeConvert()
 /* char arr to float*/
 char nativeParseFloat()
 {
-    slot mySlot = opStackGetValue(local);         /* the char array*/
+    const slot mySlot = opStackGetValue(local);         /* the char array*/
     char buf[mySlot.stackObj.arrayLength];
     f4 f;
-    u4 i;
-    for (i = 0; i < mySlot.stackObj.arrayLength; i++)
+
+    for (u1 i = 0; i < mySlot.stackObj.arrayLength; i++)
         buf[i] = (u1) heapGetElement(mySlot.stackObj.pos + i + 1).UInt;
     buf[mySlot.stackObj.arrayLength] = 0;
 #ifdef AVR8

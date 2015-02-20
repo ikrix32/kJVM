@@ -24,7 +24,7 @@
 
 char nativeStringLength()
 {
-    slot mySlot = opStackGetValue(local);
+    const slot mySlot = opStackGetValue(local);
     if (mySlot.stackObj.magic == CPSTRINGMAGIC)
     {
         methodStackPush(cN);
@@ -39,13 +39,12 @@ char nativeStringLength()
 
 char nativeCharAt()
 {
-    slot mySlot = opStackGetValue(local);
+    const slot mySlot = opStackGetValue(local);
     if (mySlot.stackObj.magic == CPSTRINGMAGIC)
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
-        opStackPush(toSlot((u4) getU1(cN,CP(cN,getU2(cN,CP(cN,mySlot.stackObj.pos) + 1))
-                                      + 3 + (u2) opStackGetValue(local + 1).UInt)));
+        opStackPush(toSlot((u4) getU1(cN,CP(cN,getU2(cN,CP(cN,mySlot.stackObj.pos) + 1)) + 3 + (u2) opStackGetValue(local + 1).UInt)));
         cN = methodStackPop();
     } else
         opStackPush(toSlot((u4) 0));

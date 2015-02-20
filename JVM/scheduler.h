@@ -17,11 +17,11 @@ void createThread(void);
 void deleteThread(void);
 
 void interruptThread(ThreadControlBlock* thread);
-ThreadControlBlock* findThreadCB(slot obj);
+ThreadControlBlock* findThreadCB(const slot obj);
 void deleteNotCurrentThread(ThreadControlBlock** t);
-void notifyThread(slot obj);
-void awakeThreadFromMutex(slot obj);
-void setMutexOnObject(ThreadControlBlock* t, slot obj);
+void notifyThread(const slot obj);
+void awakeThreadFromMutex(const slot obj);
+void setMutexOnObject(ThreadControlBlock* t,const slot obj);
 void releaseMutexOnObject(ThreadControlBlock* t, slot obj,
 ThreadControlBlock* awakeThread);
 

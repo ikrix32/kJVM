@@ -59,7 +59,7 @@ char conIn()
 
 char nativeCharOut()
 {
-    char val = opStackGetValue(local + 1).UInt;
+    const char val = opStackGetValue(local + 1).UInt;
     printf("%c", val);
     return 0;
 }

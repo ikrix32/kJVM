@@ -38,7 +38,6 @@ char notify()
 
 char notifyAll()
 {
-    u1 i, k, max;
     ThreadControlBlock* cb;
     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
         != MUTEXBLOCKED)
@@ -46,15 +45,14 @@ char notifyAll()
         exit(249);
     }
     /*can not be ->IllegalMonitorStateException*/
-    for (i = 0; i < (MAXPRIORITY); i++)
+    for (int i = 0; i < (MAXPRIORITY); i++)
     {
-        max = (threadPriorities[i].count);
+        const u1 max = (threadPriorities[i].count);
         cb = threadPriorities[i].cb;
-        for (k = 0; k < max; k++)
+        for (int k = 0; k < max; k++)
         {
             if ((cb->state == THREADWAITBLOCKED)
-                && ((cb->isMutexBlockedOrWaitingForObject).UInt
-                    == opStackGetValue(local).UInt))
+            && ((cb->isMutexBlockedOrWaitingForObject).UInt == opStackGetValue(local).UInt))
                 cb->state = THREADWAITAWAKENED;
             cb = cb->succ;
         }
@@ -65,26 +63,23 @@ char notifyAll()
 
 char nativeWait()
 {
-    u1 i, k, max;
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-        != MUTEXBLOCKED)
+    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
     {
         exit(254);
     }
-    /*can not be ->IllegalMonitorStateException*/HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-    = MUTEXNOTBLOCKED;                        /* free lock for another thread and lock this */
+    /*can not be ->IllegalMonitorStateException*/
+    HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex= MUTEXNOTBLOCKED;/* free lock for another thread and lock this */
 
     ThreadControlBlock* myTCB;
-    for (i = 0; i < (MAXPRIORITY); i++)
+    for (int i = 0; i < (MAXPRIORITY); i++)
     {
-        max = (threadPriorities[i].count);
+        const u1 max = (threadPriorities[i].count);
         myTCB = threadPriorities[i].cb;
-        for (k = 0; k < max; k++)
+        for (int k = 0; k < max; k++)
         {
             //alle blocked for object wecken!
-            if ((myTCB->isMutexBlockedOrWaitingForObject.UInt
-                 == opStackGetValue(local).UInt) && (myTCB->state
-                                                     == THREADMUTEXBLOCKED))
+            if ((myTCB->isMutexBlockedOrWaitingForObject.UInt == opStackGetValue(local).UInt)
+            && (myTCB->state == THREADMUTEXBLOCKED))
             {
                 myTCB->state = THREADNOTBLOCKED;  //!!
                 myTCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
@@ -108,5 +103,5 @@ char waitTime()
 
 char getDataAddress()
 {
-    return 1;                                     /* ret val is  on Stack !!*/
+    return 1;/* ret val is  on Stack !!*/
 }

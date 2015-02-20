@@ -25,16 +25,16 @@
 /* method stack holds global variable (cN, mN, local,..)*/
 #ifndef AVR8
 static slot* opSp;
-static u2* methodSp;
+static u2*   methodSp;
 #else
-slot* opSp;
-u2* methodSp;
+slot*   opSp;
+u2*     methodSp;
 #endif                                            // AVR8
 void opStackInit(slot** m)                        /* per thread, fixed size */
 {
 
-#if (LINUX||AVR8||AVR32LINUX)
-    if ((*m= (slot*) calloc((size_t)OPSTACKSIZE,sizeof(slot))) == NULL)
+#if (LINUX || AVR8 || AVR32LINUX)
+    if ((*m = (slot*) calloc((size_t)OPSTACKSIZE,sizeof(slot))) == NULL)
         MALLOCERR(OPSTACKSIZE * sizeof(slot), "op stack");
 #else
     /* classfiles - heap - (opstack methodstack)/ per thread*/
@@ -47,61 +47,61 @@ void opStackInit(slot** m)                        /* per thread, fixed size */
 
 //all these functions are rewritten in assembler to increase speed => routin es_stack.asm
 #ifndef AVR8
-void opStackPush(const slot val)
+inline void opStackPush(const slot val)
 {
     *(opSp++) = val;
 #ifdef DEBUGOPSTACK
-    if ((opSp-opStackBase)>maxOpStack) maxOpStack=opSp-opStackBase;
-#endif                                        // DEBUGOPSTACK
+    if ((opSp - opStackBase)>maxOpStack) maxOpStack = opSp - opStackBase;
+#endif// DEBUGOPSTACK
 }
 
 
 /*  sp grothws with increasing addresses*/
 /* and shows to TOS -> first free place*/
 
-slot opStackPop()
+inline slot opStackPop()
 {
     return *(--opSp);
 }
 
 
 /* operand stack stores 4 bytes*/
-slot opStackPeek()
+inline slot opStackPeek()
 {
     return *(opSp - 1);
 }
 
 
-void    opStackPoke(const slot val)
+inline void    opStackPoke(const slot val)
 {
     *(opSp - 1) = val;
 }
 
 
-void opStackSetValue(const u2 pos,const slot val)
+inline void opStackSetValue(const u2 pos,const slot val)
 {
     *(opStackBase + pos) = val;
 }
 
 
-slot opStackGetValue(const u2 pos)
+inline slot opStackGetValue(const u2 pos)
 {
     return*( opStackBase + pos);
 }
 
 
-u2 opStackGetSpPos()
+inline u2 opStackGetSpPos()
 {
     return (opSp - opStackBase);
 }
 
 
 /* relat ive to actual base*/
-void opStackSetSpPos(const u2 pos)
+inline void opStackSetSpPos(const u2 pos)
 {
     opSp = pos + opStackBase;
 #ifdef DEBUGOPSTACK
-    if ((opSp-opStackBase)>maxOpStack) maxOpStack=opSp-opStackBase;
+    if ((opSp - opStackBase) > maxOpStack) maxOpStack = opSp - opStackBase;
 #endif                                        // DEBUGOPSTACK
 }
 #endif
@@ -120,7 +120,7 @@ void methodStackInit(u2** m)
 
 
 #ifndef AVR8                                      //all these functions are rewritten in assembler toincrease speed => routines_stack.asm
-void methodStackPush(const u2 val)
+inline void methodStackPush(const u2 val)
 {
     *(methodSp++) = val;
 #ifdef DEBUGMETHODSTACK
@@ -129,44 +129,36 @@ void methodStackPush(const u2 val)
 }
 
 
-u2 methodStackPop()
+inline u2 methodStackPop()
 {
     return *(--methodSp);
 }
 
 
-u2 methodStackPeek()
+inline u2 methodStackPeek()
 {
     return *(methodSp - 1);
 }
 
 
-u2 methodStackGetSpPos()
+inline u2 methodStackGetSpPos()
 {
     return (methodSp - methodStackBase);
 }
 
 
 /* relative to actual base*/
-void methodStackSetSpPos(const u2 pos)
+inline void methodStackSetSpPos(const u2 pos)
 {
     methodSp = pos + methodStackBase;
 #ifdef DEBUGMETHODSTACK
-    if ((methodSp-methodStackBase)>maxMethodStack) maxMethodStack=methodSp-methodStackBase;
-#endif                                        // DEBUGMETODSTACK
+    if ((methodSp - methodStackBase) > maxMethodStack) maxMethodStack = methodSp - methodStackBase;
+#endif// DEBUGMETODSTACK
 }
 
 
-u1 methodStackEmpty()
+inline u1 methodStackEmpty()
 {
     return (methodSp == methodStackBase) ? 1 : 0;
 }
 #endif
-
-/*//BH
- void dummy(void)	{
- char* s1,*s2;
- char n;
- strncmpFlashFlash(s1,(const char*) s2, n);
- }
- */

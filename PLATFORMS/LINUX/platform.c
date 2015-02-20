@@ -13,117 +13,116 @@
 #include "platform.h"
 
 #ifdef BOOTSTRAP_BINARIES
-const u1 java_lang_ObjectBin[] =
+static const u1 java_lang_ObjectBin[] =
 #include "java_lang_Object.h"
 
-const u1 platformBin[] =
+static const u1 platformBin[] =
 #include "java_PlatForm.h"
 
-const u1 java_lang_BooleanBin[] =
+static const u1 java_lang_BooleanBin[] =
 #include "java_lang_Boolean.h"
 
-const u1 java_lang_ByteBin[] =
+static const u1 java_lang_ByteBin[] =
 #include "java_lang_Byte.h"
 
-const u1 java_lang_CharacterBin[] =
+static const u1 java_lang_CharacterBin[] =
 #include "java_lang_Character.h"
 
-const u1 java_lang_ShortBin[] =
+static const u1 java_lang_ShortBin[] =
 #include "java_lang_Short.h"
 
-const u1 java_lang_IntegerBin[] =
+static const u1 java_lang_IntegerBin[] =
 #include "java_lang_Integer.h"
 
-const u1 java_lang_FloatBin[] =
+static const u1 java_lang_FloatBin[] =
 #include "java_lang_Float.h"
 
-const u1 java_lang_CharSequenceBin[] =
+static const u1 java_lang_CharSequenceBin[] =
 #include "java_lang_CharSequence.h"
 
-const u1 java_lang_StringBin[] =
+static const u1 java_lang_StringBin[] =
 #include "java_lang_String.h"
 
-const u1 java_lang_StringBufferBin[] =
+static const u1 java_lang_StringBufferBin[] =
 #include "java_lang_StringBuffer.h"
 
-const u1 java_lang_StringBuilderBin[] =
+static const u1 java_lang_StringBuilderBin[] =
 #include "java_lang_StringBuilder.h"
 
-const u1 java_lang_ErrorBin[] =
+static const u1 java_lang_ErrorBin[] =
 #include "java_lang_Error.h"
 
-const u1 java_lang_ThrowableBin[] =
+static const u1 java_lang_ThrowableBin[] =
 #include "java_lang_Throwable.h"
 
-const u1 java_lang_ExceptionBin[] =
+static const u1 java_lang_ExceptionBin[] =
 #include "java_lang_Exception.h"
 
-const u1 java_lang_NullPointerExceptionBin[] =
+static const u1 java_lang_NullPointerExceptionBin[] =
 #include "java_lang_NullPointerException.h"
 
-const u1 java_lang_ArithmeticExceptionBin[] =
+static const u1 java_lang_ArithmeticExceptionBin[] =
 #include "java_lang_ArithmeticException.h"
 
-const u1 java_lang_ArrayIndexOutOfBoundsExceptionBin[] =
+static const u1 java_lang_ArrayIndexOutOfBoundsExceptionBin[] =
 #include "java_lang_ArrayIndexOutOfBoundsException.h"
 
-const u1 java_lang_RuntimeExceptionBin[] =
+static const u1 java_lang_RuntimeExceptionBin[] =
 #include "java_lang_RuntimeException.h"
 
-const u1 java_lang_IllegalArgumentExceptionBin[] =
+static const u1 java_lang_IllegalArgumentExceptionBin[] =
 #include "java_lang_IllegalArgumentException.h"
 
-const u1 java_lang_ClassCastExceptionBin[] =
+static const u1 java_lang_ClassCastExceptionBin[] =
 #include "java_lang_ClassCastException.h"
 
-const u1 java_lang_InterruptedExceptionBin[] =
+static const u1 java_lang_InterruptedExceptionBin[] =
 #include "java_lang_InterruptedException.h"
 
-const u1 java_lang_RuntimeBin[] =
+static const u1 java_lang_RuntimeBin[] =
 #include "java_lang_Runtime.h"
 
-const u1 java_lang_ThreadBin[] =
+static const u1 java_lang_ThreadBin[] =
 #include "java_lang_Thread.h"
 
-const u1 java_lang_mathBin[] =
+static const u1 java_lang_mathBin[] =
 #include "java_lang_Math.h"
 
-const u1 java_io_InStreamBin[] =
+static const u1 java_io_InStreamBin[] =
 #include "java_io_InStream.h"
 
-const u1 java_io_OutStreamBin[] =
+static const u1 java_io_OutStreamBin[] =
 #include "java_io_OutStream.h"
 
-const u1 java_lang_SystemBin[] =
+static const u1 java_lang_SystemBin[] =
 #include "java_lang_System.h"
 
-const u1 helloWorldBin[] =
-#include "HelloWorld.h"
-
-const u1* bootstrapBinaries[] =
+//static const u1 helloWorldBin[] =
+//#include "HelloWorld.h"
+static const u1* bootstrapBinaries[] =
 {   java_lang_ObjectBin,
     platformBin,
-    //java_lang_BooleanBin,
+    java_lang_BooleanBin,
     java_lang_ByteBin,
     java_lang_CharacterBin,
-    //java_lang_ShortBin,
+    java_lang_ShortBin,
     java_lang_IntegerBin,
-    //java_lang_FloatBin,
+    java_lang_FloatBin,
     java_lang_CharSequenceBin,
     java_lang_StringBin,
     java_lang_StringBufferBin,
     java_lang_StringBuilderBin,
-    //java_lang_ErrorBin,
-    //java_lang_ThrowableBin,
-    //java_lang_ExceptionBin,
-    //java_lang_NullPointerExceptionBin,
-    //java_lang_ArithmeticExceptionBin,
-    //java_lang_ArrayIndexOutOfBoundsExceptionBin,
-    //java_lang_RuntimeExceptionBin,
-    //java_lang_IllegalArgumentExceptionBin,
-    //java_lang_ClassCastExceptionBin,
-    //java_lang_InterruptedExceptionBin,
-    //java_lang_RuntimeBin,
+    java_lang_ErrorBin,
+    java_lang_ThrowableBin,
+    java_lang_ExceptionBin,
+    java_lang_NullPointerExceptionBin,
+    java_lang_ArithmeticExceptionBin,
+    java_lang_ArrayIndexOutOfBoundsExceptionBin,
+    java_lang_RuntimeExceptionBin,
+    java_lang_IllegalArgumentExceptionBin,
+    java_lang_ClassCastExceptionBin,
+    java_lang_InterruptedExceptionBin,
+    java_lang_RuntimeBin,
     java_lang_ThreadBin,
     java_lang_mathBin,
     java_io_InStreamBin,
@@ -131,30 +130,31 @@ const u1* bootstrapBinaries[] =
     java_lang_SystemBin,
     //helloWorldBin
 };
-const u4 bootstrapBinariesSize[] =
+
+static const u4 bootstrapBinariesSize[] =
 {   sizeof(java_lang_ObjectBin),
     sizeof(platformBin),
-    //sizeof(java_lang_BooleanBin),
+    sizeof(java_lang_BooleanBin),
     sizeof(java_lang_ByteBin),
     sizeof(java_lang_CharacterBin),
-    //sizeof(java_lang_ShortBin),
+    sizeof(java_lang_ShortBin),
     sizeof(java_lang_IntegerBin),
-    //sizeof(java_lang_FloatBin),
+    sizeof(java_lang_FloatBin),
     sizeof(java_lang_CharSequenceBin),
     sizeof(java_lang_StringBin),
     sizeof(java_lang_StringBufferBin),
     sizeof(java_lang_StringBuilderBin),
-    //sizeof(java_lang_ErrorBin),
-    //sizeof(java_lang_ThrowableBin),
-    //sizeof(java_lang_ExceptionBin),
-    //sizeof(java_lang_NullPointerExceptionBin),
-    //sizeof(java_lang_ArithmeticExceptionBin),
-    //sizeof(java_lang_ArrayIndexOutOfBoundsExceptionBin),
-    //sizeof(java_lang_RuntimeExceptionBin),
-    //sizeof(java_lang_IllegalArgumentExceptionBin),
-    //sizeof(java_lang_ClassCastExceptionBin),
-    //sizeof(java_lang_InterruptedExceptionBin),
-    //sizeof(java_lang_RuntimeBin),
+    sizeof(java_lang_ErrorBin),
+    sizeof(java_lang_ThrowableBin),
+    sizeof(java_lang_ExceptionBin),
+    sizeof(java_lang_NullPointerExceptionBin),
+    sizeof(java_lang_ArithmeticExceptionBin),
+    sizeof(java_lang_ArrayIndexOutOfBoundsExceptionBin),
+    sizeof(java_lang_RuntimeExceptionBin),
+    sizeof(java_lang_IllegalArgumentExceptionBin),
+    sizeof(java_lang_ClassCastExceptionBin),
+    sizeof(java_lang_InterruptedExceptionBin),
+    sizeof(java_lang_RuntimeBin),
     sizeof(java_lang_ThreadBin),
     sizeof(java_lang_mathBin),
     sizeof(java_io_InStreamBin),
@@ -175,7 +175,7 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
 {
     u4 length = 0;
 
-#if (AVR32LINUX||LINUX)
+#if (AVR32LINUX || LINUX)
     classFileBase=(char*)malloc((size_t) MAXBYTECODE);
     if (classFileBase==NULL)
         errorExit(-1,"malloc error while trying to allocate %d bytes for class files.\n", MAXBYTECODE);
@@ -187,14 +187,16 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
     const int noBins = sizeof(bootstrapBinariesSize)/sizeof(bootstrapBinariesSize[0]);
     for (cN = 0; cN < noBins; cN++)
     {
-        cs[cN].classFileStartAddress = classFileBase + length;
-        cs[cN].classFileLength=readClassBin(bootstrapBinaries[cN],bootstrapBinariesSize[cN],cs[cN].classFileStartAddress);
-        analyzeClass( &cs[cN]);
-        length += cs[cN].classFileLength;
-        if (length > MAXBYTECODE)
+        //printf("Load class %d,bytecode size: %d\n\n",cN,bootstrapBinariesSize[cN]);
+        if (length + bootstrapBinariesSize[cN]> MAXBYTECODE)
         {
             printf("MAXBYTECODE reached!\n"); exit(-1);
         }
+        cs[cN].classFileStartAddress = classFileBase + length;
+        cs[cN].classFileLength=readClassBin(bootstrapBinaries[cN],bootstrapBinariesSize[cN],cs[cN].classFileStartAddress);
+        analyzeClass(cN);
+
+        length += cs[cN].classFileLength;
         numClasses = cN + 1;
     }
     printf("Loaded %d classes,bytecode size: %d\n\n",numClasses,length);
@@ -208,7 +210,7 @@ void initVM(int argc, char* argv[])               /* read, analyze classfiles an
     {
         cs[cN].classFileStartAddress = classFileBase + length;
         cs[cN].classFileLength=readClassFile(argv[i + 1], cs[cN].classFileStartAddress);
-        analyzeClass( &cs[cN]);
+        analyzeClass(cN);
         length += cs[cN].classFileLength;
         if (length > MAXBYTECODE)
         {
@@ -246,8 +248,9 @@ u2 readClassBin(const u1* bin,const u4 binSize, char* addr)
         addr++;bin++;
     }
     return classFileLength += (long)addr;
-#endif
+#else
     return 0;
+#endif
 }
 
 void linuxExit(int n)

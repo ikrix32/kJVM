@@ -53,12 +53,12 @@ static slot first;
 static slot second;
 static slot third;
 static slot fourth;
-static char* className;
-static u2 classNameLength;
-static char* name;                                /* field or method*/
-static u2 nameLength;
-static char* descr;                               /* field or method*/
-static u2 descrLength;
+static char*className;
+static u2   classNameLength;
+static char*name;                                /* field or method*/
+static u2   nameLength;
+static char*descr;                               /* field or method*/
+static u2   descrLength;
 /* static u1	numFields; <-- not used?*/
 //static u2 i, j, k;
 //static s2 count;
@@ -70,7 +70,7 @@ void run()                                        /* in: classNumber,  methodNum
     pc = getStartPC();
     for (;;)
     {
-        code = getU1(cN,0);
+        code  = getU1(cN,0);
         byte1 = getU1(cN,pc);
         byte2 = getU1(cN,pc + 1);
         DEBUGPRINT("-> ");
@@ -80,7 +80,7 @@ void run()                                        /* in: classNumber,  methodNum
 #endif
         DEBUGPRINT(", pc: %x ", pc - getStartPC() - 1);
         DEBUGPRINTE(code, 2x);
-        DEBUGPRINTE(byte1, 2x);
+        DEBUGPRINTE(byte1,2x);
         DEBUGPRINTE(byte2,2x\t);
         DEBUGPRINT("sp: %d local: %d\n", opStackGetSpPos(), local);
         DEBUGPRINTSTACK;
@@ -89,7 +89,6 @@ void run()                                        /* in: classNumber,  methodNum
 
         switch (code)
         {
-
             case NOP:
             {
                 DEBUGPRINTLN("NOP");
@@ -1858,10 +1857,9 @@ void run()                                        /* in: classNumber,  methodNum
 /* generalized single comparison of target class with class at addr in cN's constant pool.i*/
 /* keeps cN unchanged if target is no super class of cN.*/
 /* else cN is the super class of former cN which has target as super class.*/
-void subCheck(u2 target, u2 addr)
+void subCheck(const u2 target,const u2 addr)
 {
-    u2 super_class =
-    cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[addr] + 1)];
+    u2 super_class = cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[addr] + 1)];
     methodStackPush(cN);
     cN = FIND_CLASS(getAddr(cN,super_class + 3), getU2(cN,super_class + 1));
     if (!checkInstance(target))
@@ -1900,7 +1898,7 @@ u1 checkInstance(const u2 target)
 }
 
 
-slot createDims(u4 dimsLeft, s2 *dimSize)
+slot createDims(const u4 dimsLeft, s2 *dimSize)
 {
     slot act_array = NULLOBJECT;
     if (dimsLeft == 0)

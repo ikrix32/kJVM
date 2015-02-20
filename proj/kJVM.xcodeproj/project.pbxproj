@@ -172,10 +172,10 @@
 		4EB8F7B21A9128E6001C885A /* LINUX */ = {
 			isa = PBXGroup;
 			children = (
+				4EB8F7B71A9128E6001C885A /* platform.h */,
 				4EB8F7B31A9128E6001C885A /* platform.c */,
 				4EB8F7B51A9128E6001C885A /* native.c */,
 				4EB8F7B61A9128E6001C885A /* native.h */,
-				4EB8F7B71A9128E6001C885A /* platform.h */,
 				4E9A38321A91400C00665CC3 /* config.h */,
 			);
 			name = LINUX;
@@ -215,13 +215,13 @@
 				4EB8F7D31A91290B001C885A /* definitions.h */,
 				4EB8F7D41A91290B001C885A /* limits.h */,
 				4EB8F7F41A91290C001C885A /* typedefinitions.h */,
+				4EB8F7FC1A91290C001C885A /* stack.h */,
 				4EB8F7F51A91290C001C885A /* stack.c */,
 				4EB8F7F61A91290C001C885A /* heap.c */,
 				4EB8F7F71A91290C001C885A /* heap.h */,
 				4EB8F7F91A91290C001C885A /* nativedispatch.c */,
 				4EB8F7FA1A91290C001C885A /* scheduler.c */,
 				4EB8F7FB1A91290C001C885A /* scheduler.h */,
-				4EB8F7FC1A91290C001C885A /* stack.h */,
 			);
 			name = JVM;
 			path = ../JVM;

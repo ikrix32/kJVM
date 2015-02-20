@@ -220,7 +220,7 @@ void run(void);
 u1  checkInstance(const u2 target);
 void raiseExceptionFromIdentifier(const char identifier[], const u1 length);
 void handleException(void);
-void subCheck(u2 target, u2 addr);
+void subCheck(const u2 target,const u2 addr);
 
-slot createDims(u4 dimsLeft, s2 *count);
+slot createDims(const u4 dimsLeft, s2 *count);
 #endif

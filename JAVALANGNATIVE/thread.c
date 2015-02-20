@@ -50,9 +50,8 @@ char nativeSetPriority()                          //by ceh
 {
     // thread is alive -> thread control block exists
     // cN -> of method (Thread)
-    u1 newPrio = opStackGetValue(local + 1).UInt;
-    u4* pCurrentPrio;
-    slot soi = opStackGetValue(local);
+    const u1 newPrio = opStackGetValue(local + 1).UInt;
+    const slot soi = opStackGetValue(local);
     cN = soi.stackObj.classNumber;                // of object, which calls the method
     if (!findFieldByRamName("priority", 8, "I", 1))
     {
@@ -60,7 +59,7 @@ char nativeSetPriority()                          //by ceh
     }
 
     // position of int field priority of the thread creating object
-    pCurrentPrio = (u4*) (heapBase + soi.stackObj.pos + fN + 1);
+    const u4* pCurrentPrio = (u4*) (heapBase + soi.stackObj.pos + fN + 1);
     if (newPrio == (*pCurrentPrio))
         return 0;                                 // nothing to do
                                                   // search thread control block af calling object

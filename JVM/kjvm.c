@@ -43,7 +43,6 @@ native methods interface
 exception handling
 scheduler
 */
-/*AVR8(arduinoMega and CharonII) EVK1100 EVK1104 NGW100 STK1000 LINUX AVR32-LINUX XMEGA -> Target Systems*/
 
 #include <stdio.h>
 #include <stdlib.h>

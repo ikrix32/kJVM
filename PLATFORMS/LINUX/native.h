@@ -1,4 +1,4 @@
-char nativeCharOut();
-char nativeCharIn();
-char nativeExit();
-char currentTimeMillis();
+char nativeCharOut(void);
+char nativeCharIn(void);
+char nativeExit(void);
+char currentTimeMillis(void);

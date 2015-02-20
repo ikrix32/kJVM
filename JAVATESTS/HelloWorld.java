@@ -9,7 +9,7 @@ public class HelloWorld {
 		
 		System.out.println("Hello World: "+currentTime+" milliseconds");
 		
-		Thread t1 = new Thread() {
+		/*Thread t1 = new Thread() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
