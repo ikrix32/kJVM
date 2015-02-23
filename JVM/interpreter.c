@@ -41,7 +41,7 @@ GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
 
 #define fieldName       name
 #define fieldNameLength     nameLength
-#define lengthArray     nameLength
+//#define lengthArray     nameLength
 #define methodName      name
 #define methodNameLength    nameLength
 #define fieldDescr      descr
@@ -63,12 +63,13 @@ static u2   descrLength;
 //static u2 i, j, k;
 //static s2 count;
 
-void run()                                        /* in: classNumber,  methodNumber cN, mN*/
+void interpreter_run()                                        /* in: classNumber,  methodNumber cN, mN*/
 {
     u1 code, byte1, byte2;
     //u2 heapPos;
-    pc = getStartPC();
-    for (;;)
+    pc = getStartPC(cN,mN);
+
+    while(1)
     {
         code  = getU1(cN,0);
         byte1 = getU1(cN,pc);
@@ -78,7 +79,7 @@ void run()                                        /* in: classNumber,  methodNum
 #ifndef TINYBAJOS_MULTITASKING
         DEBUGPRINTE(currentThreadCB->tid, x);
 #endif
-        DEBUGPRINT(", pc: %x ", pc - getStartPC() - 1);
+        DEBUGPRINT(", pc: %x ", pc - getStartPC(cN,mN) - 1);
         DEBUGPRINTE(code, 2x);
         DEBUGPRINTE(byte1,2x);
         DEBUGPRINTE(byte2,2x\t);
@@ -86,37 +87,257 @@ void run()                                        /* in: classNumber,  methodNum
         DEBUGPRINTSTACK;
         DEBUGPRINTLOCALS;
         DEBUGPRINT("\t\t\t\t");
+#ifdef USE_LABELS
+        /*const static void* const opclabels_data[256] = {
+            &&OPC_NOP         ,//0x00
+            &&OPC_ACONST_NULL ,//0x01                      // modified by mb jf
+            &&OPC_ICONST_M1   ,//0x02
+            &&OPC_ICONST_0    ,//0x03
+            &&OPC_ICONST_1    ,//0x04
+            &&OPC_ICONST_2    ,//0x05
+            &&OPC_ICONST_3    ,//0x06
+            &&OPC_ICONST_4    ,//0x07
+            &&OPC_ICONST_5    ,//0x08
+            &&OPC_LCONST_0    ,//0x09                      //long
+            &&OPC_LCONST_1    ,//0x0a
+            &&OPC_FCONST_0    ,//0x0b
+            &&OPC_FCONST_1    ,//0x0c
+            &&OPC_FCONST_2    ,//0x0d
+            &&OPC_DCONST_0    ,//0x0e
+            &&OPC_DCONST_1    ,//0x0f
 
+            &&OPC_BIPUSH      ,//0x10
+            &&OPC_SIPUSH      ,//0x11
+            &&OPC_LDC         ,//0x12
+            &&OPC_LDC_W       ,//0x13
+            &&OPC_LDC2_W      ,//0x14
+            &&OPC_ILOAD       ,//0x15
+            &&OPC_LLOAD       ,//0x16
+            &&OPC_FLOAD       ,//0x17
+            &&OPC_DLOAD       ,//0x18
+            &&OPC_ALOAD       ,//0x19
+            &&OPC_ILOAD_0     ,//0x1a
+            &&OPC_ILOAD_1     ,//0x1b
+            &&OPC_ILOAD_2     ,//0x1c
+            &&OPC_ILOAD_3     ,//0x1d
+            &&OPC_NOT_SUPPORTED,//OPC_LLOAD_0     ,//0x1e
+            &&OPC_NOT_SUPPORTED,//OPC_LLOAD_1     ,//0x1f
+
+            &&OPC_NOT_SUPPORTED,//LLOAD_2     ,//0x20
+            &&OPC_NOT_SUPPORTED,//LLOAD_3     ,//0x21
+            &&OPC_FLOAD_0     ,//0x22
+            &&OPC_FLOAD_1     ,//0x23
+            &&OPC_FLOAD_2     ,//0x24
+            &&OPC_FLOAD_3     ,//0x25
+            &&OPC_DLOAD_0     ,//0x26
+            &&OPC_DLOAD_1     ,//0x27
+            &&OPC_DLOAD_2     ,//0x28
+            &&OPC_DLOAD_3     ,//0x29
+            &&OPC_ALOAD_0     ,//0x2a
+            &&OPC_ALOAD_1     ,//0x2b
+            &&OPC_ALOAD_2     ,//0x2c
+            &&OPC_ALOAD_3     ,//0x2d
+            &&OPC_IALOAD      ,//0x2e
+            &&OPC_LALOAD      ,//0x2f
+
+            &&OPC_FALOAD      ,//0x30
+            &&OPC_DALOAD      ,//0x31
+            &&OPC_AALOAD      ,//0x32
+            &&OPC_BALOAD      ,//0x33
+            &&OPC_CALOAD      ,//0x34
+            &&OPC_SALOAD      ,//0x35
+            &&OPC_ISTORE      ,//0x36
+            &&OPC_LSTORE      ,//0x37
+            &&OPC_FSTORE      ,//0x38
+            &&OPC_DSTORE      ,//0x39
+            &&OPC_ASTORE      ,//0x3A
+            &&OPC_ISTORE_0    ,//0x3B
+            &&OPC_ISTORE_1    ,//0x3C
+            &&OPC_ISTORE_2    ,//0x3D
+            &&OPC_ISTORE_3    ,//0x3E
+            &&OPC_LSTORE_0    ,//0x3F
+
+            &&OPC_LSTORE_1    ,//0x40
+            &&OPC_LSTORE_2    ,//0x41
+            &&OPC_LSTORE_3    ,//0x42
+            &&OPC_FSTORE_0    ,//0x43
+            &&OPC_FSTORE_1    ,//0x44
+            &&OPC_FSTORE_2    ,//0x45
+            &&OPC_FSTORE_3    ,//0x46
+            &&OPC_DSTORE_0    ,//0x47
+            &&OPC_DSTORE_1    ,//0x48
+            &&OPC_DSTORE_2    ,//0x49
+            &&OPC_DSTORE_3    ,//0x4A
+            &&OPC_ASTORE_0    ,//0x4b
+            &&OPC_ASTORE_1    ,//0x4c
+            &&OPC_ASTORE_2    ,//0x4d
+            &&OPC_ASTORE_3    ,//0x4e
+            &&OPC_IASTORE     ,//0x4F                      //mb jf
+
+            &&OPC_LASTORE     ,//0x50                      //mb jf
+            &&OPC_FASTORE     ,//0x51                      //mb jf
+            &&OPC_DASTORE     ,//0x52                      //mb jf
+            &&OPC_AASTORE     ,//0x53                      //mb jf
+            &&OPC_BASTORE     ,//0x54                      //mb jf
+            &&OPC_CASTORE     ,//0x55                      //mb jf
+            &&OPC_SASTORE     ,//0x56                      //mb jf
+            &&OPC_POP         ,//0x57
+            &&OPC_POP2        ,//0x58
+            &&OPC_DUP         ,//0x59
+            &&OPC_DUP_X1      ,//0x5a
+            &&OPC_DUP_X2      ,//0x5b
+            &&OPC_DUP2        ,//0x5c
+            &&OPC_DUP2_X1     ,//0x5d
+            &&OPC_DUP2_X2     ,//0x5e
+            &&OPC_SWAP        ,//0x5f
+
+            &&OPC_IADD        ,//0x60
+            &&OPC_LADD        ,//0x61
+            &&OPC_FADD        ,//0x62
+            &&OPC_DADD        ,//0x63
+            &&OPC_ISUB        ,//0x64                      // modified by mb jf
+            &&OPC_LSUB        ,//0x65
+            &&OPC_FSUB        ,//0x66
+            &&OPC_DSUB        ,//0x67                      // modified by mb jf
+            &&OPC_IMUL        ,//0x68
+            &&OPC_LMUL        ,//0x69
+            &&OPC_FMUL        ,//0x6A                      // modified by mb jf
+            &&OPC_DMUL        ,//0x6B
+            &&OPC_IDIV        ,//0x6C                      // modified by mb jf
+            &&OPC_LDIV        ,//0x6D
+            &&OPC_FDIV        ,//0x6E                      // modified by mb jf
+            &&OPC_DDIV        ,//0x6F
+
+            &&OPC_IREM        ,//0x70
+            &&OPC_LREM        ,//0x71
+            &&OPC_FREM        ,//0x72
+            &&OPC_DREM        ,//0x73
+            &&OPC_INEG        ,//0x74
+            &&OPC_LNEG        ,//0x75
+            &&OPC_FNEG        ,//0x76
+            &&OPC_DNEG        ,//0x77
+            &&OPC_ISHL        ,//0x78
+            &&OPC_LSHL        ,//0x79
+            &&OPC_ISHR        ,//0x7A
+            &&OPC_LSHR        ,//0x7B
+            &&OPC_IUSHR       ,//0x7C
+            &&OPC_LUSHR       ,//0x7D
+            &&OPC_IAND        ,//0x7E
+            &&OPC_LAND        ,//0x7F
+
+            &&OPC_IOR         ,//0x80
+            &&OPC_LOR         ,//0x81
+            &&OPC_IXOR        ,//0x82
+            &&OPC_LXOR        ,//0x83
+            &&OPC_IINC        ,//0x84                      //modified: mb, jf
+            &&OPC_I2L         ,//0x85
+            &&OPC_I2F         ,//0x86
+            &&OPC_I2D         ,//0x87
+            &&OPC_L2I         ,//0x88
+            &&OPC_L2F         ,//0x89
+            &&OPC_L2D         ,//0x8A
+            &&OPC_F2I         ,//0x8B
+            &&OPC_F2L         ,//0x8C
+            &&OPC_F2D         ,//0x8D
+            &&OPC_D2I         ,//0x8E
+            &&OPC_D2L         ,//0x8F
+
+            &&OPC_D2F         ,//0x90
+            &&OPC_I2B         ,//0x91
+            &&OPC_I2C         ,//0x92
+            &&OPC_I2S         ,//0x93
+            &&OPC_LCMP        ,//0x94
+            &&OPC_FCMPL       ,//0x95
+            &&OPC_FCMPG       ,//0x96
+            &&OPC_DCMPL       ,//0x97
+            &&OPC_DCMPG       ,//0x98
+            &&OPC_IFEQ        ,//0x99                      //mb, jf
+            &&OPC_IFNE        ,//0x9a                      //mb, jf
+            &&OPC_IFLT        ,//0x9b                      //mb, jf
+            &&OPC_IFGE        ,//0x9c                      //mb, jf
+            &&OPC_IFGT        ,//0x9d                      //mb, jf
+            &&OPC_IFLE        ,//0x9e                      //mb, jf
+            &&OPC_IF_ICMPEQ   ,//0x9f                      //mb, jf
+
+            &&OPC_IF_ICMPNE   ,//0xa0                      //mb, jf
+            &&OPC_IF_ICMPLT   ,//0xa1                      //mb, jf
+            &&OPC_IF_ICMPGE   ,//0xa2                      //mb, jf
+            &&OPC_IF_ICMPGT   ,//0xa3                      //mb, jf
+            &&OPC_IF_ICMPLE   ,//0xa4                      //mb, jf
+            &&OPC_IF_ACMPEQ   ,//0xa5                      //mb, jf
+            &&OPC_IF_ACMPNE   ,//0xa6                      //mb, jf
+            &&OPC_GOTO        ,//0xa7                      //mb, jf
+            &&OPC_JSR         ,//0xa8                      //mb, jf
+            &&OPC_RET         ,//0xa9                      //mb, jf
+            &&OPC_TABLESWITCH ,//0xaa                      //mb, jf
+            &&OPC_LOOKUPSWITCH    ,//0xab                  //mb, jf
+            &&OPC_IRETURN     ,//0xac                      //mb, jf
+            &&OPC_LRETURN     ,//0xad                      //mb, jf
+            &&OPC_FRETURN     ,//0xae                      //mb, jf
+            &&OPC_DRETURN     ,//0xaf                      //mb, jf
+            
+            &&OPC_ARETURN     ,//0xb0                      //mb, jf
+            &&OPC_RETURN      ,//0xb1                      // modified by mb jf
+            &&OPC_GETSTATIC   ,//0xb2                      //mb jf
+            &&OPC_PUTSTATIC   ,//0xb3                      //mb jf
+            &&OPC_GETFIELD    ,//0xb4                      // modified by mb jf
+            &&OPC_PUTFIELD    ,//0xb5                      // modified by mb jf
+            &&OPC_INVOKEVIRTUAL   ,//0xb6                  // modified by mb jf
+            &&OPC_INVOKESPECIAL   ,//0xb7                  // modified by mb jf
+            &&OPC_INVOKESTATIC    ,//0xb8                  // modified by mb jf
+            &&OPC_INVOKEINTERFACE ,//0xb9
+            &&OPC_NOT_SUPPORTED,//XXXUNUSEDXXX    ,//0xba
+            &&OPC_NEW         ,//0xbb                      // modified by mb jf
+            &&OPC_NEWARRAY    ,//0xbc                      //mb jf
+            &&OPC_ANEWARRAY   ,//0xbd                      //mb jf
+            &&OPC_ARRAYLENGTH ,//0xbe                      //mb jf
+            &&OPC_ATHROW      ,//0xbf
+            
+            &&OPC_CHECKCAST   ,//0xc0                      // to do
+            &&OPC_INSTANCEOF  ,//0xc1                      // to do
+            &&OPC_MONITORENTER    ,//0xc2
+            &&OPC_MONITOREXIT     ,//0xc3
+            &&OPC_WIDE        ,//0xc4                      //mb jf
+            &&OPC_MULTIANEWARRAY  ,//0xc5                  //mb jf
+            &&OPC_IFNULL      ,//0xc6                      //mb jf
+            &&OPC_IFNONNULL   ,//0xc7                      //mb jf
+            &&OPC_GOTO_W      ,//0xc8                      //mb jf
+            &&OPC_JSR_W       ,//0xc9                      //mb jf
+        };
+        register uintptr_t *dispatch_table = (uintptr_t*)&opclabels_data[0];
+       */// DISPATCH(code);
+#else
         switch (code)
+#endif
         {
-            case NOP:
+            CASE(NOP):
             {
                 DEBUGPRINTLN("NOP");
-            }break;
-            case ACONST_NULL:
+            }BREAK;
+            CASE(ACONST_NULL):
             {
                 DEBUGPRINTLN("aconst_null -> push\t...,=> NULLOBJECT");
                 opStackPush(NULLOBJECT);
-            }break;
-            case ICONST_M1:
-            case ICONST_0:
-            case ICONST_1:
-            case ICONST_2:
-            case ICONST_3:
-            case ICONST_4:
-            case ICONST_5:
+            }BREAK;
+            CASE(ICONST_M1):
+            CASE(ICONST_0):
+            CASE(ICONST_1):
+            CASE(ICONST_2):
+            CASE(ICONST_3):
+            CASE(ICONST_4):
+            CASE(ICONST_5):
             {
                 DEBUGPRINTLN("ICONST_%4x -> push\t...,=> %4x",code-ICONST_0,code - ICONST_0);
                 opStackPush(toSlot((s4)(code - ICONST_0)));
-            }break;
-            case FCONST_0:
-            case FCONST_1:
-            case FCONST_2:
+            }BREAK;
+            CASE(FCONST_0):
+            CASE(FCONST_1):
+            CASE(FCONST_2):
             {
                 DEBUGPRINTLN("FCONST_%d  -> push\t...,=> %f",code - FCONST_0,(f4)(code - FCONST_0));
                 opStackPush(toSlot((f4)(code - FCONST_0)));
-            }break;
-            case BIPUSH:
+            }BREAK;
+            CASE(BIPUSH):
             {
                 DEBUGPRINTLN("BIPUSH  -> push\t...,=> %d",(s1)byte1);
                 /* BIPUSH is defined as follows:*/
@@ -124,13 +345,13 @@ void run()                                        /* in: classNumber,  methodNum
                 /* extends it to int signed (32bit)*/
                 /* and saves it on stack*/
                 opStackPush(toSlot(((getU1(cN,pc) & 0x80) >> 7) * 0xffffff80 | (getU1(cN,0) & 0x7f)));
-            }break;
-            case SIPUSH:
+            }BREAK;
+            CASE(SIPUSH):
             {
                 DEBUGPRINTLN("SIPUSH  -> push\t...,=> %x",(s2)BYTECODEREF);
                 opStackPush(toSlot((s4)((s2) getU2(cN,0))));
-            }break;
-            case LDC:
+            }BREAK;
+            CASE(LDC):
             {
                 DEBUGPRINT("ldc  push\t...");
                 if (getU1(cN,CP(cN, getU1(cN,0))) == CONSTANT_String)
@@ -143,74 +364,69 @@ void run()                                        /* in: classNumber,  methodNum
                 /* int or float const value on stack*/
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN(",=> x%x", opStackPeek().UInt);
-            }break;
-            case LDC_W:
+            }BREAK;
+            CASE(LDC_W):
             {
                 errorExit(-4, "LDC_W not yet realized\n");
-            }break;
-            case ILOAD:
+            }BREAK;
+            CASE(ILOAD):
+            CASE(FLOAD):
+            CASE(ALOAD):
             {
-                DEBUGPRINTLN("ILOAD -> local(%x) -> push\t...,=>",byte1);
-                /*mb jf*/
+#ifdef DEBUG
+                if(code == ILOAD) DEBUGPRINTLN("ILOAD -> local(%x) -> push\t...,=>",byte1);
+                if(code == FLOAD) DEBUGPRINTLN("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(cN,byte1));
+                if(code == ALOAD) DEBUGPRINTLN("aload -> local(%x) -> push\t,=>",byte1);
+#endif
                 opStackPush(opStackGetValue(local + getU1(cN,0)));
-            }break;
-            case FLOAD:
+            }BREAK;
+            CASE(ILOAD_0):
+            CASE(ILOAD_1):
+            CASE(ILOAD_2):
+            CASE(ILOAD_3):
+            CASE(FLOAD_0):
+            CASE(FLOAD_1):
+            CASE(FLOAD_2):
+            CASE(FLOAD_3):
+            CASE(ALOAD_0):
+            CASE(ALOAD_1):
+            CASE(ALOAD_2):
+            CASE(ALOAD_3):
             {
-                DEBUGPRINTLN("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(cN,byte1));
-                opStackPush(opStackGetValue(local + getU1(cN,0)));
-            }break;
-            case ALOAD:
-            {
-                DEBUGPRINTLN("aload -> local(%x) -> push\t,=>",byte1);
-                /*mb jf changed getU1() --> getU1(0)*/
-                opStackPush(opStackGetValue(local + getU1(cN,0)));
-            }break;
-            case ILOAD_0:
-            case ILOAD_1:
-            case ILOAD_2:
-            case ILOAD_3:
-            {
-                DEBUGPRINTLN("ILOAD_%d local -> push\t...,=>",code - ILOAD_0);
-                opStackPush(opStackGetValue(local + code - ILOAD_0));
-            }break;
-            case FLOAD_0:
-            case FLOAD_1:
-            case FLOAD_2:
-            case FLOAD_3:
-            {
-                DEBUGPRINTLN("FLOAD_%d local -> push\t...,=>",code - FLOAD_0);
-                opStackPush(opStackGetValue(local + code - FLOAD_0));
-            }break;
-            case ALOAD_0:
-            case ALOAD_1:
-            case ALOAD_2:
-            case ALOAD_3:
-            {
-                DEBUGPRINTLN("aload_%d local -> push\t...,=>",code - ALOAD_0);
-                opStackPush(opStackGetValue(local + code - ALOAD_0));
-            }break;
-            case IALOAD:
-            case FALOAD:
-            case AALOAD:
-            case BALOAD:
-            case CALOAD:
-            case SALOAD:
+                u1 base_op = ILOAD_0;
+                if(code == ALOAD_0 || code == ALOAD_1 || code == ALOAD_2 || code == ALOAD_3)
+                    base_op = ALOAD_0;
+                if(code == FLOAD_0 || code == FLOAD_1 || code == FLOAD_2 || code == FLOAD_3)
+                    base_op = FLOAD_0;
+#ifdef DEBUG
+                if(base_op == ALOAD_0)
+                    DEBUGPRINTLN("ALOAD_%d local -> push\t...,=>",code - base_op);
+                if(base_op == ILOAD_0)
+                    DEBUGPRINTLN("ILOAD_%d local -> push\t...,=>",code - base_op);
+                if(base_op == FLOAD_0)
+                    DEBUGPRINTLN("FLOAD_%d local -> push\t...,=>",code - base_op);
+#endif
+                opStackPush(opStackGetValue(local + code - base_op));
+            }BREAK;
+            CASE(IALOAD):
+            CASE(FALOAD):
+            CASE(AALOAD):
+            CASE(BALOAD):
+            CASE(CALOAD):
+            CASE(SALOAD):
             {
                 s2 count = (s2)opStackPop().Int;     /*mb jf*/
                 first = opStackPop();
 #ifdef DEBUG
-                switch (code)
-                {
-                    case IALOAD: DEBUGPRINTLN("iaload");break;
-                    case FALOAD: DEBUGPRINTLN("faload");break;
-                    case AALOAD: DEBUGPRINTLN("aaload");break;
-                    case BALOAD: DEBUGPRINTLN("baload");break;
-                    case CALOAD: DEBUGPRINTLN("caload");break;
-                    case SALOAD: DEBUGPRINTLN("saload");break;
-                }
+                if(code == IALOAD) DEBUGPRINTLN("iaload");
+                if(code == FALOAD) DEBUGPRINTLN("faload");
+                if(code == AALOAD) DEBUGPRINTLN("aaload");
+                if(code == BALOAD) DEBUGPRINTLN("baload");
+                if(code == CALOAD) DEBUGPRINTLN("caload");
+                if(code == SALOAD) DEBUGPRINTLN("saload");
                 PRINTF("%x, =>",first.UInt);
 #endif
-                lengthArray = first.stackObj.arrayLength;
+                const u4 lengthArray = first.stackObj.arrayLength;
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
@@ -223,74 +439,67 @@ void run()                                        /* in: classNumber,  methodNum
                     opStackPush(heapGetElement((u2) first.stackObj.pos + count + 1));
                     DEBUGPRINTLN(", %x", opStackPeek().UInt);
                 }
-            }break;
-            case ISTORE:
-            case FSTORE:
-            case ASTORE:
+            }BREAK;
+            CASE(ISTORE):
+            CASE(FSTORE):
+            CASE(ASTORE):
             {
 #ifdef DEBUG
-                switch (code)
-                {
-                    case ISTORE: DEBUGPRINTLN("ISTORE  pop -> local(%d)=>,\n",byte1);break;
-                    case FSTORE: DEBUGPRINTLN("FSTORE  pop -> local(%d)=>,\n",byte1);break;
-                    case ASTORE: DEBUGPRINTLN("ASTORE  pop -> local(%x)=>,\n",byte1);break;
-                }
+                if(code == ISTORE) DEBUGPRINTLN("ISTORE  pop -> local(%d)=>,\n",byte1);
+                if(code == FSTORE) DEBUGPRINTLN("FSTORE  pop -> local(%d)=>,\n",byte1);
+                if(code == ASTORE) DEBUGPRINTLN("ASTORE  pop -> local(%x)=>,\n",byte1);
 #endif
                 opStackSetValue(local+getU1(cN,0),opStackPop());
 
-            }break;
-            case ISTORE_0:
-            case ISTORE_1:
-            case ISTORE_2:
-            case ISTORE_3:
+            }BREAK;
+            CASE(ISTORE_0):
+            CASE(ISTORE_1):
+            CASE(ISTORE_2):
+            CASE(ISTORE_3):
             {
                 DEBUGPRINTLN("ISTORE_%d pop -> local   %d=>,",code-ISTORE_0,opStackPeek().Int);
                 opStackSetValue(local + code - ISTORE_0, opStackPop());
-            }break;
-            case FSTORE_0:
-            case FSTORE_1:
-            case FSTORE_2:
-            case FSTORE_3:
+            }BREAK;
+            CASE(FSTORE_0):
+            CASE(FSTORE_1):
+            CASE(FSTORE_2):
+            CASE(FSTORE_3):
             {
                 DEBUGPRINTLN("FSTORE_%d pop -> local   =>,",code - FSTORE_0);
                 opStackSetValue(local + code - FSTORE_0, opStackPop());
-            }break;
-            case ASTORE_0:
-            case ASTORE_1:
-            case ASTORE_2:
-            case ASTORE_3:
+            }BREAK;
+            CASE(ASTORE_0):
+            CASE(ASTORE_1):
+            CASE(ASTORE_2):
+            CASE(ASTORE_3):
             {
                 DEBUGPRINTLN("ASTORE_%d pop -> local  =>,",code-ASTORE_0);
                 opStackSetValue(local + code - ASTORE_0, opStackPop());
-            }break;
-            case IASTORE:
-            case FASTORE:
-            case AASTORE:
-            case BASTORE:
-            case CASTORE:
-            case SASTORE:
+            }BREAK;
+            CASE(IASTORE):
+            CASE(FASTORE):
+            CASE(AASTORE):
+            CASE(BASTORE):
+            CASE(CASTORE):
+            CASE(SASTORE):
             {
 #ifdef DEBUG
-                switch (code)
-                {
-                        /*mb jf		//int*/
-                    case IASTORE: DEBUGPRINTLN("iastore stack -> local");break;
+               if(code == IASTORE) DEBUGPRINTLN("iastore stack -> local");
                         /*mb jf		//float*/
-                    case FASTORE: DEBUGPRINTLN("fastore");break;
+                if(code == FASTORE) DEBUGPRINTLN("fastore");
                         /*mb jf		//float*/
-                    case AASTORE: DEBUGPRINTLN("fastore");break;
+                if(code == AASTORE) DEBUGPRINTLN("fastore");
                         /*mb jf		//byte or boolean*/
-                    case BASTORE: DEBUGPRINTLN("bastore");break;
+                if(code == BASTORE) DEBUGPRINTLN("bastore");
                         /*mb jf		//char*/
-                    case CASTORE: DEBUGPRINTLN("castore");break;
+                if(code == CASTORE) DEBUGPRINTLN("castore");
                         /*mb jf		//short*/
-                    case SASTORE: DEBUGPRINTLN("sastore");break;
-                }
+                if(code == SASTORE) DEBUGPRINTLN("sastore");
 #endif
                 second = opStackPop();
                 s2 count = (s2)(opStackPop().Int);
                 first = opStackPop();
-                lengthArray = first.stackObj.arrayLength;
+                const u4 lengthArray = first.stackObj.arrayLength;
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
@@ -302,24 +511,24 @@ void run()                                        /* in: classNumber,  methodNum
                 {
                     heapSetElement(second, first.stackObj.pos + count + 1);
                 }
-            }break;
-            case POP:
+            }BREAK;
+            CASE(POP):
             {
                 DEBUGPRINTLN("POP %x",opStackPeek().UInt);
                 opStackPop();
-            }break;
-            case POP2:
+            }BREAK;
+            CASE(POP2):
             {
                 DEBUGPRINTLN("POP2");
                 opStackPop();
                 opStackPop();
-            }break;
-            case DUP:
+            }BREAK;
+            CASE(DUP):
             {
                 DEBUGPRINTLN("dup");
                 opStackPush(opStackPeek());
-            }break;
-            case DUP_X1:
+            }BREAK;
+            CASE(DUP_X1):
             {
                 DEBUGPRINTLN("DUP_X1");
                 second = opStackPop();
@@ -327,8 +536,8 @@ void run()                                        /* in: classNumber,  methodNum
                 opStackPush(second);
                 opStackPush(first);
                 opStackPush(second);
-            }break;
-            case DUP_X2:
+            }BREAK;
+            CASE(DUP_X2):
             {
                 DEBUGPRINTLN("DUP_X2");
                 second = opStackPop();
@@ -338,8 +547,8 @@ void run()                                        /* in: classNumber,  methodNum
                 opStackPush(third);
                 opStackPush(first);
                 opStackPush(second);
-            }break;
-            case DUP2:
+            }BREAK;
+            CASE(DUP2):
             {
                 DEBUGPRINTLN("DUP2");
                 second = opStackPop();
@@ -348,8 +557,8 @@ void run()                                        /* in: classNumber,  methodNum
                 opStackPush(second);
                 opStackPush(first);
                 opStackPush(second);
-            }break;
-            case DUP2_X1:
+            }BREAK;
+            CASE(DUP2_X1):
             {
                 DEBUGPRINTLN("DUP2_X1");
                 second = opStackPop();
@@ -360,8 +569,8 @@ void run()                                        /* in: classNumber,  methodNum
                 opStackPush(third);
                 opStackPush(first);
                 opStackPush(second);
-            }break;
-            case DUP2_X2:
+            }BREAK;
+            CASE(DUP2_X2):
             {
                 DEBUGPRINTLN("DUP2_X2");
                 second = opStackPop();
@@ -374,48 +583,48 @@ void run()                                        /* in: classNumber,  methodNum
                 opStackPush(third);
                 opStackPush(first);
                 opStackPush(second);
-            }break;
-            case SWAP:
+            }BREAK;
+            CASE(SWAP):
             {
                 DEBUGPRINTLN("SWAP");
                 second = opStackPop();
                 first = opStackPop();
                 opStackPush(second);
                 opStackPush(first);
-            }break;
-            case IADD:
+            }BREAK;
+            CASE(IADD):
             {
                 DEBUGPRINTLN("IADD");
                 opStackPoke(toSlot((opStackPop().Int + opStackPeek().Int)));
-            }break;
-            case FADD:
+            }BREAK;
+            CASE(FADD):
             {
                 DEBUGPRINTLN("FADD");
                 opStackPoke(toSlot((opStackPop().Float + opStackPeek().Float)));
-            }break;
-            case ISUB:
+            }BREAK;
+            CASE(ISUB):
             {
                 DEBUGPRINTLN("ISUB");
                 first = opStackPop();             /*mb fj changed substraction order*/
                 opStackPoke(toSlot((opStackPeek().Int - first.Int)));
-            }break;
-            case FSUB:
+            }BREAK;
+            CASE(FSUB):
             {
                 DEBUGPRINTLN("Fsub");
                 first = opStackPop();             /*mb fj changed substraction order*/
                 opStackPoke(toSlot((opStackPeek().Float - first.Float)));
-            }break;
-            case IMUL:
+            }BREAK;
+            CASE(IMUL):
             {
                 DEBUGPRINTLN("IMUL");
                 opStackPoke(toSlot((opStackPop().Int * opStackPeek().Int)));
-            }break;
-            case FMUL:
+            }BREAK;
+            CASE(FMUL):
             {
                 DEBUGPRINTLN("FMUL");
                 opStackPoke(toSlot((opStackPop().Float * opStackPeek().Float)));
-            }break;
-            case IDIV:
+            }BREAK;
+            CASE(IDIV):
             {
                 DEBUGPRINTLN("IDIV");
                 first = opStackPop();             /*mb fj changed dividend order*/
@@ -423,8 +632,8 @@ void run()                                        /* in: classNumber,  methodNum
                     ARITHMETICEXCEPTION;
                 else
                     opStackPush(toSlot((opStackPop().Int / first.Int)));
-            }break;
-            case FDIV:
+            }BREAK;
+            CASE(FDIV):
             {
                 DEBUGPRINTLN("FDIV");
                 first = opStackPop();             /*mb fj changed dividend order*/
@@ -432,106 +641,109 @@ void run()                                        /* in: classNumber,  methodNum
                     ARITHMETICEXCEPTION;
                 else
                     opStackPoke(toSlot((opStackPeek().Float / first.Float)));
-            }break;
-            case IREM:
+            }BREAK;
+            CASE(IREM):
             {
                 DEBUGPRINTLN("IREM");
                 if (((first = opStackPop()).Int) == 0)
                     ARITHMETICEXCEPTION;
                 else
                     opStackPoke(toSlot((opStackPeek().Int % first.Int)));
-            }break;
-            case FREM:
+            }BREAK;
+            CASE(FREM):
             {
                 DEBUGPRINTLN("FREM");
                 float divisor = opStackPop().Float;
                 float dividend = opStackPop().Float;
                 int q = dividend / divisor;
                 opStackPush(toSlot((f4)(dividend - (divisor * q))));
-            }break;
-            case INEG:
+            }BREAK;
+            CASE(INEG):
             {
                 DEBUGPRINTLN("INEG");
                 opStackPoke(toSlot(-opStackPeek().Int));
-            }break;
-            case FNEG:
+            }BREAK;
+            CASE(FNEG):
             {
                 DEBUGPRINTLN("FNEG");
                 opStackPoke(toSlot(-opStackPeek().Float));
-            }break;
-            case ISHL:
+            }BREAK;
+            CASE(ISHL):
             {
                 DEBUGPRINTLN("ISHL");
-                opStackPoke(toSlot(opStackPop().UInt << opStackPeek().UInt));
-            }break;
-            case ISHR:
+                const slot shift = opStackPop();
+                const slot val = opStackPop();
+                opStackPush(toSlot(val.UInt << shift.UInt));
+            }BREAK;
+            CASE(ISHR):
             {
                 DEBUGPRINTLN("ISHR");
-                opStackPoke(toSlot(opStackPop().Int >> opStackPeek().Int));
-            }break;
-            case IUSHR:
+                const slot shift = opStackPop();
+                const slot val = opStackPop();
+                opStackPush(toSlot(val.Int >> shift.Int));
+            }BREAK;
+            CASE(IUSHR):
             {
                 DEBUGPRINTLN("IUSHR");
-                first = toSlot(opStackPop().Int & 0x0000001f);
-                second = opStackPop();
-                if (second.Int < 0)
-                    opStackPush(toSlot((second.Int >> first.Int) + (2 << ~first.Int)));
+                const slot shift = toSlot(opStackPop().Int & 0x0000001f);
+                const slot val = opStackPop();
+                if (val.Int < 0)
+                    opStackPush(toSlot((val.Int >> shift.Int) + (2 << ~shift.Int)));
                 else
-                    opStackPush(toSlot(second.Int >> first.Int));
-            }break;
-            case IAND:
+                    opStackPush(toSlot(val.Int >> shift.Int));
+            }BREAK;
+            CASE(IAND):
             {
                 DEBUGPRINTLN("IAND");
                 opStackPoke(toSlot(opStackPop().UInt & opStackPeek().UInt));
-            }break;
-            case IOR:
+            }BREAK;
+            CASE(IOR):
             {
                 DEBUGPRINTLN("IOR");
                 opStackPoke(toSlot(opStackPop().UInt | opStackPeek().UInt));
-            }break;
-            case IXOR:
+            }BREAK;
+            CASE(IXOR):
             {
                 DEBUGPRINTLN("IXOR");
                 opStackPoke(toSlot(opStackPop().UInt ^ opStackPeek().UInt));
-            }break;
-            case IINC:
+            }BREAK;
+            CASE(IINC):
             {
                 DEBUGPRINTLN("IINC");             /*mb, jf*/
                 /* position*/
                 opStackSetValue((u2)(local + byte1),
                                 /* old value*/
-                                toSlot((s4)(opStackGetValue(local + byte1).Int
-                                            + (s4) (s1) byte2)));         /* add const*/
+                                toSlot((s4)(opStackGetValue(local + byte1).Int + (s4) (s1) byte2)));         /* add const*/
                 pc += 2;                          /* to skip the index + const*/
 
-            }break;
-            case I2F:
+            }BREAK;
+            CASE(I2F):
             {
                 DEBUGPRINTLN("I2F");
                 opStackPoke(toSlot((f4) opStackPeek().Int));
-            }break;
-            case F2I:
+            }BREAK;
+            CASE(F2I):
             {
                 DEBUGPRINTLN("F2I");
                 opStackPoke(toSlot((s4)(opStackPeek().Float)));
-            }break;
-            case I2C:
+            }BREAK;
+            CASE(I2C):
             {
                 DEBUGPRINTLN("I2C");
                 opStackPoke(toSlot((opStackPeek().UInt & 0x0000ffff)));
-            }break;
-            case I2B:
+            }BREAK;
+            CASE(I2B):
             {
                 DEBUGPRINTLN("I2B");
                 opStackPoke(toSlot(opStackPeek().UInt & 0x000000ff));
-            }break;
-            case I2S:
+            }BREAK;
+            CASE(I2S):
             {
                 DEBUGPRINTLN("I2S");
                 opStackPoke(toSlot((s4)((s2) opStackPeek().Int)));
-            }break;
-            case FCMPL:
-            case FCMPG:
+            }BREAK;
+            CASE(FCMPL):
+            CASE(FCMPG):
             {
                 DEBUGPRINTLN("fcmpg");
                 second = opStackPop();
@@ -552,90 +764,90 @@ void run()                                        /* in: classNumber,  methodNum
                 {
                     opStackPush(toSlot((s4) - 1));
                 }
-            }break;
-            case IFEQ:
+            }BREAK;
+            CASE(IFEQ):
             {
                 DEBUGPRINTLN("ifeq");             /*mb, jf*/
                 if (opStackPop().Int == 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IFNULL:
+            }BREAK;
+            CASE(IFNULL):
             {
                 DEBUGPRINTLN("ifnull");
                 if (opStackPop().UInt == NULLOBJECT.UInt)
                     pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
                 else
                     pc += 2;                      /* skip branch bytes*/
-            }break;
-            case IFNONNULL:
+            }BREAK;
+            CASE(IFNONNULL):
             {
                 DEBUGPRINTLN("ifnonnull");        /* mb jf*/
                 if (opStackPop().UInt != NULLOBJECT.UInt)
                     pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
                 else
                     pc += 2;                      /* skip branch bytes*/
-            }break;
-            case IFNE:
+            }BREAK;
+            CASE(IFNE):
             {
                 DEBUGPRINTLN("ifne");             /*mb, jf*/
                 if (opStackPop().Int != 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IFLT:
+            }BREAK;
+            CASE(IFLT):
             {
                 DEBUGPRINTLN("iflt");             /*mb, jf*/
                 if (opStackPop().Int < 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IFLE:
+            }BREAK;
+            CASE(IFLE):
             {
                 DEBUGPRINTLN("ifle");             /*mb, jf*/
                 if (opStackPop().Int <= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IFGT:
+            }BREAK;
+            CASE(IFGT):
             {
                 DEBUGPRINTLN("ifgt");             /*mb, jf*/
                 if (opStackPop().Int > 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IFGE:
+            }BREAK;
+            CASE(IFGE):
             {
                 DEBUGPRINTLN("ifge");             /*mb, jf*/
                 if (opStackPop().Int >= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ACMPEQ: DEBUGPRINTLN("if_acmpeq");        /*mb, jf*/
-            case IF_ICMPEQ:
+            }BREAK;
+            CASE(IF_ACMPEQ): DEBUGPRINTLN("if_acmpeq");        /*mb, jf*/
+            CASE(IF_ICMPEQ):
             {
                 DEBUGPRINTLN("if_icmpeq");        /*mb, jf*/
                 if (opStackPop().Int == opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ACMPNE: DEBUGPRINTLN("if_acmpne");        /*mb, jf*/
-            case IF_ICMPNE:
+            }BREAK;
+            CASE(IF_ACMPNE): DEBUGPRINTLN("if_acmpne");        /*mb, jf*/
+            CASE(IF_ICMPNE):
             {
                 DEBUGPRINTLN("if_icmpne");        /*mb, jf*/
                 if (opStackPop().Int != opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ICMPLT:
+            }BREAK;
+            CASE(IF_ICMPLT):
             {
                 DEBUGPRINTLN("if_icmplt");        /*mb, jf*/
                 /*???*/
@@ -643,48 +855,48 @@ void run()                                        /* in: classNumber,  methodNum
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ICMPGE:
+            }BREAK;
+            CASE(IF_ICMPGE):
             {
                 DEBUGPRINTLN("if_icmpge");        /*mb, jf*/
                 if (opStackPop().Int <= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ICMPGT:
+            }BREAK;
+            CASE(IF_ICMPGT):
             {
                 DEBUGPRINTLN("if_icmpgt");        /*mb, jf*/
                 if (opStackPop().Int < opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case IF_ICMPLE:
+            }BREAK;
+            CASE(IF_ICMPLE):
             {
                 DEBUGPRINTLN("if_icmple");        /*mb, jf*/
                 if (opStackPop().Int >= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
-            }break;
-            case GOTO:
+            }BREAK;
+            CASE(GOTO):
             {
                 DEBUGPRINTLN("goto");             /* mb, jf*/
                 pc += (s2) BYTECODEREF - 1;
-            }break;
-            case JSR:
+            }BREAK;
+            CASE(JSR):
             {
                 DEBUGPRINTLN("jsr");              /* mb, jf*/
                 opStackPush(toSlot((u4)(pc + 2)));
                 pc += (s2) BYTECODEREF - 1;
-            }break;
-            case RET:
+            }BREAK;
+            CASE(RET):
             {
                 DEBUGPRINTLN("ret");              /* mb, jf*/
                 pc = opStackGetValue(local + getU1(cN,0)).UInt;
-            }break;
-            case TABLESWITCH:
+            }BREAK;
+            CASE(TABLESWITCH):
             {
                 DEBUGPRINTLN("tableswitch");      /* mb, jf*/
                 {
@@ -700,11 +912,11 @@ void run()                                        /* in: classNumber,  methodNum
                      */
 
                     u2 startPc = --pc;
-                    u2 relPc = pc - getStartPC(); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
+                    u2 relPc = pc - getStartPC(cN,mN); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
                     u4 windex = opStackPop().Int;
                     /* next pc as multiple of 4 --> skip padding bytes*/
                     relPc = (u2)((relPc + 4) & 0xfffc);
-                    pc = relPc + getStartPC();    /*pcMethodStart;	// set pc to begin of default address*/
+                    pc = relPc + getStartPC(cN,mN);    /*pcMethodStart;	// set pc to begin of default address*/
                     u4 offset = getU4(cN,0);         //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));	// default offset
                     u4 lowbyte = getU4(cN,0);        //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
                     u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
@@ -716,8 +928,8 @@ void run()                                        /* in: classNumber,  methodNum
                     }
                     pc = startPc + offset;
                 }
-            }break;
-            case LOOKUPSWITCH:
+            }BREAK;
+            CASE(LOOKUPSWITCH):
             {
                 DEBUGPRINTLN("lookupswitch");     /* mb, jf*/
                 {
@@ -732,12 +944,12 @@ void run()                                        /* in: classNumber,  methodNum
                      0  0  0 20  offset
                      */
                     u2 startPc = --pc;
-                    u2 relPc = pc - getStartPC(); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
+                    u2 relPc = pc - getStartPC(cN,mN); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
                     u4 key = opStackPop().Int;
 
                     /* next pc as multiple of 4 from address of 0xab (lookupswitch)*/
                     relPc = (u2)((relPc + 4) & 0xfffc);
-                    pc = relPc + getStartPC();    /* pcMethodStart;	// set pc to begin of default address*/
+                    pc = relPc + getStartPC(cN,mN);    /* pcMethodStart;	// set pc to begin of default address*/
                     u4 offset = getU4(cN,0);         /* default offset*/
                     u4 matches;
                     for (matches = getU4(cN,0); matches > 0; --matches)
@@ -752,8 +964,8 @@ void run()                                        /* in: classNumber,  methodNum
                     }
                     pc = startPc + offset;
                 }
-            }break;
-            case GETSTATIC:
+            }BREAK;
+            CASE(GETSTATIC):
             {
                 DEBUGPRINTLN("getstatic ");       /*mb jf ... corrected funtion*/
                 methodStackPush(cN);
@@ -792,8 +1004,8 @@ void run()                                        /* in: classNumber,  methodNum
                 pc += 2;
                 cN = methodStackPop();	// end GETSTATIC
 
-            }break;
-            case PUTSTATIC:
+            }BREAK;
+            CASE(PUTSTATIC):
             {   /*mb jf*/
                 DEBUGPRINTLN("putstatic -> stack in static field");
                 methodStackPush(cN);
@@ -832,8 +1044,8 @@ void run()                                        /* in: classNumber,  methodNum
 
                 cN = methodStackPop();            /* restore cN*/
                 // end PUTSTATIC
-            }break;
-            case GETFIELD:
+            }BREAK;
+            CASE(GETFIELD):
             {
                 DEBUGPRINTLN("getfield ->   heap to stack:");
                 methodStackPush(cN);
@@ -871,8 +1083,8 @@ void run()                                        /* in: classNumber,  methodNum
                 pc += 2;
                 cN = methodStackPop();
                 // end GETFIELD
-            }break;
-            case PUTFIELD:
+            }BREAK;
+            CASE(PUTFIELD):
             {
                 DEBUGPRINTLN("putfield -> stack to heap");
                 methodStackPush(cN);
@@ -939,10 +1151,10 @@ void run()                                        /* in: classNumber,  methodNum
                     cN = methodStackPop();
                 }
                 // end PUTFIELD
-            }break;
-            case INVOKESPECIAL:
-            case INVOKEVIRTUAL:
-            case INVOKEINTERFACE:
+            }BREAK;
+            CASE(INVOKESPECIAL):
+            CASE(INVOKEVIRTUAL):
+            CASE(INVOKEINTERFACE):
             {
 #ifdef DEBUG
                 if (code == INVOKEVIRTUAL) DEBUGPRINT("invokevirtual: ");
@@ -974,10 +1186,9 @@ void run()                                        /* in: classNumber,  methodNum
 
                 if(opStackGetValue(local).UInt == NULLOBJECT.UInt)
                 {
-
                     //cN = methodStackPop();
                     NULLPOINTEREXCEPTION;
-                    break;
+                    BREAK;
                 }
 
                 if ((code == INVOKEVIRTUAL) || (code == INVOKEINTERFACE))
@@ -1007,7 +1218,7 @@ void run()                                        /* in: classNumber,  methodNum
                     METHODNOTFOUNDERR(methodName, className);
                 }
 
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN)));
+                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
 
 #ifndef TINYBAJOS_MULTITASKING
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
@@ -1083,9 +1294,9 @@ void run()                                        /* in: classNumber,  methodNum
                         errorExit(-3, "native method not found cN: %d mN: %d", cN, mN);
                     }
                 }
-                pc = getStartPC();
-            }break;
-            case INVOKESTATIC:
+                pc = getStartPC(cN,mN);
+            }BREAK;
+            CASE(INVOKESTATIC):
             {
                 DEBUGPRINT("invoke static: ");    /* a static method*/
                 methodStackPush(local);
@@ -1113,7 +1324,7 @@ void run()                                        /* in: classNumber,  methodNum
                 }
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
                 DEBUGPRINTLNSTRING(className, classNameLength);
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN)));
+                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
 
 #ifndef TINYBAJOS_MULTITASKING
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
@@ -1194,34 +1405,24 @@ void run()                                        /* in: classNumber,  methodNum
                         errorExit(-3, "native method not found cN: %d mN: %d", cN, mN);
                     }
                 }
-                pc = getStartPC();
+                pc = getStartPC(cN,mN);
 
-            }break;
+            }BREAK;
             nativeValueReturn:
-            case IRETURN:
-            case FRETURN:
-            case ARETURN:
+            CASE(IRETURN):
+            CASE(FRETURN):
+            CASE(ARETURN):
             {
-                switch (code)
-                {
-                    case IRETURN:
-                    {
-                        DEBUGPRINT("i");          /*mb jf*/
-                    }break;
-                    case  FRETURN:
-                    {
-                        DEBUGPRINT("f");
-                    }break;
-                    case ARETURN:
-                    {
-                        DEBUGPRINT("a");
-                    }break;
-                }
+#ifdef DEBUG
+                if(code == IRETURN) DEBUGPRINT("i");
+                if(code == FRETURN) DEBUGPRINT("f");
+                if(code == ARETURN) DEBUGPRINT("a");
+#endif
                 code=IRETURN;
             nativeVoidReturn:
                 DEBUGPRINT("native ");
             }
-            case RETURN:
+            CASE(RETURN):
             {
                 DEBUGPRINTLN("return");
 #ifndef TINYBAJOS_MULTITASKING
@@ -1270,13 +1471,6 @@ void run()                                        /* in: classNumber,  methodNum
 #endif
                 if (methodStackEmpty())
                 {
-                    /*
-                     #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
-                     printf_P(PSTR("empty method stack\n"));
-                     #else
-                     printf("empty method stack\n");
-                     #endif
-                     */
                     /*mb jf if not <clinit> you're done :-D*/
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
                     {
@@ -1302,8 +1496,8 @@ void run()                                        /* in: classNumber,  methodNum
                 cN = methodStackPop();
                 local = methodStackPop();
                 if (code== IRETURN) opStackPush(first);
-            }break;
-            case NEW:
+            }BREAK;
+            CASE(NEW):
             {
                 DEBUGPRINT("new");
                 pc += 2;
@@ -1351,8 +1545,8 @@ void run()                                        /* in: classNumber,  methodNum
                 DEBUGPRINTLNSTRING(getAddr(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1)) + 3),
                                    getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1 )) + 1));
 
-            }break;
-            case NEWARRAY:
+            }BREAK;
+            CASE(NEWARRAY):
             {
                 DEBUGPRINTLN("newarray");         /* mb jf*/
                 s2 count = (s2)opStackPop().UInt;
@@ -1417,8 +1611,8 @@ void run()                                        /* in: classNumber,  methodNum
                     }break;
                 }                                 /* switch*/
                 pc++;                             /* skip type*/
-            }break;
-            case ANEWARRAY:
+            }BREAK;
+            CASE(ANEWARRAY):
             {
                 DEBUGPRINTLN("anewarray");        /* mb jf*/
                 pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
@@ -1426,8 +1620,8 @@ void run()                                        /* in: classNumber,  methodNum
                 *cnt = 0;
                 opStackPush(createDims(1, cnt));  /* call recursive function to allocate heap for arrays*/
                 free (cnt);
-            }break;
-            case ARRAYLENGTH:
+            }BREAK;
+            CASE(ARRAYLENGTH):
             {
                 DEBUGPRINTLN("arraylength");      /* mb jf*/
                 first = opStackPop();
@@ -1440,8 +1634,8 @@ void run()                                        /* in: classNumber,  methodNum
                     opStackPush(toSlot((u4)first.stackObj.arrayLength));
                 }
 
-            }break;
-            case MONITORENTER:
+            }BREAK;
+            CASE(MONITORENTER):
             {
 #ifndef TINYBAJOS_MULTITASKING
                 first=opStackPop();
@@ -1486,8 +1680,8 @@ void run()                                        /* in: classNumber,  methodNum
 #else
                 DNOTSUPPORTED;
 #endif
-            }break;
-            case MONITOREXIT:                 /* have I always the lock ?*/
+            }BREAK;
+            CASE(MONITOREXIT):                 /* have I always the lock ?*/
             {
 #ifndef TINYBAJOS_MULTITASKING
                 first=opStackPop();
@@ -1527,8 +1721,8 @@ void run()                                        /* in: classNumber,  methodNum
 #else
                 DNOTSUPPORTED;
 #endif
-            }break;
-            case ATHROW:
+            }BREAK;
+            CASE(ATHROW):
             {
                 DEBUGPRINTLN("athrow");
 #ifndef TINYBAJOS_EXCEPTION
@@ -1537,8 +1731,8 @@ void run()                                        /* in: classNumber,  methodNum
                 exit(-101);
 #endif
 
-            }break;
-            case CHECKCAST:
+            }BREAK;
+            CASE(CHECKCAST):
             {
                 DEBUGPRINTLN("checkcast");
                 /* In general, we try to cast as much as possible.*/
@@ -1624,8 +1818,8 @@ void run()                                        /* in: classNumber,  methodNum
                     opStackPop();
                     CLASSCASTEXCEPTION;
                 }
-            }break;
-            case INSTANCEOF:
+            }BREAK;
+            CASE(INSTANCEOF):
             {
                 DEBUGPRINTLN("instanceof");
                 first = opStackPop();
@@ -1714,8 +1908,8 @@ void run()                                        /* in: classNumber,  methodNum
                 {
                     opStackPush(toSlot((u4)0));
                 }
-            }break;
-            case WIDE:
+            }BREAK;
+            CASE(WIDE):
             {
                 DEBUGPRINTLN("wide");             /* mb jf*/
                 /* not tested because so many locals are hard to implement on purpose  14.12.2006*/
@@ -1741,7 +1935,7 @@ void run()                                        /* in: classNumber,  methodNum
                     /*not tested because no exceptions implemented yet 14.12.2006*/
                     /* the opcode of athrow is required*/
                     u2 addr = opStackGetValue(local + count).UInt;
-                    pc = addr+getStartPC();       /*pcMethodStart;	//assumtion: the address is the relative address, absolute address may be required*/
+                    pc = addr + getStartPC(cN,mN);       /*pcMethodStart;	//assumtion): the address is the relative address, absolute address may be required*/
                 }
                 if (nextOp == IINC)               /* if iinc operation...*/
                 {
@@ -1753,8 +1947,8 @@ void run()                                        /* in: classNumber,  methodNum
                                     toSlot((u4)(opStackGetValue(local + count).Int
                                                 + constB)));               /* add const*/
                 }
-            }break;
-            case MULTIANEWARRAY:
+            }BREAK;
+            CASE(MULTIANEWARRAY):
             {
                 DEBUGPRINTLN("multianewarray");   /* mb jf*/
                 pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
@@ -1765,89 +1959,97 @@ void run()                                        /* in: classNumber,  methodNum
                 /* call recursive function to allocate heap for arrays*/
                 opStackPush(createDims(dim, local_cnt));
                 free (local_cnt);
-            }break;
-            case GOTO_W:
+            }BREAK;
+            CASE(GOTO_W):
             {   /* mb jf*/
                 DEBUGPRINTLN("goto_w (not tested)");
                 /* not tested because wide jumps are hard to implement on purpose  14.12.2006*/
                 u4 addr = getU4(cN,0);
-                pc = addr +getStartPC();          /*pcMethodStart; //assumtion: the address is the relative address, absolute address may be required*/
+                pc = addr + getStartPC(cN,mN);          /*pcMethodStart; //assumtion: the address is the relative address, absolute address may be required*/
 
-            }break;
-            case JSR_W:
+            }BREAK;
+            CASE(JSR_W):
             {   /* mb jf*/
                 DEBUGPRINTLN("jsr_w (not tested)%d %d",byte1, byte2);
                 /* not tested because no exceptions implemented yet 14.12.2006*/
                 /* the opcode of athrow is required*/
                 u4 my_addr = getU4(cN,0);
                 opStackPush(toSlot(my_addr));
-            }break;
-            case LCONST_0:
-            case LCONST_1:
-            case DCONST_0:
-            case DCONST_1:
-            case LDC2_W:
-            case LLOAD:
-            case DLOAD:
-            case DLOAD_0:
-            case DLOAD_1:
-            case DLOAD_2:
-            case DLOAD_3:
-            case LALOAD:
-            case DALOAD:
-            case LSTORE:
-            case DSTORE:
-            case LSTORE_0:
-            case LSTORE_1:
-            case LSTORE_2:
-            case LSTORE_3:
-            case DSTORE_0:
-            case DSTORE_1:
-            case DSTORE_2:
-            case DSTORE_3:
-            case LASTORE:
-            case DASTORE:
-            case LADD:
-            case DADD:
-            case LSUB:
-            case DSUB:
-            case LMUL:
-            case DMUL:
-            case LDIV:
-            case DDIV:
-            case LREM:
-            case DREM:
-            case LNEG:
-            case DNEG:
-            case LSHL:
-            case LSHR:
-            case LUSHR:
-            case LAND:
-            case LOR:
-            case LXOR:
-            case I2L:
-            case I2D:
-            case L2I:
-            case L2F:
-            case L2D:
-            case F2L:
-            case F2D:
-            case D2I:
-            case D2L:
-            case D2F:
-            case LCMP:
-            case DCMPL:
-            case DCMPG:
-            case DRETURN:
-            case LRETURN:
+            }BREAK;
+            CASE(LCONST_0):
+            CASE(LCONST_1):
+            CASE(DCONST_0):
+            CASE(DCONST_1):
+            CASE(LDC2_W):
+            CASE(LLOAD):
+            CASE(DLOAD):
+            CASE(DLOAD_0):
+            CASE(DLOAD_1):
+            CASE(DLOAD_2):
+            CASE(DLOAD_3):
+            CASE(LALOAD):
+            CASE(DALOAD):
+            CASE(LSTORE):
+            CASE(DSTORE):
+            CASE(LSTORE_0):
+            CASE(LSTORE_1):
+            CASE(LSTORE_2):
+            CASE(LSTORE_3):
+            CASE(DSTORE_0):
+            CASE(DSTORE_1):
+            CASE(DSTORE_2):
+            CASE(DSTORE_3):
+            CASE(LASTORE):
+            CASE(DASTORE):
+            CASE(LADD):
+            CASE(DADD):
+            CASE(LSUB):
+            CASE(DSUB):
+            CASE(LMUL):
+            CASE(DMUL):
+            CASE(LDIV):
+            CASE(DDIV):
+            CASE(LREM):
+            CASE(DREM):
+            CASE(LNEG):
+            CASE(DNEG):
+            CASE(LSHL):
+            CASE(LSHR):
+            CASE(LUSHR):
+            CASE(LAND):
+            CASE(LOR):
+            CASE(LXOR):
+            CASE(I2L):
+            CASE(I2D):
+            CASE(L2I):
+            CASE(L2F):
+            CASE(L2D):
+            CASE(F2L):
+            CASE(F2D):
+            CASE(D2I):
+            CASE(D2L):
+            CASE(D2F):
+            CASE(LCMP):
+            CASE(DCMPL):
+            CASE(DCMPG):
+            CASE(DRETURN):
+            CASE(LRETURN):
+            CASE(NOT_SUPPORTED):
             {
                 DNOTSUPPORTED;
-            }break;
+            }BREAK;
         }/* switch*/
+#ifdef USE_LABELS
+        OPC_NEXT:
+				//const static void* LABEL1 = &&OPC_NEXT;
+				goto OPC_NOP;
+#endif
+				
+
 #ifndef TINYBAJOS_MULTITASKING
         scheduler();
 #endif
-    }//for (;;)
+    }
 
     verbosePrintf("Termination\n");
 
@@ -2019,9 +2221,9 @@ void handleException()
         u2 cur_catch = METHODCODEEXCEPTIONBASE(cN, mN) + 8 * i;
 
         /* checking if catch range is usable */
-        if (pc - getStartPC() - 1 < getU2(cN,cur_catch + 2) || pc - getStartPC() - 1 >= getU2(cN,cur_catch + 4))
+        if (pc - getStartPC(cN,mN) - 1 < getU2(cN,cur_catch + 2) || pc - getStartPC(cN,mN) - 1 >= getU2(cN,cur_catch + 4))
         {
-            DEBUGPRINTLN("pc: %d", pc - getStartPC() - 1);
+            DEBUGPRINTLN("pc: %d", pc - getStartPC(cN,mN) - 1);
             DEBUGPRINTLN("start: %d", getU2(cN,cur_catch + 2));
             DEBUGPRINTLN("end: %d", getU2(cN,cur_catch + 4));
             DEBUGPRINTLN("not my range");
@@ -2051,7 +2253,7 @@ void handleException()
         {
             DEBUGPRINTLN("catching!");
             cN = methodStackPop();
-            pc = getStartPC() + getU2(cN,cur_catch + 6);
+            pc = getStartPC(cN,mN) + getU2(cN,cur_catch + 6);
             return;
         }
         cN = methodStackPop();

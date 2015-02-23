@@ -11,6 +11,7 @@
 #include "classfile.h"
 #include "heap.h"
 #include "platform.h"
+#include "classloader.h"
 
 #ifdef BOOTSTRAP_BINARIES
 static const u1 java_lang_ObjectBin[] =
@@ -97,8 +98,6 @@ static const u1 java_io_OutStreamBin[] =
 static const u1 java_lang_SystemBin[] =
 #include "java_lang_System.h"
 
-//static const u1 helloWorldBin[] =
-//#include "HelloWorld.h"
 static const u1* bootstrapBinaries[] =
 {   java_lang_ObjectBin,
     platformBin,
@@ -128,7 +127,6 @@ static const u1* bootstrapBinaries[] =
     java_io_InStreamBin,
     java_io_OutStreamBin,
     java_lang_SystemBin,
-    //helloWorldBin
 };
 
 static const u4 bootstrapBinariesSize[] =
@@ -160,7 +158,6 @@ static const u4 bootstrapBinariesSize[] =
     sizeof(java_io_InStreamBin),
     sizeof(java_io_OutStreamBin),
     sizeof(java_lang_SystemBin),
-    //sizeof(helloWorldBin)
 };
 #endif
 
@@ -168,60 +165,16 @@ void initHW()
 {
 }
 
-
-/* all class files stored for linux in DS (malloc)*/
-
-void initVM(int argc, char* argv[])               /* read, analyze classfiles and fill structures*/
-{
-    u4 length = 0;
-
-#if (AVR32LINUX || LINUX)
-    classFileBase=(char*)malloc((size_t) MAXBYTECODE);
-    if (classFileBase==NULL)
-        errorExit(-1,"malloc error while trying to allocate %d bytes for class files.\n", MAXBYTECODE);
-#endif
-
-    heapInit();                                   /* linux avr8 malloc , others hard coded!*/
-
+void loadBootstrapClasses(){
 #ifdef BOOTSTRAP_BINARIES
     const int noBins = sizeof(bootstrapBinariesSize)/sizeof(bootstrapBinariesSize[0]);
-    for (cN = 0; cN < noBins; cN++)
-    {
-        //printf("Load class %d,bytecode size: %d\n\n",cN,bootstrapBinariesSize[cN]);
-        if (length + bootstrapBinariesSize[cN]> MAXBYTECODE)
-        {
-            printf("MAXBYTECODE reached!\n"); exit(-1);
-        }
-        cs[cN].classFileStartAddress = classFileBase + length;
-        cs[cN].classFileLength=readClassBin(bootstrapBinaries[cN],bootstrapBinariesSize[cN],cs[cN].classFileStartAddress);
-        analyzeClass(cN);
+    for (int i = 0; i < noBins; i++)
+        classLoader_loadClass(bootstrapBinaries[i], bootstrapBinariesSize[i]);
 
-        length += cs[cN].classFileLength;
-        numClasses = cN + 1;
-    }
-    printf("Loaded %d classes,bytecode size: %d\n\n",numClasses,length);
+    for (int i = 0; i < numClasses; i++)
+        classLoader_clinitClass(i);
 #endif
-
-#if LINUX|| AVR32LINUX
-    if (argc > MAXCLASSES)
-        errorExit(-1,"ERROR: trying to load %d classes, MAXCLASSES is %d\n", argc, MAXCLASSES);
-
-    for (int i = 0; i < argc; i++,cN++)
-    {
-        cs[cN].classFileStartAddress = classFileBase + length;
-        cs[cN].classFileLength=readClassFile(argv[i + 1], cs[cN].classFileStartAddress);
-        analyzeClass(cN);
-        length += cs[cN].classFileLength;
-        if (length > MAXBYTECODE)
-        {
-            printf("MAXBYTECODE reached!\n"); exit(-1);
-        }
-        numClasses = cN + 1;
-    }
-#endif
-    DEBUGPRINTHEAP;
 }
-
 
 u2 readClassFile(char* fileName, char* addr)
 {

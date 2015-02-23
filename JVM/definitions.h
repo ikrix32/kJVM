@@ -1,8 +1,3 @@
-/*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
 
@@ -165,9 +160,9 @@
 #define FIELDBASE(classId,fieldId)        (cs[classId].field_info[fieldId])
 
 // change pc
-#define METHODCODEBASE(classId,methodId)       (getStartPC() - 14)
+#define METHODCODEBASE(classId,methodId)       (getStartPC(classId,methodId) - 14)
                                                   //start at length(u2)
-#define METHODCODEEXCEPTIONBASE(classId,methodId)  (getStartPC() + getU4(classId,getStartPC() - 4))
+#define METHODCODEEXCEPTIONBASE(classId,methodId)  (getStartPC(classId,methodId) + getU4(classId,getStartPC(classId,methodId) - 4))
 #define METHODEXCEPTIONBASE(classId,methodId)  (cs[classId].method_info[methodId,3])
 
 #define   CONSTANT_Class                    7
@@ -262,11 +257,11 @@ avr8Printf(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)
 
-#define PRINTEXITTHREAD(a,b) {avr8Printf(a,b);\
-    if (numThreads==1) \
+#define PRINTEXITTHREAD(a,b) {\
+    avr8Printf(a,b);\
+    if (numThreads == 1) \
     { \
-        avr8Printf("kjvm terminated\n"); \
-        exit(0); \
+        return; \
     }\
     else {  deleteThread();} \
 }

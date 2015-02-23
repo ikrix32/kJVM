@@ -1,9 +1,3 @@
-/*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-// fuer lehrzwecke,...
-// version 0.1 vom 1.10.07
 #ifndef __HEAP__
 #define __HEAP__
 

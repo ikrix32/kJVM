@@ -1,3 +1,4 @@
+package tests;
 
 public class HelloWorld {
 
@@ -5,7 +6,7 @@ public class HelloWorld {
 			System.out.println("HALLO");
 		}
 	public static void main(String args[]){
-		final int currentTime = System.currentTimeMillis();
+		final int currentTime = (int)System.currentTimeMillis();
 		
 		System.out.println("Hello World: "+currentTime+" milliseconds");
 		

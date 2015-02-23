@@ -60,15 +60,15 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld.class"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld$1.class"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld$2.class"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

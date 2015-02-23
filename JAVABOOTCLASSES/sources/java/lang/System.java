@@ -6,7 +6,7 @@ import platform.*;
 
 /**
  * System utilities.
- */
+ * /
 public final class System {
 	public final static PlatForm platform = new PlatForm();
 	public static final OutStream out = new OutStream(platform);
@@ -18,7 +18,7 @@ public final class System {
 
 	/**
 	 * Copies one array to another.
-	 */
+	 * /
 	static void arraycopy(char[] src, int srcOffset, char[] dest,
 			int destOffset, int length) {
 		for (int i = 0; i < length; i++)
@@ -28,7 +28,7 @@ public final class System {
 	/**
 	 * @author 22.02.2008; Anna Maria Damm; FHW-BA Berlin; Bayer Schering Pharma
 	 *         AG Terminate the application.
-	 */
+	 * /
 	public static void exit(int code) {
 		platform.exit(code);
 	}
@@ -40,9 +40,9 @@ public final class System {
 	 *          Current time expressed in milliseconds. In the RCX, this is the
 	 *          number of milliseconds since the RCX has been on. (In Java, this
 	 *          would be since January 1st, 1970).
-	 */
+	 * /
 	public static int currentTimeMillis() {
 		return platform.currentTimeMillis();
 	}
 
-}
+}*/

@@ -13,10 +13,15 @@
 #define __i386__ 1
 #undef DEBUG
 
-#ifdef NRF51
-#define exit(x)
-#endif
-
 #define BOOTSTRAP_BINARIES
 
+#ifdef NRF51
+#define BLE_CONSOLE
+
+#define exit(...)
+#ifdef BLE_CONSOLE
+#define printf(...) ble_print(__VA_ARGS__)
 #endif
+#endif
+
+#endif//kJVM_config_h

@@ -34,7 +34,7 @@ char floatToCharArray()
 #ifdef AVR8
     dtostrf( f, 7, 3, buf );
 #else
-    snprintf(buf, 7, "%f", f);
+    snprintf(buf, 8, "%f", f);//krix was 7
 #endif
     u2 heapPos = getFreeHeapSpace(8 + 1);         /* char arr length + marker*/
     mySlot.stackObj.pos = heapPos;

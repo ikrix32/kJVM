@@ -108,9 +108,9 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)                      /*  cou
 }
 
 
-u2 findMaxLocals(const u1 classId)                                /*cN,mN*/
+u2 findMaxLocals(const u1 classId,const u1 methodId)                                /*cN,mN*/
 {
-    return getU2(classId,getStartPC() - 6);
+    return getU2(classId,getStartPC(classId,methodId) - 6);
 }
 
 
@@ -544,7 +544,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
         DEBUGPRINTF(" descriptor: %04x ",getU2(classId,pc + 4));
         DEBUGPRINTF(" \tattribute_count: %04x\n",getU2(classId,pc + 6));
         /*Signature*/
-        //BHDEBUGPRINTSTRING(METHODDESCRSTR(cN,n),METHODDESCRSTRLENGTH(cN,n));
+        //BHDEBUGPRINTSTRING(METHODDESCRSTR(classId,n),METHODDESCRSTRLENGTH(classId,n));
         const int a = getU2(classId,pc + 6);
         pc += 8;
         if (a == 0)
@@ -588,7 +588,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
                 }
 #endif
                 pc += etl * 8;
-                const u2 h = getU2(cN,0);
+                const u2 h = getU2(classId,0);
                 DEBUGPRINTF("\t\tCode: attributes_count: %d\n", h);
                 //LineNumberTable(var),LocalVariableTable(var),StackMapTable
                 for (int i = 0; i < h; i++)
@@ -665,7 +665,7 @@ void analyzeFields(const u1 classId)
         const u2 fielddescr = cs[classId].constant_pool[getU2(classId,cs[classId].field_info[n] + 4)];
         const u1 isNotObject= STRNCMPRAMFLASH("L",(const char*) getAddr(classId,fielddescr + 3), 1);
 
-        //printf("cN %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(cN,fielddescr + 3),fN);
+        //printf("classId %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(classId,fielddescr + 3),fN);
         if ((ACC_STATIC & getU2(classId,pc)) && !((ACC_FINAL & getU2(classId,pc)) && isNotObject))
             // count only normal static fields and final static fields in  class object
             fN++;
@@ -718,16 +718,16 @@ void analyzeFields(const u1 classId)
 }                                                 // end analyze fields
 
 
-u2 getStartPC()                                   /*cN,mN*/
+u2 getStartPC(const u1 classId,const u1 methodId)                                   /*cN,mN*/
 {
     u2 attrLength = 0;                            /* search code-position*/
     /* number of attributes*/
-    for (u2 i = 0; i < getU2(cN,METHODBASE(cN, mN) + 6); i++)
+    for (u2 i = 0; i < getU2(classId,METHODBASE(classId, methodId) + 6); i++)
     {
-        if (STRNCMPRAMFLASH("Code",getAddr(cN,cs[cN].constant_pool[getU2(cN,METHODBASE(cN, mN) + 8 + attrLength)] + 3), 4) == 0)
-            return (u2) METHODBASE(cN, mN) + 8 + 14 + attrLength;
+        if (STRNCMPRAMFLASH("Code",getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)] + 3), 4) == 0)
+            return (u2) METHODBASE(classId, methodId) + 8 + 14 + attrLength;
         /*+attrLength;		????*/
-        attrLength = getU4(cN,METHODBASE(cN, mN) + 8) + 6;
-    }                                             /* < 64K	*/
+        attrLength = getU4(classId,METHODBASE(classId, methodId) + 8) + 6;
+    } /* < 64K	*/
     return 0;
 }

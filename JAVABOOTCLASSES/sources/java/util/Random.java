@@ -14,7 +14,7 @@ public class Random
   }
 
 	public Random () {
-		this(System.currentTimeMillis());
+		this((int)System.currentTimeMillis());
 	}
   
   /**

@@ -1,5 +1,4 @@
 //
-//  config.h
 //  kJVM
 //
 //  Created by Florin Cristian on 15/02/15.
@@ -19,12 +18,9 @@
 #ifndef TINYBAJOS_ERROREXIT
 void errorExitFunction(int nr, const char *format, ...);
 #endif
-void initHW(void);
-#ifdef LINUX
-void initVM(int argc, char* argv[]);
-#else
-void initVM(void);
-#endif
+void vm_init(void);
+s1 vm_run(const u1 classId);
+
 #ifdef __DEF_GLOBALS__
 #define GLOBAL
 #define INIT__(_a) =(_a)
@@ -45,6 +41,7 @@ GLOBAL slot* heapBase INIT__(NULL);
 GLOBAL u2    heapTop INIT__(MAXHEAP);
 #ifndef AVR8
 GLOBAL char* classFileBase INIT__(NULL);
+GLOBAL u4    crtByteCodeSize;
 #endif
 #if (AVR32UC3A || AVR32AP7000)
 GLOBAL char* appClassFileBase INIT__(NULL);

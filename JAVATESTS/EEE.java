@@ -9,7 +9,7 @@ public class EEE extends Thread {
 	int t;
 	char c = '0';
 	boolean bool = true;
-	float x = Math.PI;
+	float x = (float) Math.PI;
 	int[] ii = new int[3];
 
 	public static void main(String[] args) {

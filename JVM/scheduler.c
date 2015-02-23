@@ -267,8 +267,8 @@ void createThread (void)
         *(t->methodStackBase + 0) = (u2) 0;
         *(t->methodStackBase + 1) = cN;
         *(t->methodStackBase + 2) = mN;
-        *(t->methodStackBase + 3) = getStartPC();
-        *(t->methodStackBase + 4) = findMaxLocals(cN);
+        *(t->methodStackBase + 3) = getStartPC(cN,mN);
+        *(t->methodStackBase + 4) = findMaxLocals(cN,mN);
         /* reference to caller object (from start())*/
         *(t->opStackBase) = opStackGetValue(local);
         //verbosePrintf("cN x%x mN x%x startPC x%x\n", cN, mN, *(t->methodStackBase + 3));

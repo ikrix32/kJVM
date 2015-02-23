@@ -22,6 +22,8 @@
 		4EB8F8011A91290C001C885A /* heap.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7F61A91290C001C885A /* heap.c */; };
 		4EB8F8021A91290C001C885A /* nativedispatch.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7F91A91290C001C885A /* nativedispatch.c */; };
 		4EB8F8031A91290C001C885A /* scheduler.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7FA1A91290C001C885A /* scheduler.c */; };
+		4EEBF6241A9A203B00FED254 /* classloader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EEBF6221A9A203B00FED254 /* classloader.c */; };
+		4EEBF6271A9A2C7500FED254 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EEBF6261A9A2C7500FED254 /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -68,7 +70,6 @@
 		4E86B2191A92C8DD00B66AF0 /* java_lang_Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Thread.h; sourceTree = "<group>"; };
 		4E86B21A1A92C8DD00B66AF0 /* java_lang_Throwable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Throwable.h; sourceTree = "<group>"; };
 		4E86B21B1A92C8DD00B66AF0 /* java_PlatForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_PlatForm.h; sourceTree = "<group>"; };
-		4E86B21C1A92DA8F00B66AF0 /* HelloWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloWorld.h; sourceTree = "<group>"; };
 		4E9A38321A91400C00665CC3 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4EB8F7481A8FD0E3001C885A /* kJVM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kJVM; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EB8F7B31A9128E6001C885A /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
@@ -101,6 +102,29 @@
 		4EB8F7FA1A91290C001C885A /* scheduler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = scheduler.c; sourceTree = "<group>"; };
 		4EB8F7FB1A91290C001C885A /* scheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scheduler.h; sourceTree = "<group>"; };
 		4EB8F7FC1A91290C001C885A /* stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stack.h; sourceTree = "<group>"; };
+		4EEBF6221A9A203B00FED254 /* classloader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = classloader.c; sourceTree = "<group>"; };
+		4EEBF6231A9A203B00FED254 /* classloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classloader.h; sourceTree = "<group>"; };
+		4EEBF6261A9A2C7500FED254 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		4EEBF6291A9A52E600FED254 /* Arithmetic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Arithmetic.h; sourceTree = "<group>"; };
+		4EEBF62A1A9A52E600FED254 /* HelloWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloWorld.h; sourceTree = "<group>"; };
+		4EEBF62B1A9A52E600FED254 /* Inheritance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Inheritance.h; sourceTree = "<group>"; };
+		4EEBF62C1A9A52E600FED254 /* InheritanceA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InheritanceA.h; sourceTree = "<group>"; };
+		4EEBF62D1A9A52E600FED254 /* InheritanceB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InheritanceB.h; sourceTree = "<group>"; };
+		4EEBF62E1A9A52E600FED254 /* Fibonacci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fibonacci.h; sourceTree = "<group>"; };
+		4EEBF62F1A9A52E600FED254 /* ICMP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ICMP.h; sourceTree = "<group>"; };
+		4EEBF6301A9A52E600FED254 /* SelfInstance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelfInstance.h; sourceTree = "<group>"; };
+		4EEBF6311A9A52E600FED254 /* MathTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MathTest.h; sourceTree = "<group>"; };
+		4EEBF6321A9A52E600FED254 /* ArraySize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ArraySize.h; sourceTree = "<group>"; };
+		4EEBF6331A9A52E600FED254 /* ArrayTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ArrayTest.h; sourceTree = "<group>"; };
+		4EEBF6341A9A52E600FED254 /* Switch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Switch.h; sourceTree = "<group>"; };
+		4EEBF6351A9A52E600FED254 /* StaticTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StaticTest.h; sourceTree = "<group>"; };
+		4EEBF6361A9A52E600FED254 /* StringAndHeapTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringAndHeapTest.h; sourceTree = "<group>"; };
+		4EEBF6371A9A52E600FED254 /* Erathostenes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Erathostenes.h; sourceTree = "<group>"; };
+		4EEBF6381A9A52E600FED254 /* FloatTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloatTest.h; sourceTree = "<group>"; };
+		4EEBF6391A9A52E600FED254 /* FloatTest2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FloatTest2.h; sourceTree = "<group>"; };
+		4EEBF63A1A9A52E600FED254 /* AnotherClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnotherClass.h; sourceTree = "<group>"; };
+		4EEBF63B1A9A52E600FED254 /* OneClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OneClass.h; sourceTree = "<group>"; };
+		4EEBF63C1A9A52E600FED254 /* QuickSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuickSort.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,7 +141,6 @@
 		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
-				4E86B21C1A92DA8F00B66AF0 /* HelloWorld.h */,
 				4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */,
 				4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */,
 				4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */,
@@ -172,6 +195,7 @@
 		4EB8F7B21A9128E6001C885A /* LINUX */ = {
 			isa = PBXGroup;
 			children = (
+				4EEBF6261A9A2C7500FED254 /* main.c */,
 				4EB8F7B71A9128E6001C885A /* platform.h */,
 				4EB8F7B31A9128E6001C885A /* platform.c */,
 				4EB8F7B51A9128E6001C885A /* native.c */,
@@ -206,6 +230,9 @@
 		4EB8F7CE1A91290B001C885A /* JVM */ = {
 			isa = PBXGroup;
 			children = (
+				4EEBF6281A9A52E600FED254 /* java_tests */,
+				4EEBF6221A9A203B00FED254 /* classloader.c */,
+				4EEBF6231A9A203B00FED254 /* classloader.h */,
 				4E86B1E01A92C15800B66AF0 /* kjvm.h */,
 				4E86B1DF1A92C15800B66AF0 /* kjvm.c */,
 				4EB8F7D51A91290B001C885A /* classfile.h */,
@@ -225,6 +252,33 @@
 			);
 			name = JVM;
 			path = ../JVM;
+			sourceTree = "<group>";
+		};
+		4EEBF6281A9A52E600FED254 /* java_tests */ = {
+			isa = PBXGroup;
+			children = (
+				4EEBF6291A9A52E600FED254 /* Arithmetic.h */,
+				4EEBF62A1A9A52E600FED254 /* HelloWorld.h */,
+				4EEBF62B1A9A52E600FED254 /* Inheritance.h */,
+				4EEBF62C1A9A52E600FED254 /* InheritanceA.h */,
+				4EEBF62D1A9A52E600FED254 /* InheritanceB.h */,
+				4EEBF62E1A9A52E600FED254 /* Fibonacci.h */,
+				4EEBF62F1A9A52E600FED254 /* ICMP.h */,
+				4EEBF6301A9A52E600FED254 /* SelfInstance.h */,
+				4EEBF6311A9A52E600FED254 /* MathTest.h */,
+				4EEBF6321A9A52E600FED254 /* ArraySize.h */,
+				4EEBF6331A9A52E600FED254 /* ArrayTest.h */,
+				4EEBF6341A9A52E600FED254 /* Switch.h */,
+				4EEBF6351A9A52E600FED254 /* StaticTest.h */,
+				4EEBF6361A9A52E600FED254 /* StringAndHeapTest.h */,
+				4EEBF6371A9A52E600FED254 /* Erathostenes.h */,
+				4EEBF6381A9A52E600FED254 /* FloatTest.h */,
+				4EEBF6391A9A52E600FED254 /* FloatTest2.h */,
+				4EEBF63A1A9A52E600FED254 /* AnotherClass.h */,
+				4EEBF63B1A9A52E600FED254 /* OneClass.h */,
+				4EEBF63C1A9A52E600FED254 /* QuickSort.h */,
+			);
+			path = java_tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -291,9 +345,11 @@
 				4E86B1E11A92C15800B66AF0 /* kjvm.c in Sources */,
 				4EB8F7CC1A9128FF001C885A /* object.c in Sources */,
 				4EB8F7C91A9128FF001C885A /* thread.c in Sources */,
+				4EEBF6271A9A2C7500FED254 /* main.c in Sources */,
 				4EB8F8001A91290C001C885A /* stack.c in Sources */,
 				4EB8F7CB1A9128FF001C885A /* lock.c in Sources */,
 				4EB8F8031A91290C001C885A /* scheduler.c in Sources */,
+				4EEBF6241A9A203B00FED254 /* classloader.c in Sources */,
 				4EB8F7B81A9128E6001C885A /* platform.c in Sources */,
 				4EB8F7FF1A91290C001C885A /* interpreter.c in Sources */,
 				4EB8F7CA1A9128FF001C885A /* interruptthread.c in Sources */,

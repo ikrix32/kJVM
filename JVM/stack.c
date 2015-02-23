@@ -96,7 +96,7 @@ inline u2 opStackGetSpPos()
 }
 
 
-/* relat ive to actual base*/
+/* relative to actual base*/
 inline void opStackSetSpPos(const u2 pos)
 {
     opSp = pos + opStackBase;
