@@ -175,7 +175,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -347,7 +347,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -362,10 +362,10 @@
             <uC99>0</uC99>
             <useXO>0</useXO>
             <VariousControls>
-              <MiscControls>--c99 --pointer_alignment=1</MiscControls>
+              <MiscControls>--c99</MiscControls>
               <Define>NRF51 BSP_DEFINES_ONLY BOARD_NRF6310 BLE_STACK_SUPPORT_REQD S110 SOFTDEVICE_PRESENT</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\src;..\..\..\src\unix;..\..\..\build\unix;..\..\..\ble_console;..\..\..\iceq\tests</IncludePath>
+              <IncludePath>..\..\..\..\PLATFORMS\LINUX\ble_console;..\..\..\..\PLATFORMS\LINUX;..\..\..\..\JVM;..\..\..\..\JAVALANGNATIVE;..\..\..\..\JAVALANGNATIVE\binaries;..\..\..\..\JVM\java_tests</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -409,204 +409,199 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>KJVM.c</FileName>
+              <FileName>kjvm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\iceq\KJVM.c</FilePath>
+              <FilePath>..\..\..\..\JVM\kjvm.c</FilePath>
+            </File>
+            <File>
+              <FileName>kjvm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JVM\kjvm.h</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>nanovm</GroupName>
+          <GroupName>JVM</GroupName>
           <Files>
             <File>
-              <FileName>array.c</FileName>
+              <FileName>classfile.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\array.c</FilePath>
+              <FilePath>..\..\..\..\JVM\classfile.c</FilePath>
             </File>
             <File>
-              <FileName>array.h</FileName>
+              <FileName>classfile.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\array.h</FilePath>
+              <FilePath>..\..\..\..\JVM\classfile.h</FilePath>
             </File>
             <File>
-              <FileName>debug.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\debug.c</FilePath>
-            </File>
-            <File>
-              <FileName>debug.h</FileName>
+              <FileName>definitions.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\debug.h</FilePath>
-            </File>
-            <File>
-              <FileName>error.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\error.c</FilePath>
-            </File>
-            <File>
-              <FileName>error.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\error.h</FilePath>
+              <FilePath>..\..\..\..\JVM\definitions.h</FilePath>
             </File>
             <File>
               <FileName>heap.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\heap.c</FilePath>
+              <FilePath>..\..\..\..\JVM\heap.c</FilePath>
             </File>
             <File>
               <FileName>heap.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\heap.h</FilePath>
+              <FilePath>..\..\..\..\JVM\heap.h</FilePath>
             </File>
             <File>
-              <FileName>loader.c</FileName>
+              <FileName>interpreter.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\loader.c</FilePath>
+              <FilePath>..\..\..\..\JVM\interpreter.c</FilePath>
             </File>
             <File>
-              <FileName>loader.h</FileName>
+              <FileName>interpreter.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\loader.h</FilePath>
+              <FilePath>..\..\..\..\JVM\interpreter.h</FilePath>
             </File>
             <File>
-              <FileName>native_formatter.c</FileName>
+              <FileName>limits.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JVM\limits.h</FilePath>
+            </File>
+            <File>
+              <FileName>nativedispatch.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\native_formatter.c</FilePath>
+              <FilePath>..\..\..\..\JVM\nativedispatch.c</FilePath>
             </File>
             <File>
-              <FileName>native_formatter.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\native_formatter.h</FilePath>
-            </File>
-            <File>
-              <FileName>native_impl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\native_impl.h</FilePath>
-            </File>
-            <File>
-              <FileName>native_math.c</FileName>
+              <FileName>scheduler.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\native_math.c</FilePath>
+              <FilePath>..\..\..\..\JVM\scheduler.c</FilePath>
             </File>
             <File>
-              <FileName>native_math.h</FileName>
+              <FileName>scheduler.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\native_math.h</FilePath>
-            </File>
-            <File>
-              <FileName>native_stdio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\native_stdio.c</FilePath>
-            </File>
-            <File>
-              <FileName>native_stdio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\native_stdio.h</FilePath>
-            </File>
-            <File>
-              <FileName>nvmfeatures.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\nvmfeatures.h</FilePath>
-            </File>
-            <File>
-              <FileName>nvmfile.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\nvmfile.c</FilePath>
-            </File>
-            <File>
-              <FileName>nvmfile.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\nvmfile.h</FilePath>
-            </File>
-            <File>
-              <FileName>nvmstring.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\nvmstring.c</FilePath>
-            </File>
-            <File>
-              <FileName>nvmstring.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\nvmstring.h</FilePath>
-            </File>
-            <File>
-              <FileName>nvmtypes.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\nvmtypes.h</FilePath>
-            </File>
-            <File>
-              <FileName>opcodes.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\opcodes.h</FilePath>
+              <FilePath>..\..\..\..\JVM\scheduler.h</FilePath>
             </File>
             <File>
               <FileName>stack.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\stack.c</FilePath>
+              <FilePath>..\..\..\..\JVM\stack.c</FilePath>
             </File>
             <File>
               <FileName>stack.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\stack.h</FilePath>
+              <FilePath>..\..\..\..\JVM\stack.h</FilePath>
             </File>
             <File>
-              <FileName>types.h</FileName>
+              <FileName>typedefinitions.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\types.h</FilePath>
+              <FilePath>..\..\..\..\JVM\typedefinitions.h</FilePath>
             </File>
             <File>
-              <FileName>utils.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\utils.h</FilePath>
-            </File>
-            <File>
-              <FileName>vm.c</FileName>
+              <FileName>classloader.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\vm.c</FilePath>
+              <FilePath>..\..\..\..\JVM\classloader.c</FilePath>
             </File>
             <File>
-              <FileName>vm.h</FileName>
+              <FileName>classloader.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\src\vm.h</FilePath>
-            </File>
-            <File>
-              <FileName>nvm_mem_access.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\nvm_mem_access.c</FilePath>
-            </File>
-            <File>
-              <FileName>nvm_mem_access.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\nvm_mem_access.h</FilePath>
+              <FilePath>..\..\..\..\JVM\classloader.h</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>unix</GroupName>
+          <GroupName>JAVALANGNATIVE</GroupName>
           <Files>
             <File>
-              <FileName>native.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\src\unix\native.h</FilePath>
+              <FileName>float.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\float.c</FilePath>
             </File>
             <File>
-              <FileName>native_impl.c</FileName>
+              <FileName>float.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\float.h</FilePath>
+            </File>
+            <File>
+              <FileName>interruptthread.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\unix\native_impl.c</FilePath>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\interruptthread.c</FilePath>
+            </File>
+            <File>
+              <FileName>interruptthread.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\interruptthread.h</FilePath>
+            </File>
+            <File>
+              <FileName>lock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\lock.c</FilePath>
+            </File>
+            <File>
+              <FileName>lock.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\lock.h</FilePath>
+            </File>
+            <File>
+              <FileName>object.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\object.c</FilePath>
+            </File>
+            <File>
+              <FileName>object.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\object.h</FilePath>
+            </File>
+            <File>
+              <FileName>string.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\string.c</FilePath>
+            </File>
+            <File>
+              <FileName>string.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\string.h</FilePath>
+            </File>
+            <File>
+              <FileName>thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>thread.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\thread.h</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>build_unix</GroupName>
+          <GroupName>platform</GroupName>
           <Files>
             <File>
               <FileName>config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\build\unix\config.h</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\config.h</FilePath>
             </File>
             <File>
-              <FileName>nvmdefault.h</FileName>
+              <FileName>native.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\native.c</FilePath>
+            </File>
+            <File>
+              <FileName>native.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\build\unix\nvmdefault.h</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\native.h</FilePath>
+            </File>
+            <File>
+              <FileName>platform.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>platform.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\platform.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -616,67 +611,32 @@
             <File>
               <FileName>ble_nus.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\ble_console\ble_nus.c</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\ble_nus.c</FilePath>
+            </File>
+            <File>
+              <FileName>ble_nus.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\ble_nus.h</FilePath>
             </File>
             <File>
               <FileName>console.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\ble_console\console.c</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\console.c</FilePath>
+            </File>
+            <File>
+              <FileName>console.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\console.h</FilePath>
             </File>
             <File>
               <FileName>retarget.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\ble_console\retarget.c</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\retarget.c</FilePath>
             </File>
             <File>
               <FileName>retarget.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\ble_console\retarget.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>tests</GroupName>
-          <Files>
-            <File>
-              <FileName>ICMP.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\ICMP.h</FilePath>
-            </File>
-            <File>
-              <FileName>HelloWorld.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\HelloWorld.h</FilePath>
-            </File>
-            <File>
-              <FileName>Fibonacci.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\Fibonacci.h</FilePath>
-            </File>
-            <File>
-              <FileName>DivByZero.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\DivByZero.h</FilePath>
-            </File>
-            <File>
-              <FileName>AnotherClass.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\AnotherClass.h</FilePath>
-            </File>
-            <File>
-              <FileName>SelfInstance.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\SelfInstance.h</FilePath>
-            </File>
-            <File>
-              <FileName>LedBlink.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\LedBlink.h</FilePath>
-            </File>
-            <File>
-              <FileName>Inheritance.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\iceq\tests\Inheritance.h</FilePath>
+              <FilePath>..\..\..\..\PLATFORMS\LINUX\ble_console\retarget.h</FilePath>
             </File>
           </Files>
         </Group>
