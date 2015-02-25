@@ -11,6 +11,8 @@
  */
 
 #include "ble_nus.h"
+
+#ifdef BLE_CONSOLE
 #include "nordic_common.h"
 #include "ble_srv_common.h"
 #include <string.h>
@@ -306,3 +308,4 @@ uint32_t ble_nus_send_string(ble_nus_t * p_nus, uint8_t * string, uint16_t lengt
     
     return sd_ble_gatts_hvx(p_nus->conn_handle, &hvx_params);
 }
+#endif

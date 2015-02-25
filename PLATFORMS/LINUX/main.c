@@ -31,7 +31,7 @@ void setPin(int pin,bool on){
 #endif
 
 
-
+#ifdef ENABLE_TESTS
 static const u1 helloWorldBin[] =
 #include "HelloWorld.h"
 
@@ -152,6 +152,7 @@ static const char* testNames[] =
     //"Thread1",
     //"Thread",
 };
+#endif
 
 #ifdef TINYBAJOS
 void main() __attribute__ ((noreturn));
@@ -180,6 +181,7 @@ void main()
 
         vm_init();
 
+#ifdef ENABLE_TESTS
         const int noTests = sizeof(testBinariesSize) / sizeof(testBinariesSize[0]);
 
         for (int i = 0; i < noTests; i++)
@@ -192,7 +194,8 @@ void main()
             vm_run(classId);//run main on last loaded class
             printf("\n========== End Test %s =========\n",testNames[i]);
         }
-
+#endif
+				
 #ifdef NRF51
 #ifdef BLE_CONSOLE
         nrf_delay_ms(10000);

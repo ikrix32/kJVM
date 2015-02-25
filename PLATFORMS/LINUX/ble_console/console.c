@@ -23,7 +23,9 @@
 
 
 
+#include "config.h"
 
+#ifdef BLE_CONSOLE
 
 #include <stdint.h>
 #include <string.h>
@@ -42,10 +44,9 @@
 #include "app_util_platform.h"
 //#include "bsp.h"
 
-#include "config.h"
 #include "console.h"
 
-#ifdef BLE_CONSOLE
+
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
 

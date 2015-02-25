@@ -32,6 +32,9 @@
 #ifndef BLE_NUS_H__
 #define BLE_NUS_H__
 
+#include "config.h"
+
+#ifdef BLE_CONSOLE
 #include "ble.h"
 #include "ble_srv_common.h"
 #include <stdint.h>
@@ -119,7 +122,7 @@ void ble_nus_on_ble_evt(ble_nus_t * p_nus, ble_evt_t * p_ble_evt);
  *              It returns NRF_ERROR_NULL if the pointer p_nus is NULL.
  */
 uint32_t ble_nus_send_string(ble_nus_t * p_nus, uint8_t * string, uint16_t length);
-
+#endif
 #endif // BLE_NUS_H__
 
 /** @} */

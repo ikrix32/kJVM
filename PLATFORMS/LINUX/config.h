@@ -15,10 +15,12 @@
 
 #define BOOTSTRAP_BINARIES
 
+#define ENABLE_TESTS
+
 //#define USE_STACK_MACROS
 
 #ifdef NRF51
-#define BLE_CONSOLE
+//#define BLE_CONSOLE
 
 #define exit(...)
 #ifdef BLE_CONSOLE
