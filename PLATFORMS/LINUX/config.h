@@ -15,6 +15,8 @@
 
 #define BOOTSTRAP_BINARIES
 
+//#define USE_STACK_MACROS
+
 #ifdef NRF51
 #define BLE_CONSOLE
 

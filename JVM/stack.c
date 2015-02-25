@@ -21,6 +21,7 @@
 #include "definitions.h"
 #include "stack.h"
 
+#ifndef USE_STACK_MACROS
 /* op stack holds  locals and operanden*/
 /* method stack holds global variable (cN, mN, local,..)*/
 #ifndef AVR8
@@ -30,6 +31,7 @@ static u2*   methodSp;
 slot*   opSp;
 u2*     methodSp;
 #endif                                            // AVR8
+#endif
 void opStackInit(slot** m)                        /* per thread, fixed size */
 {
 
@@ -44,7 +46,7 @@ void opStackInit(slot** m)                        /* per thread, fixed size */
 #endif
 }
 
-
+#ifndef USE_STACK_MACROS
 //all these functions are rewritten in assembler to increase speed => routin es_stack.asm
 #ifndef AVR8
 inline void opStackPush(const slot val)
@@ -106,6 +108,8 @@ inline void opStackSetSpPos(const u2 pos)
 }
 #endif
 
+#endif
+
 void methodStackInit(u2** m)
 {
 #if (LINUX||AVR8||AVR32LINUX)
@@ -118,7 +122,7 @@ void methodStackInit(u2** m)
 #endif
 }
 
-
+#ifndef USE_STACK_MACROS
 #ifndef AVR8                                      //all these functions are rewritten in assembler toincrease speed => routines_stack.asm
 inline void methodStackPush(const u2 val)
 {
@@ -161,4 +165,5 @@ inline u1 methodStackEmpty()
 {
     return (methodSp == methodStackBase) ? 1 : 0;
 }
+#endif
 #endif

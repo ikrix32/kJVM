@@ -118,10 +118,10 @@ u2 getFreeHeapSpace(const u2 length)
     }
     /* alles umsonst*/
 
-    verbosePrintf(" no free heap space for object/array of length: 0x%x",length);
+    PRINTF(" no free heap space for object/array of length: 0x%x\n",length);
 
     exit(-1);
-		return 0;
+    return 0;
 }
 
 

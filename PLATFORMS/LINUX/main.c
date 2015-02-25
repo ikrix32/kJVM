@@ -56,7 +56,7 @@ static const u1 stringAndHeapTestBin[] =
 static const u1 switchTestBin[] =
 #include "Switch.h"
 
-static const u1 arrayTestBin[] =
+static const u1 arraySizeTestBin[] =
 #include "ArraySize.h"
 
 static const u1 inheritanceABin[]=
@@ -68,9 +68,28 @@ static const u1 inheritanceBBin[]=
 static const u1 inheritanceBin[]=
 #include "Inheritance.h"
 
+static const u1 floatTestBin[]=
+#include "FloatTest.h"
+
+static const u1 quickSortBin[]=
+#include "QuickSort.h"
+
+static const u1 erathostenesBin[]=
+#include "Erathostenes.h"
+
+static const u1 divizionbyZeroBin[]=
+#include "DivByZero.h"
+
+/*static const u1 thread1Bin[]=
+#include "ThreadTest$1.h"
+
+static const u1 threadBin[]=
+#include "ThreadTest.h"
+ */
+
 static const u1* testBinaries[] =
 {
-    /*helloWorldBin,
+    helloWorldBin,
     arithmeticBin,
     ICMPBin,
     fibonacciBin,
@@ -78,15 +97,21 @@ static const u1* testBinaries[] =
     staticTestBin,
     stringAndHeapTestBin,
     switchTestBin,
-    arrayTestBin,*/
+    arraySizeTestBin,
     inheritanceABin,
     inheritanceBBin,
     inheritanceBin,
+    floatTestBin,
+    quickSortBin,
+    erathostenesBin,
+    divizionbyZeroBin,
+    //thread1Bin,
+    //threadBin,
 };
 
 static const u4 testBinariesSize[] =
 {
-    /*sizeof(helloWorldBin),
+    sizeof(helloWorldBin),
     sizeof(arithmeticBin),
     sizeof(ICMPBin),
     sizeof(fibonacciBin),
@@ -94,10 +119,38 @@ static const u4 testBinariesSize[] =
     sizeof(staticTestBin),
     sizeof(stringAndHeapTestBin),
     sizeof(switchTestBin),
-    sizeof(arrayTestBin),*/
+    sizeof(arraySizeTestBin),
     sizeof(inheritanceABin),
     sizeof(inheritanceBBin),
     sizeof(inheritanceBin),
+    sizeof(floatTestBin),
+    sizeof(quickSortBin),
+    sizeof(erathostenesBin),
+    sizeof(divizionbyZeroBin),
+    //sizeof(thread1Bin),
+    //sizeof(threadBin),
+};
+
+static const char* testNames[] =
+{
+    "HelloWorld",
+    "Arithmetic",
+    "ICMP",
+    "Fibonacci",
+    "SelfInstance",
+    "StaticTest",
+    "StringAndHeap",
+    "SwitchTest",
+    "ArraySizeTest",
+    "InheritanceA",
+    "InheritanceB",
+    "InheritanceTest",
+    "FloatTest",
+    "QuickSort",
+    "Erathostenes",
+    "DivByZero",
+    //"Thread1",
+    //"Thread",
 };
 
 #ifdef TINYBAJOS
@@ -131,13 +184,13 @@ void main()
 
         for (int i = 0; i < noTests; i++)
         {
-            printf("\n========== Start Test %d =========\n",i);
+            printf("\n========== Start Test %s (id: %d) =========\n",testNames[i],i);
             const u1 classId = classLoader_loadClass(testBinaries[i], testBinariesSize[i]);
 
             classLoader_clinitClass(classId);
 
             vm_run(classId);//run main on last loaded class
-            printf("\n========== End Test %d =========\n",i);
+            printf("\n========== End Test %s =========\n",testNames[i]);
         }
 
 #ifdef NRF51

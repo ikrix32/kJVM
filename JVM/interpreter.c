@@ -65,15 +65,15 @@ static u2   descrLength;
 
 void interpreter_run()                                        /* in: classNumber,  methodNumber cN, mN*/
 {
-    u1 code, byte1, byte2;
+    //u1 code, byte1, byte2;
     //u2 heapPos;
     pc = getStartPC(cN,mN);
 
     while(1)
     {
-        code  = getU1(cN,0);
-        byte1 = getU1(cN,pc);
-        byte2 = getU1(cN,pc + 1);
+              u1 code  = getU1(cN,0);
+        const u1 byte1 = getU1(cN,pc);
+        const u1 byte2 = getU1(cN,pc + 1);
         DEBUGPRINT("-> ");
 
 #ifndef TINYBAJOS_MULTITASKING
@@ -319,7 +319,7 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN("aconst_null -> push\t...,=> NULLOBJECT");
                 opStackPush(NULLOBJECT);
             }BREAK;
-            CASE(ICONST_M1):
+            CASE(ICONST_M1)://???
             CASE(ICONST_0):
             CASE(ICONST_1):
             CASE(ICONST_2):
@@ -334,6 +334,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(FCONST_1):
             CASE(FCONST_2):
             {
+                //u1 base = ICONST_0;
                 DEBUGPRINTLN("FCONST_%d  -> push\t...,=> %f",code - FCONST_0,(f4)(code - FCONST_0));
                 opStackPush(toSlot((f4)(code - FCONST_0)));
             }BREAK;
@@ -360,8 +361,7 @@ void interpreter_run()                                        /* in: classNumber
                     first.stackObj.classNumber = cN;
                     first.stackObj.pos = (u2)(/*((u2)cN <<8)*/+byte1);
                     opStackPush(first);
-                } else
-                /* int or float const value on stack*/
+                } else /* int or float const value on stack*/
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN(",=> x%x", opStackPeek().UInt);
             }BREAK;
@@ -380,34 +380,30 @@ void interpreter_run()                                        /* in: classNumber
 #endif
                 opStackPush(opStackGetValue(local + getU1(cN,0)));
             }BREAK;
-            CASE(ILOAD_0):
-            CASE(ILOAD_1):
-            CASE(ILOAD_2):
-            CASE(ILOAD_3):
-            CASE(FLOAD_0):
-            CASE(FLOAD_1):
-            CASE(FLOAD_2):
-            CASE(FLOAD_3):
-            CASE(ALOAD_0):
-            CASE(ALOAD_1):
-            CASE(ALOAD_2):
-            CASE(ALOAD_3):
+            case ILOAD_0:
+            case ILOAD_1:
+            case ILOAD_2:
+            case ILOAD_3:
             {
-                u1 base_op = ILOAD_0;
-                if(code == ALOAD_0 || code == ALOAD_1 || code == ALOAD_2 || code == ALOAD_3)
-                    base_op = ALOAD_0;
-                if(code == FLOAD_0 || code == FLOAD_1 || code == FLOAD_2 || code == FLOAD_3)
-                    base_op = FLOAD_0;
-#ifdef DEBUG
-                if(base_op == ALOAD_0)
-                    DEBUGPRINTLN("ALOAD_%d local -> push\t...,=>",code - base_op);
-                if(base_op == ILOAD_0)
-                    DEBUGPRINTLN("ILOAD_%d local -> push\t...,=>",code - base_op);
-                if(base_op == FLOAD_0)
-                    DEBUGPRINTLN("FLOAD_%d local -> push\t...,=>",code - base_op);
-#endif
-                opStackPush(opStackGetValue(local + code - base_op));
+                DEBUGPRINTLN("ILOAD_%d local -> push\t...,=>",code - ILOAD_0);
+                opStackPush(opStackGetValue(local + code - ILOAD_0));
             }BREAK;
+            case FLOAD_0:
+            case FLOAD_1:
+            case FLOAD_2:
+            case FLOAD_3:
+            {
+                 DEBUGPRINTLN("FLOAD_%d local -> push\t...,=>",code - FLOAD_0);
+                 opStackPush(opStackGetValue(local + code - FLOAD_0));
+            }BREAK;
+            case ALOAD_0:
+            case ALOAD_1:
+            case ALOAD_2:
+            case ALOAD_3:
+            {
+                 DEBUGPRINTLN("aload_%d local -> push\t...,=>",code - ALOAD_0);
+                 opStackPush(opStackGetValue(local + code - ALOAD_0));
+            }break;
             CASE(IALOAD):
             CASE(FALOAD):
             CASE(AALOAD):
@@ -415,7 +411,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(CALOAD):
             CASE(SALOAD):
             {
-                s2 count = (s2)opStackPop().Int;     /*mb jf*/
+                const s2 count = (s2)opStackPop().Int;     /*mb jf*/
                 first = opStackPop();
 #ifdef DEBUG
                 if(code == IALOAD) DEBUGPRINTLN("iaload");
@@ -1121,7 +1117,6 @@ void interpreter_run()                                        /* in: classNumber
                     }
                     else
                     {
-
                         cN = second.stackObj.classNumber;
                         if (!findFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                         {
@@ -1418,7 +1413,7 @@ void interpreter_run()                                        /* in: classNumber
                 if(code == FRETURN) DEBUGPRINT("f");
                 if(code == ARETURN) DEBUGPRINT("a");
 #endif
-                code=IRETURN;
+                code = IRETURN;
             nativeVoidReturn:
                 DEBUGPRINT("native ");
             }
@@ -2036,6 +2031,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(LRETURN):
             CASE(NOT_SUPPORTED):
             {
+                PRINTF("code:%d",code);
                 DNOTSUPPORTED;
             }BREAK;
         }/* switch*/

@@ -25,13 +25,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../JVM/heap.c"
-            timestampString = "446331280.003165"
+            filePath = "../JVM/classfile.c"
+            timestampString = "446430675.360659"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "66"
-            endingLineNumber = "66"
-            landmarkName = "getFreeHeapSpace()"
+            startingLineNumber = "509"
+            endingLineNumber = "509"
+            landmarkName = "analyzeConstantPool()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -41,13 +41,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../JVM/heap.c"
-            timestampString = "446331330.768511"
+            filePath = "../JVM/classfile.c"
+            timestampString = "446430677.704326"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "89"
-            endingLineNumber = "89"
-            landmarkName = "getFreeHeapSpace()"
+            startingLineNumber = "512"
+            endingLineNumber = "512"
+            landmarkName = "analyzeConstantPool()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -57,13 +57,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../JVM/heap.c"
-            timestampString = "446331336.543411"
+            filePath = "../JVM/interpreter.c"
+            timestampString = "446431922.79406"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "123"
-            endingLineNumber = "123"
-            landmarkName = "getFreeHeapSpace()"
+            startingLineNumber = "1586"
+            endingLineNumber = "1586"
+            landmarkName = "interpreter_run()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -73,13 +73,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../JVM/heap.c"
-            timestampString = "446331347.105464"
+            filePath = "../JVM/interpreter.c"
+            timestampString = "446431922.79406"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "77"
-            endingLineNumber = "77"
-            landmarkName = "getFreeHeapSpace()"
+            startingLineNumber = "1605"
+            endingLineNumber = "1605"
+            landmarkName = "interpreter_run()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -89,13 +89,29 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../JVM/kjvm.c"
-            timestampString = "446339743.748473"
+            filePath = "../JVM/interpreter.c"
+            timestampString = "446431922.79406"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "71"
-            endingLineNumber = "71"
-            landmarkName = "vm_run()"
+            startingLineNumber = "1676"
+            endingLineNumber = "1676"
+            landmarkName = "interpreter_run()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../JVM/interpreter.c"
+            timestampString = "446431922.79406"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1717"
+            endingLineNumber = "1717"
+            landmarkName = "interpreter_run()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -125,6 +125,9 @@
 		4EEBF63A1A9A52E600FED254 /* AnotherClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnotherClass.h; sourceTree = "<group>"; };
 		4EEBF63B1A9A52E600FED254 /* OneClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OneClass.h; sourceTree = "<group>"; };
 		4EEBF63C1A9A52E600FED254 /* QuickSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuickSort.h; sourceTree = "<group>"; };
+		4EEBF63D1A9BFC7F00FED254 /* DivByZero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivByZero.h; sourceTree = "<group>"; };
+		4EEBF63E1A9BFC7F00FED254 /* ThreadTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadTest.h; sourceTree = "<group>"; };
+		4EEBF63F1A9BFC7F00FED254 /* ThreadTest$1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadTest$1.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -257,6 +260,9 @@
 		4EEBF6281A9A52E600FED254 /* java_tests */ = {
 			isa = PBXGroup;
 			children = (
+				4EEBF63D1A9BFC7F00FED254 /* DivByZero.h */,
+				4EEBF63E1A9BFC7F00FED254 /* ThreadTest.h */,
+				4EEBF63F1A9BFC7F00FED254 /* ThreadTest$1.h */,
 				4EEBF6291A9A52E600FED254 /* Arithmetic.h */,
 				4EEBF62A1A9A52E600FED254 /* HelloWorld.h */,
 				4EEBF62B1A9A52E600FED254 /* Inheritance.h */,
