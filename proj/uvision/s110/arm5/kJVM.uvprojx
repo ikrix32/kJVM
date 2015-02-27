@@ -347,7 +347,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -549,16 +549,6 @@
               <FilePath>..\..\..\..\JAVALANGNATIVE\object.h</FilePath>
             </File>
             <File>
-              <FileName>string.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\JAVALANGNATIVE\string.c</FilePath>
-            </File>
-            <File>
-              <FileName>string.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\JAVALANGNATIVE\string.h</FilePath>
-            </File>
-            <File>
               <FileName>thread.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\JAVALANGNATIVE\thread.c</FilePath>
@@ -567,6 +557,16 @@
               <FileName>thread.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\JAVALANGNATIVE\thread.h</FilePath>
+            </File>
+            <File>
+              <FileName>nstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\nstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>nstring.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\JAVALANGNATIVE\nstring.h</FilePath>
             </File>
           </Files>
         </Group>

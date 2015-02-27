@@ -28,7 +28,7 @@
 #ifdef BLE_CONSOLE
 
 #include <stdint.h>
-#include <string.h>
+//#include <string.h>
 #include "nordic_common.h"
 #include "nrf.h"
 #include "nrf51_bitfields.h"

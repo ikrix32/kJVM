@@ -14,7 +14,7 @@
  *----------------------------------------------------------------------------*/
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
+#include "nstring.h"
 
 #include "retarget.h"
 #include "console.h"
@@ -26,7 +26,7 @@ void ble_print( const char * format, ... )
   va_list args;
   va_start (args, format);
   vsprintf (buffer,format, args);
-  console_print((uint8_t*)&buffer,strlen(buffer));
+  console_print((uint8_t*)&buffer,stringLength(buffer));
   va_end (args);
 }
 #else

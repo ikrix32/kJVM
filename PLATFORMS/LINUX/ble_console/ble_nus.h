@@ -40,6 +40,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 #define BLE_UUID_NUS_SERVICE            0x0001                       /**< The UUID of the Nordic UART Service. */
 #define BLE_UUID_NUS_TX_CHARACTERISTIC  0x0002                       /**< The UUID of the TX Characteristic. */
 #define BLE_UUID_NUS_RX_CHARACTERISTIC  0x0003                       /**< The UUID of the RX Characteristic. */

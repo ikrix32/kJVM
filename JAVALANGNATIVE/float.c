@@ -12,7 +12,7 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
 #include "kjvm.h"
@@ -71,7 +71,7 @@ char nativeParseFloat()
         buf[i] = (u1) heapGetElement(mySlot.stackObj.pos + i + 1).UInt;
     buf[mySlot.stackObj.arrayLength] = 0;
 #ifdef AVR8
-    f=strtod(buf,NULL);
+    f = strtod(buf,NULL);
 #else
     sscanf(buf, "%f", &f);
 #endif

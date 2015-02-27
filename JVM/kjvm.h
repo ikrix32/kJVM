@@ -7,7 +7,7 @@
 
 #ifndef __KJVM__
 #define __KJVM__
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "typedefinitions.h"

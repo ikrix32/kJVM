@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #ifndef NRF51
 #include <unistd.h>
 #include <sys/types.h>

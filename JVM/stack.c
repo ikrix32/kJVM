@@ -36,7 +36,7 @@ void opStackInit(slot** m)                        /* per thread, fixed size */
 {
 
 #if (LINUX || AVR8 || AVR32LINUX)
-    if ((*m = (slot*) calloc((size_t)OPSTACKSIZE,sizeof(slot))) == NULL)
+    if ((*m = (slot*) malloc((size_t)OPSTACKSIZE * sizeof(slot))) == NULL)
         MALLOCERR(OPSTACKSIZE * sizeof(slot), "op stack");
 #else
     /* classfiles - heap - (opstack methodstack)/ per thread*/

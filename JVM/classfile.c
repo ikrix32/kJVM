@@ -2,17 +2,17 @@
  * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
  * See the file "license.terms" for information on usage and redistribution of this file.
  */
-#if LINUX || AVR32LINUX
+/*#if LINUX || AVR32LINUX
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#endif
+#endif*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "definitions.h"
 #include "kjvm.h"
 #include "heap.h"
-#include <string.h>
+#include "nstring.h"
 #ifdef AVR8
 #include <avr/pgmspace.h>
 #endif

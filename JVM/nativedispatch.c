@@ -3,7 +3,7 @@
  * See the file "license.terms" for information on usage and redistribution of this file.
  */
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "typedefinitions.h"
 /* insert and update here functionForNativeMethodType-arrays for classes with native methods*/
 /* array length ->  at least up to last native method < methods_count*/
@@ -11,7 +11,7 @@
 /* if method is non native -> insert NULL, otherwise pointer to nativce C-function*/
 
 #include "object.h"
-#include "string.h"
+#include "nstring.h"
 #include "thread.h"
 #include "interruptthread.h"
 #include "lock.h"

@@ -9,8 +9,8 @@
 /* jan08 synchronized, wait notify*/
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <string.h>
+//#include <math.h>
+#include "nstring.h"
 
 #include "typedefinitions.h"
 #include "classfile.h"
@@ -74,19 +74,21 @@ void interpreter_run()                                        /* in: classNumber
               u1 code  = getU1(cN,0);
         const u1 byte1 = getU1(cN,pc);
         const u1 byte2 = getU1(cN,pc + 1);
-        DEBUGPRINT("-> ");
+#ifdef DEBUG_VM
+        DEBUGPRINT_OPC("-> ");
 
 #ifndef TINYBAJOS_MULTITASKING
         DEBUGPRINTE(currentThreadCB->tid, x);
 #endif
-        DEBUGPRINT(", pc: %x ", pc - getStartPC(cN,mN) - 1);
+        DEBUGPRINT_OPC(", pc: %x ", pc - getStartPC(cN,mN) - 1);
         DEBUGPRINTE(code, 2x);
         DEBUGPRINTE(byte1,2x);
         DEBUGPRINTE(byte2,2x\t);
-        DEBUGPRINT("sp: %d local: %d\n", opStackGetSpPos(), local);
+        DEBUGPRINT_OPC("sp: %d local: %d\n", opStackGetSpPos(), local);
         DEBUGPRINTSTACK;
         DEBUGPRINTLOCALS;
-        DEBUGPRINT("\t\t\t\t");
+        DEBUGPRINT_OPC("\t\t\t\t");
+#endif
 #ifdef USE_LABELS
         /*const static void* const opclabels_data[256] = {
             &&OPC_NOP         ,//0x00
@@ -312,11 +314,11 @@ void interpreter_run()                                        /* in: classNumber
         {
             CASE(NOP):
             {
-                DEBUGPRINTLN("NOP");
+                DEBUGPRINTLN_OPC("NOP");
             }BREAK;
             CASE(ACONST_NULL):
             {
-                DEBUGPRINTLN("aconst_null -> push\t...,=> NULLOBJECT");
+                DEBUGPRINTLN_OPC("aconst_null -> push\t...,=> NULLOBJECT");
                 opStackPush(NULLOBJECT);
             }BREAK;
             CASE(ICONST_M1)://???
@@ -327,7 +329,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ICONST_4):
             CASE(ICONST_5):
             {
-                DEBUGPRINTLN("ICONST_%4x -> push\t...,=> %4x",code-ICONST_0,code - ICONST_0);
+                DEBUGPRINTLN_OPC("ICONST_%4x -> push\t...,=> %4x",code-ICONST_0,code - ICONST_0);
                 opStackPush(toSlot((s4)(code - ICONST_0)));
             }BREAK;
             CASE(FCONST_0):
@@ -335,12 +337,12 @@ void interpreter_run()                                        /* in: classNumber
             CASE(FCONST_2):
             {
                 //u1 base = ICONST_0;
-                DEBUGPRINTLN("FCONST_%d  -> push\t...,=> %f",code - FCONST_0,(f4)(code - FCONST_0));
+                DEBUGPRINTLN_OPC("FCONST_%d  -> push\t...,=> %f",code - FCONST_0,(f4)(code - FCONST_0));
                 opStackPush(toSlot((f4)(code - FCONST_0)));
             }BREAK;
             CASE(BIPUSH):
             {
-                DEBUGPRINTLN("BIPUSH  -> push\t...,=> %d",(s1)byte1);
+                DEBUGPRINTLN_OPC("BIPUSH  -> push\t...,=> %d",(s1)byte1);
                 /* BIPUSH is defined as follows:*/
                 /* reads a signed 8 bit constant from byte1,*/
                 /* extends it to int signed (32bit)*/
@@ -349,12 +351,12 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(SIPUSH):
             {
-                DEBUGPRINTLN("SIPUSH  -> push\t...,=> %x",(s2)BYTECODEREF);
+                DEBUGPRINTLN_OPC("SIPUSH  -> push\t...,=> %x",(s2)BYTECODEREF);
                 opStackPush(toSlot((s4)((s2) getU2(cN,0))));
             }BREAK;
             CASE(LDC):
             {
-                DEBUGPRINT("ldc  push\t...");
+                DEBUGPRINT_OPC("ldc  push\t...");
                 if (getU1(cN,CP(cN, getU1(cN,0))) == CONSTANT_String)
                 {
                     first.stackObj.magic = CPSTRINGMAGIC;
@@ -363,7 +365,7 @@ void interpreter_run()                                        /* in: classNumber
                     opStackPush(first);
                 } else /* int or float const value on stack*/
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
-                DEBUGPRINTLN(",=> x%x", opStackPeek().UInt);
+                DEBUGPRINTLN_OPC(",=> x%x", opStackPeek().UInt);
             }BREAK;
             CASE(LDC_W):
             {
@@ -374,9 +376,9 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ALOAD):
             {
 #ifdef DEBUG
-                if(code == ILOAD) DEBUGPRINTLN("ILOAD -> local(%x) -> push\t...,=>",byte1);
-                if(code == FLOAD) DEBUGPRINTLN("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(cN,byte1));
-                if(code == ALOAD) DEBUGPRINTLN("aload -> local(%x) -> push\t,=>",byte1);
+                if(code == ILOAD) DEBUGPRINTLN_OPC("ILOAD -> local(%x) -> push\t...,=>",byte1);
+                if(code == FLOAD) DEBUGPRINTLN_OPC("FLOAD -> local(%d: %d) -> push\t...,=>",byte1,getU1(cN,byte1));
+                if(code == ALOAD) DEBUGPRINTLN_OPC("aload -> local(%x) -> push\t,=>",byte1);
 #endif
                 opStackPush(opStackGetValue(local + getU1(cN,0)));
             }BREAK;
@@ -385,7 +387,7 @@ void interpreter_run()                                        /* in: classNumber
             case ILOAD_2:
             case ILOAD_3:
             {
-                DEBUGPRINTLN("ILOAD_%d local -> push\t...,=>",code - ILOAD_0);
+                DEBUGPRINTLN_OPC("ILOAD_%d local -> push\t...,=>",code - ILOAD_0);
                 opStackPush(opStackGetValue(local + code - ILOAD_0));
             }BREAK;
             case FLOAD_0:
@@ -393,7 +395,7 @@ void interpreter_run()                                        /* in: classNumber
             case FLOAD_2:
             case FLOAD_3:
             {
-                 DEBUGPRINTLN("FLOAD_%d local -> push\t...,=>",code - FLOAD_0);
+                 DEBUGPRINTLN_OPC("FLOAD_%d local -> push\t...,=>",code - FLOAD_0);
                  opStackPush(opStackGetValue(local + code - FLOAD_0));
             }BREAK;
             case ALOAD_0:
@@ -401,7 +403,7 @@ void interpreter_run()                                        /* in: classNumber
             case ALOAD_2:
             case ALOAD_3:
             {
-                 DEBUGPRINTLN("aload_%d local -> push\t...,=>",code - ALOAD_0);
+                 DEBUGPRINTLN_OPC("aload_%d local -> push\t...,=>",code - ALOAD_0);
                  opStackPush(opStackGetValue(local + code - ALOAD_0));
             }break;
             CASE(IALOAD):
@@ -414,13 +416,13 @@ void interpreter_run()                                        /* in: classNumber
                 const s2 count = (s2)opStackPop().Int;     /*mb jf*/
                 first = opStackPop();
 #ifdef DEBUG
-                if(code == IALOAD) DEBUGPRINTLN("iaload");
-                if(code == FALOAD) DEBUGPRINTLN("faload");
-                if(code == AALOAD) DEBUGPRINTLN("aaload");
-                if(code == BALOAD) DEBUGPRINTLN("baload");
-                if(code == CALOAD) DEBUGPRINTLN("caload");
-                if(code == SALOAD) DEBUGPRINTLN("saload");
-                PRINTF("%x, =>",first.UInt);
+                if(code == IALOAD) DEBUGPRINTLN_OPC("iaload");
+                if(code == FALOAD) DEBUGPRINTLN_OPC("faload");
+                if(code == AALOAD) DEBUGPRINTLN_OPC("aaload");
+                if(code == BALOAD) DEBUGPRINTLN_OPC("baload");
+                if(code == CALOAD) DEBUGPRINTLN_OPC("caload");
+                if(code == SALOAD) DEBUGPRINTLN_OPC("saload");
+                DEBUGPRINT_OPC("%x, =>",first.UInt);
 #endif
                 const u4 lengthArray = first.stackObj.arrayLength;
                 if (first.UInt == NULLOBJECT.UInt)
@@ -433,7 +435,7 @@ void interpreter_run()                                        /* in: classNumber
                 else
                 {
                     opStackPush(heapGetElement((u2) first.stackObj.pos + count + 1));
-                    DEBUGPRINTLN(", %x", opStackPeek().UInt);
+                    DEBUGPRINTLN_OPC(", %x", opStackPeek().UInt);
                 }
             }BREAK;
             CASE(ISTORE):
@@ -441,9 +443,9 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ASTORE):
             {
 #ifdef DEBUG
-                if(code == ISTORE) DEBUGPRINTLN("ISTORE  pop -> local(%d)=>,\n",byte1);
-                if(code == FSTORE) DEBUGPRINTLN("FSTORE  pop -> local(%d)=>,\n",byte1);
-                if(code == ASTORE) DEBUGPRINTLN("ASTORE  pop -> local(%x)=>,\n",byte1);
+                if(code == ISTORE) DEBUGPRINTLN_OPC("ISTORE  pop -> local(%d)=>,\n",byte1);
+                if(code == FSTORE) DEBUGPRINTLN_OPC("FSTORE  pop -> local(%d)=>,\n",byte1);
+                if(code == ASTORE) DEBUGPRINTLN_OPC("ASTORE  pop -> local(%x)=>,\n",byte1);
 #endif
                 opStackSetValue(local+getU1(cN,0),opStackPop());
 
@@ -453,7 +455,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ISTORE_2):
             CASE(ISTORE_3):
             {
-                DEBUGPRINTLN("ISTORE_%d pop -> local   %d=>,",code-ISTORE_0,opStackPeek().Int);
+                DEBUGPRINTLN_OPC("ISTORE_%d pop -> local   %d=>,",code-ISTORE_0,opStackPeek().Int);
                 opStackSetValue(local + code - ISTORE_0, opStackPop());
             }BREAK;
             CASE(FSTORE_0):
@@ -461,7 +463,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(FSTORE_2):
             CASE(FSTORE_3):
             {
-                DEBUGPRINTLN("FSTORE_%d pop -> local   =>,",code - FSTORE_0);
+                DEBUGPRINTLN_OPC("FSTORE_%d pop -> local   =>,",code - FSTORE_0);
                 opStackSetValue(local + code - FSTORE_0, opStackPop());
             }BREAK;
             CASE(ASTORE_0):
@@ -469,7 +471,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ASTORE_2):
             CASE(ASTORE_3):
             {
-                DEBUGPRINTLN("ASTORE_%d pop -> local  =>,",code-ASTORE_0);
+                DEBUGPRINTLN_OPC("ASTORE_%d pop -> local  =>,",code-ASTORE_0);
                 opStackSetValue(local + code - ASTORE_0, opStackPop());
             }BREAK;
             CASE(IASTORE):
@@ -480,17 +482,17 @@ void interpreter_run()                                        /* in: classNumber
             CASE(SASTORE):
             {
 #ifdef DEBUG
-               if(code == IASTORE) DEBUGPRINTLN("iastore stack -> local");
+               if(code == IASTORE) DEBUGPRINTLN_OPC("iastore stack -> local");
                         /*mb jf		//float*/
-                if(code == FASTORE) DEBUGPRINTLN("fastore");
+                if(code == FASTORE) DEBUGPRINTLN_OPC("fastore");
                         /*mb jf		//float*/
-                if(code == AASTORE) DEBUGPRINTLN("fastore");
+                if(code == AASTORE) DEBUGPRINTLN_OPC("fastore");
                         /*mb jf		//byte or boolean*/
-                if(code == BASTORE) DEBUGPRINTLN("bastore");
+                if(code == BASTORE) DEBUGPRINTLN_OPC("bastore");
                         /*mb jf		//char*/
-                if(code == CASTORE) DEBUGPRINTLN("castore");
+                if(code == CASTORE) DEBUGPRINTLN_OPC("castore");
                         /*mb jf		//short*/
-                if(code == SASTORE) DEBUGPRINTLN("sastore");
+                if(code == SASTORE) DEBUGPRINTLN_OPC("sastore");
 #endif
                 second = opStackPop();
                 s2 count = (s2)(opStackPop().Int);
@@ -510,23 +512,23 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(POP):
             {
-                DEBUGPRINTLN("POP %x",opStackPeek().UInt);
+                DEBUGPRINTLN_OPC("POP %x",opStackPeek().UInt);
                 opStackPop();
             }BREAK;
             CASE(POP2):
             {
-                DEBUGPRINTLN("POP2");
+                DEBUGPRINTLN_OPC("POP2");
                 opStackPop();
                 opStackPop();
             }BREAK;
             CASE(DUP):
             {
-                DEBUGPRINTLN("dup");
+                DEBUGPRINTLN_OPC("dup");
                 opStackPush(opStackPeek());
             }BREAK;
             CASE(DUP_X1):
             {
-                DEBUGPRINTLN("DUP_X1");
+                DEBUGPRINTLN_OPC("DUP_X1");
                 second = opStackPop();
                 first = opStackPop();
                 opStackPush(second);
@@ -535,7 +537,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(DUP_X2):
             {
-                DEBUGPRINTLN("DUP_X2");
+                DEBUGPRINTLN_OPC("DUP_X2");
                 second = opStackPop();
                 first = opStackPop();
                 third = opStackPop();
@@ -546,7 +548,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(DUP2):
             {
-                DEBUGPRINTLN("DUP2");
+                DEBUGPRINTLN_OPC("DUP2");
                 second = opStackPop();
                 first = opStackPop();
                 opStackPush(first);
@@ -556,7 +558,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(DUP2_X1):
             {
-                DEBUGPRINTLN("DUP2_X1");
+                DEBUGPRINTLN_OPC("DUP2_X1");
                 second = opStackPop();
                 first = opStackPop();
                 third = opStackPop();
@@ -568,7 +570,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(DUP2_X2):
             {
-                DEBUGPRINTLN("DUP2_X2");
+                DEBUGPRINTLN_OPC("DUP2_X2");
                 second = opStackPop();
                 first = opStackPop();
                 third = opStackPop();
@@ -582,7 +584,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(SWAP):
             {
-                DEBUGPRINTLN("SWAP");
+                DEBUGPRINTLN_OPC("SWAP");
                 second = opStackPop();
                 first = opStackPop();
                 opStackPush(second);
@@ -590,39 +592,39 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IADD):
             {
-                DEBUGPRINTLN("IADD");
+                DEBUGPRINTLN_OPC("IADD");
                 opStackPoke(toSlot((opStackPop().Int + opStackPeek().Int)));
             }BREAK;
             CASE(FADD):
             {
-                DEBUGPRINTLN("FADD");
+                DEBUGPRINTLN_OPC("FADD");
                 opStackPoke(toSlot((opStackPop().Float + opStackPeek().Float)));
             }BREAK;
             CASE(ISUB):
             {
-                DEBUGPRINTLN("ISUB");
+                DEBUGPRINTLN_OPC("ISUB");
                 first = opStackPop();             /*mb fj changed substraction order*/
                 opStackPoke(toSlot((opStackPeek().Int - first.Int)));
             }BREAK;
             CASE(FSUB):
             {
-                DEBUGPRINTLN("Fsub");
+                DEBUGPRINTLN_OPC("Fsub");
                 first = opStackPop();             /*mb fj changed substraction order*/
                 opStackPoke(toSlot((opStackPeek().Float - first.Float)));
             }BREAK;
             CASE(IMUL):
             {
-                DEBUGPRINTLN("IMUL");
+                DEBUGPRINTLN_OPC("IMUL");
                 opStackPoke(toSlot((opStackPop().Int * opStackPeek().Int)));
             }BREAK;
             CASE(FMUL):
             {
-                DEBUGPRINTLN("FMUL");
+                DEBUGPRINTLN_OPC("FMUL");
                 opStackPoke(toSlot((opStackPop().Float * opStackPeek().Float)));
             }BREAK;
             CASE(IDIV):
             {
-                DEBUGPRINTLN("IDIV");
+                DEBUGPRINTLN_OPC("IDIV");
                 first = opStackPop();             /*mb fj changed dividend order*/
                 if (first.Int == 0)
                     ARITHMETICEXCEPTION;
@@ -631,7 +633,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(FDIV):
             {
-                DEBUGPRINTLN("FDIV");
+                DEBUGPRINTLN_OPC("FDIV");
                 first = opStackPop();             /*mb fj changed dividend order*/
                 if (first.Float == 0.0)
                     ARITHMETICEXCEPTION;
@@ -640,7 +642,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IREM):
             {
-                DEBUGPRINTLN("IREM");
+                DEBUGPRINTLN_OPC("IREM");
                 if (((first = opStackPop()).Int) == 0)
                     ARITHMETICEXCEPTION;
                 else
@@ -648,7 +650,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(FREM):
             {
-                DEBUGPRINTLN("FREM");
+                DEBUGPRINTLN_OPC("FREM");
                 float divisor = opStackPop().Float;
                 float dividend = opStackPop().Float;
                 int q = dividend / divisor;
@@ -656,31 +658,31 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(INEG):
             {
-                DEBUGPRINTLN("INEG");
+                DEBUGPRINTLN_OPC("INEG");
                 opStackPoke(toSlot(-opStackPeek().Int));
             }BREAK;
             CASE(FNEG):
             {
-                DEBUGPRINTLN("FNEG");
+                DEBUGPRINTLN_OPC("FNEG");
                 opStackPoke(toSlot(-opStackPeek().Float));
             }BREAK;
             CASE(ISHL):
             {
-                DEBUGPRINTLN("ISHL");
+                DEBUGPRINTLN_OPC("ISHL");
                 const slot shift = opStackPop();
                 const slot val = opStackPop();
                 opStackPush(toSlot(val.UInt << shift.UInt));
             }BREAK;
             CASE(ISHR):
             {
-                DEBUGPRINTLN("ISHR");
+                DEBUGPRINTLN_OPC("ISHR");
                 const slot shift = opStackPop();
                 const slot val = opStackPop();
                 opStackPush(toSlot(val.Int >> shift.Int));
             }BREAK;
             CASE(IUSHR):
             {
-                DEBUGPRINTLN("IUSHR");
+                DEBUGPRINTLN_OPC("IUSHR");
                 const slot shift = toSlot(opStackPop().Int & 0x0000001f);
                 const slot val = opStackPop();
                 if (val.Int < 0)
@@ -690,22 +692,22 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IAND):
             {
-                DEBUGPRINTLN("IAND");
+                DEBUGPRINTLN_OPC("IAND");
                 opStackPoke(toSlot(opStackPop().UInt & opStackPeek().UInt));
             }BREAK;
             CASE(IOR):
             {
-                DEBUGPRINTLN("IOR");
+                DEBUGPRINTLN_OPC("IOR");
                 opStackPoke(toSlot(opStackPop().UInt | opStackPeek().UInt));
             }BREAK;
             CASE(IXOR):
             {
-                DEBUGPRINTLN("IXOR");
+                DEBUGPRINTLN_OPC("IXOR");
                 opStackPoke(toSlot(opStackPop().UInt ^ opStackPeek().UInt));
             }BREAK;
             CASE(IINC):
             {
-                DEBUGPRINTLN("IINC");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("IINC");             /*mb, jf*/
                 /* position*/
                 opStackSetValue((u2)(local + byte1),
                                 /* old value*/
@@ -715,33 +717,33 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(I2F):
             {
-                DEBUGPRINTLN("I2F");
+                DEBUGPRINTLN_OPC("I2F");
                 opStackPoke(toSlot((f4) opStackPeek().Int));
             }BREAK;
             CASE(F2I):
             {
-                DEBUGPRINTLN("F2I");
+                DEBUGPRINTLN_OPC("F2I");
                 opStackPoke(toSlot((s4)(opStackPeek().Float)));
             }BREAK;
             CASE(I2C):
             {
-                DEBUGPRINTLN("I2C");
+                DEBUGPRINTLN_OPC("I2C");
                 opStackPoke(toSlot((opStackPeek().UInt & 0x0000ffff)));
             }BREAK;
             CASE(I2B):
             {
-                DEBUGPRINTLN("I2B");
+                DEBUGPRINTLN_OPC("I2B");
                 opStackPoke(toSlot(opStackPeek().UInt & 0x000000ff));
             }BREAK;
             CASE(I2S):
             {
-                DEBUGPRINTLN("I2S");
+                DEBUGPRINTLN_OPC("I2S");
                 opStackPoke(toSlot((s4)((s2) opStackPeek().Int)));
             }BREAK;
             CASE(FCMPL):
             CASE(FCMPG):
             {
-                DEBUGPRINTLN("fcmpg");
+                DEBUGPRINTLN_OPC("fcmpg");
                 second = opStackPop();
                 first = opStackPop();
                 if (first.Float == 0x7fc00000 || second.Float == 0x7fc00000)
@@ -763,7 +765,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFEQ):
             {
-                DEBUGPRINTLN("ifeq");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifeq");             /*mb, jf*/
                 if (opStackPop().Int == 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
@@ -771,7 +773,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFNULL):
             {
-                DEBUGPRINTLN("ifnull");
+                DEBUGPRINTLN_OPC("ifnull");
                 if (opStackPop().UInt == NULLOBJECT.UInt)
                     pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
                 else
@@ -779,7 +781,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFNONNULL):
             {
-                DEBUGPRINTLN("ifnonnull");        /* mb jf*/
+                DEBUGPRINTLN_OPC("ifnonnull");        /* mb jf*/
                 if (opStackPop().UInt != NULLOBJECT.UInt)
                     pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
                 else
@@ -787,7 +789,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFNE):
             {
-                DEBUGPRINTLN("ifne");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifne");             /*mb, jf*/
                 if (opStackPop().Int != 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
@@ -795,7 +797,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFLT):
             {
-                DEBUGPRINTLN("iflt");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("iflt");             /*mb, jf*/
                 if (opStackPop().Int < 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
@@ -803,7 +805,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFLE):
             {
-                DEBUGPRINTLN("ifle");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifle");             /*mb, jf*/
                 if (opStackPop().Int <= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
@@ -811,7 +813,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFGT):
             {
-                DEBUGPRINTLN("ifgt");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifgt");             /*mb, jf*/
                 if (opStackPop().Int > 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
@@ -819,25 +821,25 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFGE):
             {
-                DEBUGPRINTLN("ifge");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifge");             /*mb, jf*/
                 if (opStackPop().Int >= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
             }BREAK;
-            CASE(IF_ACMPEQ): DEBUGPRINTLN("if_acmpeq");        /*mb, jf*/
+            CASE(IF_ACMPEQ): DEBUGPRINTLN_OPC("if_acmpeq");        /*mb, jf*/
             CASE(IF_ICMPEQ):
             {
-                DEBUGPRINTLN("if_icmpeq");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpeq");        /*mb, jf*/
                 if (opStackPop().Int == opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
                     pc += 2;                      /* to skip the jump-adress*/
             }BREAK;
-            CASE(IF_ACMPNE): DEBUGPRINTLN("if_acmpne");        /*mb, jf*/
+            CASE(IF_ACMPNE): DEBUGPRINTLN_OPC("if_acmpne");        /*mb, jf*/
             CASE(IF_ICMPNE):
             {
-                DEBUGPRINTLN("if_icmpne");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpne");        /*mb, jf*/
                 if (opStackPop().Int != opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
@@ -845,7 +847,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IF_ICMPLT):
             {
-                DEBUGPRINTLN("if_icmplt");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmplt");        /*mb, jf*/
                 /*???*/
                 if (opStackPop().Int > opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
@@ -854,7 +856,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IF_ICMPGE):
             {
-                DEBUGPRINTLN("if_icmpge");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpge");        /*mb, jf*/
                 if (opStackPop().Int <= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
@@ -862,7 +864,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IF_ICMPGT):
             {
-                DEBUGPRINTLN("if_icmpgt");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpgt");        /*mb, jf*/
                 if (opStackPop().Int < opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
@@ -870,7 +872,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IF_ICMPLE):
             {
-                DEBUGPRINTLN("if_icmple");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmple");        /*mb, jf*/
                 if (opStackPop().Int >= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
@@ -878,23 +880,23 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(GOTO):
             {
-                DEBUGPRINTLN("goto");             /* mb, jf*/
+                DEBUGPRINTLN_OPC("goto");             /* mb, jf*/
                 pc += (s2) BYTECODEREF - 1;
             }BREAK;
             CASE(JSR):
             {
-                DEBUGPRINTLN("jsr");              /* mb, jf*/
+                DEBUGPRINTLN_OPC("jsr");              /* mb, jf*/
                 opStackPush(toSlot((u4)(pc + 2)));
                 pc += (s2) BYTECODEREF - 1;
             }BREAK;
             CASE(RET):
             {
-                DEBUGPRINTLN("ret");              /* mb, jf*/
+                DEBUGPRINTLN_OPC("ret");              /* mb, jf*/
                 pc = opStackGetValue(local + getU1(cN,0)).UInt;
             }BREAK;
             CASE(TABLESWITCH):
             {
-                DEBUGPRINTLN("tableswitch");      /* mb, jf*/
+                DEBUGPRINTLN_OPC("tableswitch");      /* mb, jf*/
                 {
                     /*
                      aa		tableswitch
@@ -927,7 +929,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(LOOKUPSWITCH):
             {
-                DEBUGPRINTLN("lookupswitch");     /* mb, jf*/
+                DEBUGPRINTLN_OPC("lookupswitch");     /* mb, jf*/
                 {
                     /*
                      ab          lookupswitch
@@ -963,7 +965,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(GETSTATIC):
             {
-                DEBUGPRINTLN("getstatic ");       /*mb jf ... corrected funtion*/
+                DEBUGPRINTLN_OPC("getstatic ");       /*mb jf ... corrected funtion*/
                 methodStackPush(cN);
                 fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
                                                getU2(cN,/* name-index*/
@@ -1003,7 +1005,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(PUTSTATIC):
             {   /*mb jf*/
-                DEBUGPRINTLN("putstatic -> stack in static field");
+                DEBUGPRINTLN_OPC("putstatic -> stack in static field");
                 methodStackPush(cN);
                 fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
                                                getU2(cN,                        /* name-index*/
@@ -1043,7 +1045,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(GETFIELD):
             {
-                DEBUGPRINTLN("getfield ->   heap to stack:");
+                DEBUGPRINTLN_OPC("getfield ->   heap to stack:");
                 methodStackPush(cN);
                 first = opStackPop();
                 fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
@@ -1082,7 +1084,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(PUTFIELD):
             {
-                DEBUGPRINTLN("putfield -> stack to heap");
+                DEBUGPRINTLN_OPC("putfield -> stack to heap");
                 methodStackPush(cN);
                 {
                     /* mb jf print name*/
@@ -1152,9 +1154,9 @@ void interpreter_run()                                        /* in: classNumber
             CASE(INVOKEINTERFACE):
             {
 #ifdef DEBUG
-                if (code == INVOKEVIRTUAL) DEBUGPRINT("invokevirtual: ");
-                if (code == INVOKEINTERFACE) DEBUGPRINT("invokeinterface: ");
-                if (code == INVOKESPECIAL) DEBUGPRINT("invoke special: ");
+                if (code == INVOKEVIRTUAL) DEBUGPRINT_OPC("invokevirtual: ");
+                if (code == INVOKEINTERFACE) DEBUGPRINT_OPC("invokeinterface: ");
+                if (code == INVOKESPECIAL) DEBUGPRINT_OPC("invoke special: ");
 #endif
                 methodStackPush(local);
                 methodStackPush(cN);
@@ -1293,7 +1295,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(INVOKESTATIC):
             {
-                DEBUGPRINT("invoke static: ");    /* a static method*/
+                DEBUGPRINT_OPC("invoke static: ");    /* a static method*/
                 methodStackPush(local);
                 methodStackPush(cN);
                 methodStackPush(mN);
@@ -1409,17 +1411,17 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ARETURN):
             {
 #ifdef DEBUG
-                if(code == IRETURN) DEBUGPRINT("i");
-                if(code == FRETURN) DEBUGPRINT("f");
-                if(code == ARETURN) DEBUGPRINT("a");
+                if(code == IRETURN) DEBUGPRINT_OPC("i");
+                if(code == FRETURN) DEBUGPRINT_OPC("f");
+                if(code == ARETURN) DEBUGPRINT_OPC("a");
 #endif
                 code = IRETURN;
             nativeVoidReturn:
-                DEBUGPRINT("native ");
+                DEBUGPRINT_OPC("native ");
             }
             CASE(RETURN):
             {
-                DEBUGPRINTLN("return");
+                DEBUGPRINTLN_OPC("return");
 #ifndef TINYBAJOS_MULTITASKING
                 if (getU2(cN,METHODBASE(cN,mN))&ACC_SYNCHRONIZED)
                 {
@@ -1469,7 +1471,7 @@ void interpreter_run()                                        /* in: classNumber
                     /*mb jf if not <clinit> you're done :-D*/
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
                     {
-                        DEBUGPRINTLN(" from <clinit>");
+                        DEBUGPRINTLN_OPC(" from <clinit>");
 
                         return;
                     }
@@ -1494,7 +1496,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(NEW):
             {
-                DEBUGPRINT("new");
+                DEBUGPRINT_OPC("new");
                 pc += 2;
                 methodStackPush(cN);
                 methodStackPush(mN);
@@ -1526,7 +1528,7 @@ void interpreter_run()                                        /* in: classNumber
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
                 first.stackObj.classNumber=cN;
-                DEBUGPRINTLN(" -> push %x\n",heapPos);
+                DEBUGPRINTLN_OPC(" -> push %x\n",heapPos);
                 opStackPush(first);               /* reference to.stackObject on opStack*/
                 HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
@@ -1543,7 +1545,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(NEWARRAY):
             {
-                DEBUGPRINTLN("newarray");         /* mb jf*/
+                DEBUGPRINTLN_OPC("newarray");         /* mb jf*/
                 s2 count = (s2)opStackPop().UInt;
                 if (count < 0)
                 {
@@ -1609,7 +1611,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(ANEWARRAY):
             {
-                DEBUGPRINTLN("anewarray");        /* mb jf*/
+                DEBUGPRINTLN_OPC("anewarray");        /* mb jf*/
                 pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
                 s2 *cnt = (s2 *) malloc(sizeof(s2));
                 *cnt = 0;
@@ -1618,7 +1620,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(ARRAYLENGTH):
             {
-                DEBUGPRINTLN("arraylength");      /* mb jf*/
+                DEBUGPRINTLN_OPC("arraylength");      /* mb jf*/
                 first = opStackPop();
                 if (first.UInt == NULLOBJECT.UInt)
                 {
@@ -1719,7 +1721,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(ATHROW):
             {
-                DEBUGPRINTLN("athrow");
+                DEBUGPRINTLN_OPC("athrow");
 #ifndef TINYBAJOS_EXCEPTION
                 handleException();
 #else
@@ -1729,7 +1731,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(CHECKCAST):
             {
-                DEBUGPRINTLN("checkcast");
+                DEBUGPRINTLN_OPC("checkcast");
                 /* In general, we try to cast as much as possible.*/
                 /* Only if we perfectly know that this cast is invalid, break it.*/
                 first = opStackPeek();
@@ -1816,7 +1818,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(INSTANCEOF):
             {
-                DEBUGPRINTLN("instanceof");
+                DEBUGPRINTLN_OPC("instanceof");
                 first = opStackPop();
                 u2 targetclass = getU2(cN,0);
                 char performcheck = 1;
@@ -1906,7 +1908,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(WIDE):
             {
-                DEBUGPRINTLN("wide");             /* mb jf*/
+                DEBUGPRINTLN_OPC("wide");             /* mb jf*/
                 /* not tested because so many locals are hard to implement on purpose  14.12.2006*/
                 u2 nextOp = getU1(cN,0);             /* which operation to extend?*/
                 s2 count = getU2(cN,0);
@@ -1945,7 +1947,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(MULTIANEWARRAY):
             {
-                DEBUGPRINTLN("multianewarray");   /* mb jf*/
+                DEBUGPRINTLN_OPC("multianewarray");   /* mb jf*/
                 pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
                 u1 dim = getU1(cN,0);                /* dimensions*/
 
@@ -1957,7 +1959,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(GOTO_W):
             {   /* mb jf*/
-                DEBUGPRINTLN("goto_w (not tested)");
+                DEBUGPRINTLN_OPC("goto_w (not tested)");
                 /* not tested because wide jumps are hard to implement on purpose  14.12.2006*/
                 u4 addr = getU4(cN,0);
                 pc = addr + getStartPC(cN,mN);          /*pcMethodStart; //assumtion: the address is the relative address, absolute address may be required*/
@@ -1965,7 +1967,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(JSR_W):
             {   /* mb jf*/
-                DEBUGPRINTLN("jsr_w (not tested)%d %d",byte1, byte2);
+                DEBUGPRINTLN_OPC("jsr_w (not tested)%d %d",byte1, byte2);
                 /* not tested because no exceptions implemented yet 14.12.2006*/
                 /* the opcode of athrow is required*/
                 u4 my_addr = getU4(cN,0);
@@ -2031,7 +2033,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(LRETURN):
             CASE(NOT_SUPPORTED):
             {
-                PRINTF("code:%d",code);
+                DEBUGPRINT_OPC("code:%d",code);
                 DNOTSUPPORTED;
             }BREAK;
         }/* switch*/
@@ -2210,8 +2212,8 @@ void handleException()
     /* number of catches the try block has*/
     u2 n = getU2(cN,METHODCODEEXCEPTIONBASE(cN, mN));
 
-    DEBUGPRINTLN("trying to catch class number %d", classNumberFromPushedObject);
-    DEBUGPRINTLN("%d catch clauses", n);
+    DEBUGPRINTLN_OPC("trying to catch class number %d", classNumberFromPushedObject);
+    DEBUGPRINTLN_OPC("%d catch clauses", n);
     for (int i = 0; i < n; ++i)
     {
         u2 cur_catch = METHODCODEEXCEPTIONBASE(cN, mN) + 8 * i;
@@ -2219,10 +2221,10 @@ void handleException()
         /* checking if catch range is usable */
         if (pc - getStartPC(cN,mN) - 1 < getU2(cN,cur_catch + 2) || pc - getStartPC(cN,mN) - 1 >= getU2(cN,cur_catch + 4))
         {
-            DEBUGPRINTLN("pc: %d", pc - getStartPC(cN,mN) - 1);
-            DEBUGPRINTLN("start: %d", getU2(cN,cur_catch + 2));
-            DEBUGPRINTLN("end: %d", getU2(cN,cur_catch + 4));
-            DEBUGPRINTLN("not my range");
+            DEBUGPRINTLN_OPC("pc: %d", pc - getStartPC(cN,mN) - 1);
+            DEBUGPRINTLN_OPC("start: %d", getU2(cN,cur_catch + 2));
+            DEBUGPRINTLN_OPC("end: %d", getU2(cN,cur_catch + 4));
+            DEBUGPRINTLN_OPC("not my range");
             continue;
         }
 
@@ -2232,14 +2234,14 @@ void handleException()
                         getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,cur_catch + 8)) + 1)) + 1));
         if (cN == INVALID_CLASS_ID)
         {
-            DEBUGPRINTLN("Exception class not found:  %d\n", cN);
+            DEBUGPRINTLN_OPC("Exception class not found:  %d\n", cN);
             cN = methodStackPop();
             continue;                             /* class is not in the class table - broken code.*/
         }
 
         /* Ya well, this is the catched class's number in code exception table*/
         u1 classNumberInCodeExceptionTable = cN;
-        DEBUGPRINTLN("classNumberInCodeExceptionTable: %d",
+        DEBUGPRINTLN_OPC("classNumberInCodeExceptionTable: %d",
                      classNumberInCodeExceptionTable);
 
         cN = classNumberFromPushedObject;
@@ -2247,7 +2249,7 @@ void handleException()
         /* start catching */
         if (checkInstance(classNumberInCodeExceptionTable))
         {
-            DEBUGPRINTLN("catching!");
+            DEBUGPRINTLN_OPC("catching!");
             cN = methodStackPop();
             pc = getStartPC(cN,mN) + getU2(cN,cur_catch + 6);
             return;
@@ -2258,13 +2260,13 @@ void handleException()
     /* keine catch clause gefunden, also weiter im nächsten stack frame*/
     if (methodStackEmpty())
     {
-        DEBUGPRINTLN("we are thru, this was the top frame");
+        DEBUGPRINTLN_OPC("we are thru, this was the top frame");
         cN = classNumberFromPushedObject;
         UNHANDLEDEXCEPTIONERR((char *) getAddr(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].this_class)] + 1)] + 3));
     }
     else
     {
-        DEBUGPRINTLN("popping stack frame");
+        DEBUGPRINTLN_OPC("popping stack frame");
         first = opStackPop();
         opStackSetSpPos(methodStackPop());
         pc = methodStackPop() + 2;

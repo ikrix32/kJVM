@@ -1,4 +1,5 @@
 #include "definitions.h"
+#include <stdlib.h>
 #include "kjvm.h"
 #include "classfile.h"
 #include "heap.h"

@@ -15,7 +15,7 @@
 #ifdef BLE_CONSOLE
 #include "nordic_common.h"
 #include "ble_srv_common.h"
-#include <string.h>
+//#include <string.h>
 
 /**@brief     Function for handling the @ref BLE_GAP_EVT_CONNECTED event from the S110 SoftDevice.
  *

@@ -78,8 +78,8 @@
     #define STRNCMPRAMFLASH strncmpRamFlash
     #define STRNCMPFLASHFLASH strncmpFlashFlash
 #else
-    #define STRNCMPRAMFLASH strncmp
-    #define STRNCMPFLASHFLASH strncmp
+    #define STRNCMPRAMFLASH     stringsNotEquals
+    #define STRNCMPFLASHFLASH   stringsNotEquals
 #endif
 
 
@@ -201,6 +201,14 @@
 #define DEBUGPRINT(format, ...) avr8Printf((format),  ## __VA_ARGS__)
 #define DEBUGPRINTLN(format, ...) avr8Printf((format),  ## __VA_ARGS__); avr8Printf("\n");
 
+#ifdef DEBUG_VM
+#define DEBUGPRINTLN_OPC(format, ...) avr8Printf((format),  ## __VA_ARGS__)
+#define DEBUGPRINT_OPC(format, ...) avr8Printf((format),  ## __VA_ARGS__)
+#else
+#define DEBUGPRINTLN_OPC(format, ...)
+#define DEBUGPRINT_OPC(format, ...)
+#endif
+
 #define DEBUGPRINTE(x,f)    avr8Printf(#x ": " "%"#f" ",x)
 #define PRINTE(x,f)  avr8Printf(#x ": " "%"#f" ",x)
 #define DEBUGPRINTSTACK {\
@@ -254,6 +262,9 @@ avr8Printf(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
 #define OUTSTREAM stderr
 #endif
 
+#define DEBUGPRINTLN_OPC(format, ...)
+#define DEBUGPRINT_OPC(format, ...)
+
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)
 
@@ -293,7 +304,7 @@ avr8Printf(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
 #ifdef AVR8
 #define STRNCMP strncmpRamFlash
 #else
-#define STRNCMP strncmp
+#define STRNCMP stringsNotEquals
 #endif
 //end of file
 #endif

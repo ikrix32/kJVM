@@ -4,7 +4,8 @@
  */
 #ifndef TINYBAJOS_MULTITASKING
 
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
 #include "kjvm.h"

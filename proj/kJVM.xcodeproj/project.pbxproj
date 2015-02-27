@@ -15,7 +15,7 @@
 		4EB8F7CA1A9128FF001C885A /* interruptthread.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7BF1A9128FF001C885A /* interruptthread.c */; };
 		4EB8F7CB1A9128FF001C885A /* lock.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7C11A9128FF001C885A /* lock.c */; };
 		4EB8F7CC1A9128FF001C885A /* object.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7C31A9128FF001C885A /* object.c */; };
-		4EB8F7CD1A9128FF001C885A /* string.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7C51A9128FF001C885A /* string.c */; };
+		4EB8F7CD1A9128FF001C885A /* nstring.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7C51A9128FF001C885A /* nstring.c */; };
 		4EB8F7FD1A91290C001C885A /* classfile.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7CF1A91290B001C885A /* classfile.c */; };
 		4EB8F7FF1A91290C001C885A /* interpreter.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7D21A91290B001C885A /* interpreter.c */; };
 		4EB8F8001A91290C001C885A /* stack.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7F51A91290C001C885A /* stack.c */; };
@@ -85,8 +85,8 @@
 		4EB8F7C21A9128FF001C885A /* lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lock.h; sourceTree = "<group>"; };
 		4EB8F7C31A9128FF001C885A /* object.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = object.c; sourceTree = "<group>"; };
 		4EB8F7C41A9128FF001C885A /* object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
-		4EB8F7C51A9128FF001C885A /* string.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = string.c; sourceTree = "<group>"; };
-		4EB8F7C61A9128FF001C885A /* string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = string.h; sourceTree = "<group>"; };
+		4EB8F7C51A9128FF001C885A /* nstring.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nstring.c; sourceTree = "<group>"; };
+		4EB8F7C61A9128FF001C885A /* nstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nstring.h; sourceTree = "<group>"; };
 		4EB8F7C71A9128FF001C885A /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = thread.h; sourceTree = "<group>"; };
 		4EB8F7CF1A91290B001C885A /* classfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = classfile.c; sourceTree = "<group>"; };
 		4EB8F7D21A91290B001C885A /* interpreter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = interpreter.c; sourceTree = "<group>"; };
@@ -221,8 +221,8 @@
 				4EB8F7C21A9128FF001C885A /* lock.h */,
 				4EB8F7C31A9128FF001C885A /* object.c */,
 				4EB8F7C41A9128FF001C885A /* object.h */,
-				4EB8F7C51A9128FF001C885A /* string.c */,
-				4EB8F7C61A9128FF001C885A /* string.h */,
+				4EB8F7C51A9128FF001C885A /* nstring.c */,
+				4EB8F7C61A9128FF001C885A /* nstring.h */,
 				4EB8F7C71A9128FF001C885A /* thread.h */,
 				4EB8F7BE1A9128FF001C885A /* thread.c */,
 			);
@@ -346,7 +346,7 @@
 				4EB8F8011A91290C001C885A /* heap.c in Sources */,
 				4EB8F7FD1A91290C001C885A /* classfile.c in Sources */,
 				4EB8F8021A91290C001C885A /* nativedispatch.c in Sources */,
-				4EB8F7CD1A9128FF001C885A /* string.c in Sources */,
+				4EB8F7CD1A9128FF001C885A /* nstring.c in Sources */,
 				4EB8F7C81A9128FF001C885A /* float.c in Sources */,
 				4E86B1E11A92C15800B66AF0 /* kjvm.c in Sources */,
 				4EB8F7CC1A9128FF001C885A /* object.c in Sources */,

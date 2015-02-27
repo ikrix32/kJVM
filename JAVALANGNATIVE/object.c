@@ -12,7 +12,7 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
 #include "kjvm.h"
@@ -39,8 +39,7 @@ char notify()
 char notifyAll()
 {
     ThreadControlBlock* cb;
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-        != MUTEXBLOCKED)
+    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
     {
         exit(249);
     }

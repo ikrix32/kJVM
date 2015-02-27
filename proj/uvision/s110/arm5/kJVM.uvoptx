@@ -121,10 +121,6 @@
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>DLGTARM</Key>
           <Name>(1010=-1,-1,-1,-1,0)(1007=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
@@ -431,7 +427,7 @@
 
   <Group>
     <GroupName>JAVALANGNATIVE</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -547,8 +543,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\string.c</PathWithFileName>
-      <FilenameWithoutPath>string.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\thread.c</PathWithFileName>
+      <FilenameWithoutPath>thread.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -560,8 +556,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\string.h</PathWithFileName>
-      <FilenameWithoutPath>string.h</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\thread.h</PathWithFileName>
+      <FilenameWithoutPath>thread.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -573,8 +569,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\thread.c</PathWithFileName>
-      <FilenameWithoutPath>thread.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\nstring.c</PathWithFileName>
+      <FilenameWithoutPath>nstring.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -586,8 +582,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\thread.h</PathWithFileName>
-      <FilenameWithoutPath>thread.h</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\JAVALANGNATIVE\nstring.h</PathWithFileName>
+      <FilenameWithoutPath>nstring.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -595,7 +591,7 @@
 
   <Group>
     <GroupName>platform</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

@@ -12,14 +12,14 @@
 // ..., [arg0, [arg1 ...]] -> ..
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #ifndef NRF51
 #include <termios.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
 #endif
-#include <string.h>
+//#include <string.h>
 #include "typedefinitions.h"
 #include "definitions.h"
 #include "kjvm.h"

@@ -12,7 +12,7 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 #ifndef TINYBAJOS_MULTITASKING
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
 #include "kjvm.h"
@@ -47,7 +47,7 @@ char static_cli()
 char initInterrupt()
 {
 
-    u1 vectorNr = opStackGetValue(local + 1).UInt;
+   const u1 vectorNr = opStackGetValue(local + 1).UInt;
 
     //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
@@ -61,7 +61,7 @@ char initInterrupt()
 
 char removeInterrupt()
 {
-    u1 vectorNr = opStackGetValue(local).UInt;
+    const u1 vectorNr = opStackGetValue(local).UInt;
     //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;
@@ -72,7 +72,7 @@ char removeInterrupt()
 
 char forceInterrupt()
 {
-    u1 vectorNr = opStackGetValue(local).UInt;
+    const u1 vectorNr = opStackGetValue(local).UInt;
     //interruptNr not valid
     if (vectorNr >= NUMBEROFINTERRUPTS)
         return 0;

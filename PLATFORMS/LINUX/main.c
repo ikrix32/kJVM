@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-#ifndef NRF51
+//#include <stdlib.h>
+/*#ifndef NRF51
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#endif
+#endif*/
 #include "definitions.h"
 #include "kjvm.h"
 #include "classfile.h"
