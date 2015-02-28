@@ -90,10 +90,10 @@ static const u1 java_lang_mathBin[] =
 #include "java_lang_Math.h"
 
 static const u1 java_io_InStreamBin[] =
-#include "java_io_InStream.h"
+#include "java_io_InputStream.h"
 
 static const u1 java_io_OutStreamBin[] =
-#include "java_io_OutStream.h"
+#include "java_io_PrintStream.h"
 
 static const u1 java_lang_SystemBin[] =
 #include "java_lang_System.h"

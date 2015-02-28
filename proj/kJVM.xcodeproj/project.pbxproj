@@ -39,11 +39,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4E1035B71AA1403200BF56D5 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../PLATFORMS/LINUX/debug.h; sourceTree = "<group>"; };
+		4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InputStream.h; sourceTree = "<group>"; };
+		4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_PrintStream.h; sourceTree = "<group>"; };
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
 		4E86B1FF1A92C58A00B66AF0 /* java_lang_Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Object.h; sourceTree = "<group>"; };
-		4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InStream.h; sourceTree = "<group>"; };
-		4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_OutStream.h; sourceTree = "<group>"; };
 		4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArithmeticException.h; sourceTree = "<group>"; };
 		4E86B2031A92C8DD00B66AF0 /* java_lang_ArrayIndexOutOfBoundsException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArrayIndexOutOfBoundsException.h; sourceTree = "<group>"; };
 		4E86B2041A92C8DD00B66AF0 /* java_lang_Boolean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Boolean.h; sourceTree = "<group>"; };
@@ -127,7 +128,6 @@
 		4EEBF63C1A9A52E600FED254 /* QuickSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuickSort.h; sourceTree = "<group>"; };
 		4EEBF63D1A9BFC7F00FED254 /* DivByZero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DivByZero.h; sourceTree = "<group>"; };
 		4EEBF63E1A9BFC7F00FED254 /* ThreadTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadTest.h; sourceTree = "<group>"; };
-		4EEBF63F1A9BFC7F00FED254 /* ThreadTest$1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadTest$1.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,8 +144,8 @@
 		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
-				4E86B2001A92C8DD00B66AF0 /* java_io_InStream.h */,
-				4E86B2011A92C8DD00B66AF0 /* java_io_OutStream.h */,
+				4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */,
+				4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */,
 				4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */,
 				4E86B2031A92C8DD00B66AF0 /* java_lang_ArrayIndexOutOfBoundsException.h */,
 				4E86B2041A92C8DD00B66AF0 /* java_lang_Boolean.h */,
@@ -243,6 +243,7 @@
 				4EB8F7F81A91290C001C885A /* interpreter.h */,
 				4EB8F7D21A91290B001C885A /* interpreter.c */,
 				4EB8F7D31A91290B001C885A /* definitions.h */,
+				4E1035B71AA1403200BF56D5 /* debug.h */,
 				4EB8F7D41A91290B001C885A /* limits.h */,
 				4EB8F7F41A91290C001C885A /* typedefinitions.h */,
 				4EB8F7FC1A91290C001C885A /* stack.h */,
@@ -262,7 +263,6 @@
 			children = (
 				4EEBF63D1A9BFC7F00FED254 /* DivByZero.h */,
 				4EEBF63E1A9BFC7F00FED254 /* ThreadTest.h */,
-				4EEBF63F1A9BFC7F00FED254 /* ThreadTest$1.h */,
 				4EEBF6291A9A52E600FED254 /* Arithmetic.h */,
 				4EEBF62A1A9A52E600FED254 /* HelloWorld.h */,
 				4EEBF62B1A9A52E600FED254 /* Inheritance.h */,

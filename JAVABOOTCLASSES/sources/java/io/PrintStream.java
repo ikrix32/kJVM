@@ -3,10 +3,10 @@ package java.io;
 import platform.PlatForm;
 import java.lang.*;
 
-public class OutStream {
+public class PrintStream {
 	PlatForm platform;
 
-	public OutStream(PlatForm platform) {
+	public PrintStream(PlatForm platform) {
 		this.platform = platform;
 	}
 

@@ -372,9 +372,9 @@ void analyzeClass(const u1 classId)
 {
     pc = 0;
 
-    DEBUGPRINTF("class number:\t \t\t%X   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n", classId);
+    DEBUG_CL_PRINTF("class number:\t \t\t%X   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n", classId);
     cs[classId].magic = pc;                                /* relative position in classfile*/
-    DEBUGPRINTF("cf\tmagic:\t %X\t", getU4(classId,pc));
+    DEBUG_CL_PRINTF("cf\tmagic:\t %X\t", getU4(classId,pc));
     pc = 4;                                       /* NOT +=4, because getU*(pc) increases pc when pc = 0 */
 
     cs[classId].minor_version = pc++;                      /* 4*/
@@ -382,40 +382,40 @@ void analyzeClass(const u1 classId)
     if (getU2(classId,cs[classId].major_version) > 52)
         ERROREXIT(1,"this java version is not supported yet: cs[classId].major_version %d\n",
                   getU2(classId,cs[classId].major_version));
-    DEBUGPRINTF("version:\t%d.%d\n", getU2(classId,pc),getU2(classId,pc-2));
+    DEBUG_CL_PRINTF("version:\t%d.%d\n", getU2(classId,pc),getU2(classId,pc-2));
 
     pc += 2;
     cs[classId].constant_pool_count = pc;
-    DEBUGPRINTF("cf\tconstant_pool_count:\t%d\n", getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tconstant_pool_count:\t%d\n", getU2(classId,pc));
     pc += 2;
     const int constantPoolSize = sizeof(u2) * getU2(classId,cs[classId].constant_pool_count);
-    DEBUGPRINTF("cf\tconstant_pool_size:\t%d\n", constantPoolSize);
+    DEBUG_CL_PRINTF("cf\tconstant_pool_size:\t%d\n", constantPoolSize);
     if ((cs[classId].constant_pool = (u2*) malloc(constantPoolSize)) == NULL)
         ERROREXIT(2,"malloc error\n");
 
     analyzeConstantPool(classId);
 
     cs[classId].access_flags = pc;
-    DEBUGPRINTF("cf\taccess_flags: %x\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\taccess_flags: %x\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].this_class = pc;
-    DEBUGPRINTF("cf\tthis_class: %d\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tthis_class: %d\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].super_class = pc;
-    DEBUGPRINTF("cf\tsuper_class: %d\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tsuper_class: %d\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].interfaces_count = pc;
-    DEBUGPRINTF("cf\tinterfaces_count: %d\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tinterfaces_count: %d\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].interfaces = pc;
     pc += getU2(classId,cs[classId].interfaces_count) * 2;
 
     cs[classId].fields_count = pc;
-    DEBUGPRINTF("cf\tfields_count: %d\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tfields_count: %d\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].field_info = NULL;
@@ -426,7 +426,7 @@ void analyzeClass(const u1 classId)
         analyzeFields(classId);
     }
     cs[classId].methods_count = pc;
-    DEBUGPRINTF("cf\tmethods_count: %d\n",getU2(classId,pc));
+    DEBUG_CL_PRINTF("cf\tmethods_count: %d\n",getU2(classId,pc));
 
     pc += 2;
     cs[classId].method_info = NULL;
@@ -437,7 +437,7 @@ void analyzeClass(const u1 classId)
         analyzeMethods(classId);
     }
     const u2 ln = getU2(classId,0);                                // class file attribute count
-    DEBUGPRINTF("cf-attributes: count: %d ",ln);
+    DEBUG_CL_PRINTF("cf-attributes: count: %d ",ln);
     // SourceFile (6), Deprecated (4),InnerClasses,EnclosingMethod,Synthetic,Signature
 }
 
@@ -453,46 +453,46 @@ void analyzeConstantPool(const u1 classId)
         {
             case CONSTANT_Class:/*    7 */
             {
-                DEBUGPRINTF("\tcp %d\t:Class\t\t-> name:\t%d\n",n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("\tcp %d\t:Class\t\t-> name:\t%d\n",n,getU2(classId,pc));
                 pc += 2;
             }break;
             case CONSTANT_String:             /*    8 */
             {
-                DEBUGPRINTF("\tcp %d\t:String\t\t-> string:\t%d\n",n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("\tcp %d\t:String\t\t-> string:\t%d\n",n,getU2(classId,pc));
                 pc += 2;
             }break;
             case CONSTANT_Fieldref:           /*    9 */
             {
-                DEBUGPRINTF("\tcp %d\t:Fieldref\t-> class: %d ", n,getU2(classId,pc));
-                DEBUGPRINTF("name_and_type:\t%d\n", getU2(classId,pc+2));
+                DEBUG_CL_PRINTF("\tcp %d\t:Fieldref\t-> class: %d ", n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("name_and_type:\t%d\n", getU2(classId,pc+2));
                 pc += 4;
             }break;
             case CONSTANT_InterfaceMethodref: /*   11 */
             {
-                DEBUGPRINTF("\tcp %d\t:InterfaceMethodref->class: %d ",n,getU2(classId,pc));
-                DEBUGPRINTF("name_and_type_index\t%d\n",getU2(classId,pc+2));
+                DEBUG_CL_PRINTF("\tcp %d\t:InterfaceMethodref->class: %d ",n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("name_and_type_index\t%d\n",getU2(classId,pc+2));
                 pc += 4;
             }break;
             case CONSTANT_Methodref:          /*    10  nur Methoden, die aufgerufen werden!!!*/
             {
-                DEBUGPRINTF("\tcp %d\t:Methodref\t-> class: %d ",n,getU2(classId,pc));
-                DEBUGPRINTF("name_and_type:\t%d\n", getU2(classId,pc+2));
+                DEBUG_CL_PRINTF("\tcp %d\t:Methodref\t-> class: %d ",n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("name_and_type:\t%d\n", getU2(classId,pc+2));
                 pc += 4;
             }break;
             case CONSTANT_Integer:            /*    3*/
             {
-                DEBUGPRINTF("cp %d\t: Integer -> name:\t%d\n",n,getU4(classId,pc));
+                DEBUG_CL_PRINTF("cp %d\t: Integer -> name:\t%d\n",n,getU4(classId,pc));
                 pc += 4;
             }break;
             case CONSTANT_NameAndType:        /*    12*/
             {
-                DEBUGPRINTF("\tcp %d\t:nameAndType\t-> name:\t%d ",n,getU2(classId,pc));
-                DEBUGPRINTF("descriptor:\t %d\n",getU2(classId,pc+2));
+                DEBUG_CL_PRINTF("\tcp %d\t:nameAndType\t-> name:\t%d ",n,getU2(classId,pc));
+                DEBUG_CL_PRINTF("descriptor:\t %d\n",getU2(classId,pc+2));
                 pc += 4;
             }break;
             case CONSTANT_Float:              /*    4 */
             {
-#ifdef DEBUG
+#ifdef DEBUG_CLASS_LOADING
 #ifdef AVR8                           // change all avr8 string to flash strings gives more data ram space for java!!
                 {
                     u1 float_str[7];
@@ -500,7 +500,7 @@ void analyzeConstantPool(const u1 classId)
                     printf_P(PSTR("\tcp %d\t:Float:\t%s  \n"),n,float_str);
                 }
 #else
-                printf("\tcp %d\t:Float:\t%f  \n",n,getFloat(classId,pc));
+                DEBUG_CL_PRINTF("\tcp %d\t:Float:\t%f  \n",n,getFloat(classId,pc));
 #endif
 #endif
                 pc += 4;
@@ -515,12 +515,12 @@ void analyzeConstantPool(const u1 classId)
             {
                 const u2 length = getU2(classId,0);
                 //constantsSize += length;
-                DEBUGPRINTF("\tcp %d\t:Utf8:\t\t-> ",n);
-#ifdef DEBUG
+                DEBUG_CL_PRINTF("\tcp %d\t:Utf8:\t\t-> ",n);
+#ifdef DEBUG_CLASS_LOADING
                 for (int i = 0; i < length; i++)
-                    DEBUGPRINTF("%c",getU1(classId, pc + i));
+                    DEBUG_CL_PRINTF("%c",getU1(classId, pc + i));
                 /* utf8 chars ???*/
-                DEBUGPRINTF("\n");
+                DEBUG_CL_PRINTF("\n");
 #endif
                 pc += length;
             }break;
@@ -539,10 +539,10 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
     for (int n = 0; n < getU2(classId,cs[classId].methods_count); n++) /*methods*/
     {
         cs[classId].method_info[n] = pc;                   /* absolute in classfile*/
-        DEBUGPRINTF("\tmethod %d\taccess_flags: %04x",n,getU2(classId,pc));
-        DEBUGPRINTF(" name: %04x ",getU2(classId,pc + 2));
-        DEBUGPRINTF(" descriptor: %04x ",getU2(classId,pc + 4));
-        DEBUGPRINTF(" \tattribute_count: %04x\n",getU2(classId,pc + 6));
+        DEBUG_CL_PRINTF("\tmethod %d\taccess_flags: %04x",n,getU2(classId,pc));
+        DEBUG_CL_PRINTF(" name: %04x ",getU2(classId,pc + 2));
+        DEBUG_CL_PRINTF(" descriptor: %04x ",getU2(classId,pc + 4));
+        DEBUG_CL_PRINTF(" \tattribute_count: %04x\n",getU2(classId,pc + 6));
         /*Signature*/
         //BHDEBUGPRINTSTRING(METHODDESCRSTR(classId,n),METHODDESCRSTRLENGTH(classId,n));
         const int a = getU2(classId,pc + 6);
@@ -565,31 +565,31 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
             const char* adr = getAddr(classId,cs[classId].constant_pool[getU2(classId,0)] + 1 + 2);
             if (STRNCMPRAMFLASH("Code", adr, 4) == 0)
             {
-                DEBUGPRINTF("\t\tCode: attribute_length: %d\n",getU4(classId,pc));
-                DEBUGPRINTF("\t\tCode: max_stack: %d\n", getU2(classId,pc + 4));
-                DEBUGPRINTF("\t\tCode: max_locals: %d\n",getU2(classId,pc + 6));
-                DEBUGPRINTF("\t\tCode: code_length: %d pc: %d\n\t\t",getU4(classId,pc + 8),pc);
+                DEBUG_CL_PRINTF("\t\tCode: attribute_length: %d\n",getU4(classId,pc));
+                DEBUG_CL_PRINTF("\t\tCode: max_stack: %d\n", getU2(classId,pc + 4));
+                DEBUG_CL_PRINTF("\t\tCode: max_locals: %d\n",getU2(classId,pc + 6));
+                DEBUG_CL_PRINTF("\t\tCode: code_length: %d pc: %d\n\t\t",getU4(classId,pc + 8),pc);
                 pc += 12;
-#ifdef DEBUG
+#ifdef DEBUG_CLASS_LOADING
                 for (int i = 0; i < getU4(classId,pc - 4); i++)
-                    DEBUGPRINTF("%2x ",getU1(classId,pc + i));
+                    DEBUG_CL_PRINTF("%2x ",getU1(classId,pc + i));
                 /*length*/
 #endif
                 pc += getU4(classId,pc - 4);
                 const u2 etl = getU2(classId,0);
-                DEBUGPRINTF("\n\t\tCode: exception_table_length: %d\n",etl);
-#ifdef DEBUG    /* exception_table	*/
+                DEBUG_CL_PRINTF("\n\t\tCode: exception_table_length: %d\n",etl);
+#ifdef DEBUG_CLASS_LOADING /* exception_table	*/
                 for (int i = 0;i < etl;i++)
                 {
-                    DEBUGPRINTF("\t\t\texception: nr: %d startPC: %d\n",i,getU2(classId,pc + 8 * i));
-                    DEBUGPRINTF("\t\t\texception: nr: %d endPC: %d\n",i,getU2(classId,8 * i + 2));
-                    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(classId,8 * i + 6));
-                    DEBUGPRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(classId,8 * i + 6));
+                    DEBUG_CL_PRINTF("\t\t\texception: nr: %d startPC: %d\n",i,getU2(classId,pc + 8 * i));
+                    DEBUG_CL_PRINTF("\t\t\texception: nr: %d endPC: %d\n",i,getU2(classId,8 * i + 2));
+                    DEBUG_CL_PRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(classId,8 * i + 6));
+                    DEBUG_CL_PRINTF("\t\t\texception: nr: %d catchType: %d\n",i,getU2(classId,8 * i + 6));
                 }
 #endif
                 pc += etl * 8;
                 const u2 h = getU2(classId,0);
-                DEBUGPRINTF("\t\tCode: attributes_count: %d\n", h);
+                DEBUG_CL_PRINTF("\t\tCode: attributes_count: %d\n", h);
                 //LineNumberTable(var),LocalVariableTable(var),StackMapTable
                 for (int i = 0; i < h; i++)
                 {
@@ -617,15 +617,15 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
             }                                     // code
             if (STRNCMPRAMFLASH("Exceptions", adr, 10) == 0)
             {
-                DEBUGPRINTF("exception object\n");
+                DEBUG_CL_PRINTF("exception object\n");
                 mN = n;
 
                 u4 n2 = getU4(classId,0);
                 /*attribute_length. don't need that.*/
                 n2 = getU2(classId,0);
-#ifdef DEBUG
+#ifdef DEBUG_CLASS_LOADING
                 for (int i = 0;i < n2;i++)
-                    DEBUGPRINTF("\t\t\texception: nr: %d class: %d\n",i,getU2(classId,pc + 2 * i));
+                    DEBUG_CL_PRINTF("\t\t\texception: nr: %d class: %d\n",i,getU2(classId,pc + 2 * i));
 #endif
                 pc += 2 * n2;
                 /*pc=(u2)getU4(0)+pc;*/
@@ -658,10 +658,10 @@ void analyzeFields(const u1 classId)
     for (int n = 0 ; n < getU2(classId,cs[classId].fields_count); n++)  /*num fields*/
     {
         cs[classId].field_info[n] = pc;                    /* absolute in classfile*/
-        DEBUGPRINTF("\tfield %x\taccess_flags: %d\n",n,getU2(classId,pc));
-        DEBUGPRINTF("\tfield %d\tname: %d\n",n,getU2(classId,pc+2));
-        DEBUGPRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(classId,pc+4));
-        DEBUGPRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(classId,pc+6));
+        DEBUG_CL_PRINTF("\tfield %x\taccess_flags: %d\n",n,getU2(classId,pc));
+        DEBUG_CL_PRINTF("\tfield %d\tname: %d\n",n,getU2(classId,pc+2));
+        DEBUG_CL_PRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(classId,pc+4));
+        DEBUG_CL_PRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(classId,pc+6));
         const u2 fielddescr = cs[classId].constant_pool[getU2(classId,cs[classId].field_info[n] + 4)];
         const u1 isNotObject= STRNCMPRAMFLASH("L",(const char*) getAddr(classId,fielddescr + 3), 1);
 

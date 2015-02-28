@@ -9,9 +9,9 @@ import platform.*;
  */
 public final class System {
 	public final static PlatForm platform = new PlatForm();
-	public static final OutStream out = new OutStream(platform);
-	public static final InStream in = new InStream(platform);
-	public static final OutStream err = out;
+	public static final PrintStream out = new PrintStream(platform);
+	public static final InputStream in = new InputStream(platform);
+	public static final PrintStream err = out;
 
 	private System() {
 	}

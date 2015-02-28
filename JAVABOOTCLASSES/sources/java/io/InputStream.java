@@ -3,10 +3,10 @@ package java.io;
 import platform.*;
 import java.lang.*;
 
-public class InStream {
+public class InputStream {
 	PlatForm platform;
 
-	public InStream(PlatForm platform) {
+	public InputStream(PlatForm platform) {
 		this.platform = platform;
 	}
 
