@@ -50,8 +50,19 @@ GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
 #define methodDescrLength   descrLength
 
 #define GET_TAG(x) getU1(cN,CP(cN, x))
-#define METHODREF_GET_CLASS(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+
+#define METHODREF_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define METHODREF_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+
+#define FIELDINFO_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define FIELDINFO_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+
+
+#define NAMEANDTYPE_GET_NAMEID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define NAMEANDTYPE_GET_DESCRIPTIONID(x) getU2(cN,CP(cN, x) + 3)//1 = sizeof(tag) + sizeof(nameId)
+
 #define CLASSINFO_GET_NAMEID(classInfoId) getU2(cN,CP(cN, classInfoId) + 1)//1 = sizeof(tag)
+
 #define UTF8_GET_LENGTH(id) getU2(cN,CP(cN, id) + 1);// 1 = sizeof(tag)
 #define UTF8_GET_STRING(id) (char*)getAddr(cN,CP(cN, id) + 3);//3 = sizeof(tag) + sizeof(classNameLength)
 
@@ -974,37 +985,35 @@ void interpreter_run()                                        /* in: classNumber
             {
                 DEBUGPRINTLN_OPC("getstatic ");       /*mb jf ... corrected funtion*/
                 methodStackPush(cN);
-                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
-                                               getU2(cN,/* name-index*/
-                                                     /* index to name and type*/
-                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);                   /* bytes*/
-                fieldNameLength = getU2(cN,/* length*/
-                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
-                /* utf8*/
-                fieldDescr = (char*) getAddr(cN,CP(cN,
-                                                getU2(cN,/* descriptor-index*/
-                                                      /* index to name and type*/
-                                                      CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
-                                                      + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(cN,/* length*/
-                                         CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
 
-                const u2 classInfo = METHODREF_GET_CLASS(BYTECODEREF);//1 ctpool tag u1
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+
+                fieldName = UTF8_GET_STRING(nameId);
+                fieldNameLength = UTF8_GET_LENGTH(nameId);
+
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+
+                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+
+
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
                 const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
 
-                const char* cclassName = UTF8_GET_STRING(classNameId);
-                const u2 cclassNameLength = UTF8_GET_LENGTH(classNameId);
-                //printf("Class name: %s,%d\n",cclassName,cclassNameLength);
-                cN = FIND_CLASS(cclassName,cclassNameLength);
+                className = UTF8_GET_STRING(classNameId);
+                classNameLength = UTF8_GET_LENGTH(classNameId);
+
+                cN = FIND_CLASS(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
-                    CLASSNOTFOUNDERR(cclassName,cclassNameLength);
+                    CLASSNOTFOUNDERR(className,classNameLength);
                 }
 
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
                 {
-                    FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                    FIELDNOTFOUNDERR(fieldName,className);
                 }
                 /* got position in constant pool --> results in position on heap*/
                 DEBUGPRINTLNSTRING(fieldName, fieldNameLength);
@@ -1017,34 +1026,34 @@ void interpreter_run()                                        /* in: classNumber
             {   /*mb jf*/
                 DEBUGPRINTLN_OPC("putstatic -> stack in static field");
                 methodStackPush(cN);
-                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
-                                               getU2(cN,                        /* name-index*/
-                                                     /* index to name and type*/
-                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
-                                                     + 1)) + 3);                   /* bytes*/
-                fieldNameLength = getU2(cN,
-                                        /* length*/
-                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
-                /* utf8*/
-                fieldDescr = (char*) getAddr(cN,CP(cN,
-                                                getU2(cN,                        /* descriptor-index*/
-                                                      /* index to name and type*/
-                                                      CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3))
-                                                      + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
 
-                cN = FIND_CLASS(getAddr(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
-                                getU2(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1));
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+
+                fieldName = UTF8_GET_STRING(nameId);
+                fieldNameLength = UTF8_GET_LENGTH(nameId);
+
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+
+                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
+                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+
+                className = UTF8_GET_STRING(classNameId);
+                classNameLength = UTF8_GET_LENGTH(classNameId);
+
+                cN = FIND_CLASS(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
-                    CLASSNOTFOUNDERR(getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3),
-                                     getU2(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 1));
+                    CLASSNOTFOUNDERR(className,classNameLength);
                 }
 
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                 {
-                    FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                    FIELDNOTFOUNDERR(fieldName,className);
                 }
 
                 heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
@@ -1058,36 +1067,40 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN_OPC("getfield ->   heap to stack:");
                 methodStackPush(cN);
                 first = opStackPop();
-                fieldName = (char*) getAddr(cN,CP(cN,/* utf8*/
-                                               getU2(cN,/* name-index*/
-                                                     /* index to name and type*/
-                                                     CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);/* bytes*/
-                fieldNameLength = getU2(cN,/* length*/
-                                        CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
-                /* utf8*/
-                fieldDescr = (char*) getAddr(cN,CP(cN,getU2(cN,/* descriptor-index*/
-                                                         /* index to name and type*/
-                                                         CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);                   /* bytes*/
-                fieldDescrLength = getU2(cN,/* length*/
-                                         CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
-                /*
-                 #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
-                 printf_P(PSTR("GETFIELD popRef %x von findClass %x numfields von dieser kl.%x"),first,cN,numFields);
-                 #else
-                 printf("GETFIELD popRef %x von findClass %x numfields von dieser kl.%x",first,cN,numFields);
-                 #endif
-                 */
-                /* findClass liefert nur die Klasse, in der das field verwendet wird*/
-                /* nicht die Klasse in der das field definiert wird (kann eine superclass sein)*/
-                /* jetzt ist es noch besser, im stackobject die classnummer zu ermitteln*/
 
-                cN = first.stackObj.classNumber;
-                if (!findFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+
+                fieldName = UTF8_GET_STRING(nameId);
+                fieldNameLength = UTF8_GET_LENGTH(nameId);
+
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+
+                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+
+                /* FindClass provides only the class in which the field is used */
+                /* Not the class is defined in the field (can be a super class) */
+                /* Now it's even better in the stack object to determine the class number */
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
+                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+
+                className = UTF8_GET_STRING(classNameId);
+                classNameLength = UTF8_GET_LENGTH(classNameId);
+
+                //krix - findclass before
+                cN = FIND_CLASS(className,classNameLength);
+                if (cN == INVALID_CLASS_ID)
                 {
-                    FIELDNOTFOUNDERR(fieldName,
-                                     getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN, BYTECODEREF) + 1)) + 1)) + 3));
+                    CLASSNOTFOUNDERR(className,classNameLength);
                 }
-                opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN+ 1).Int));
+                const u2 fieldClassId = cN;
+                cN = first.stackObj.classNumber;
+                if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                {
+                   FIELDNOTFOUNDERR(fieldName,className);
+                }
+                opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN +  1).Int));
                 pc += 2;
                 cN = methodStackPop();
                 // end GETFIELD
@@ -1097,29 +1110,32 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN_OPC("putfield -> stack to heap");
                 methodStackPush(cN);
                 {
-                    /* mb jf print name*/
-                    fieldName = (char*) getAddr(cN,CP(cN, /* utf8*/
-                                                   getU2(cN,/* name-index*/
-                                                         /* index to name and type*/
-                                                         CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);               /* bytes*/
-                    fieldNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);                     /* length*/
-                    fieldDescr = (char*) getAddr(cN,CP(cN, /* utf8*/
-                                                    getU2(cN,/* descriptor-index*/
-                                                          /* index to name and type*/
-                                                          CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);               /* bytes*/
-                    fieldDescrLength = getU2(cN,
-                                             CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
-
-                    cN = FIND_CLASS(getAddr(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+1))+3),
-                                    getU2(cN,CP(cN,getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF)+1))+1))+1));
-                    if (cN == INVALID_CLASS_ID)
-                    {
-                        CLASSNOTFOUNDERR(getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 3),
-                                         getU2(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 1));
-                    }
-
                     first = opStackPop();         /*mb jf doesn't work without variable ?!?!*/
                     second = opStackPop();
+
+                    const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+                    const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+
+                    fieldName = UTF8_GET_STRING(nameId);
+                    fieldNameLength = UTF8_GET_LENGTH(nameId);
+
+                    const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+
+                    fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
+                    fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+
+
+                    const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+
+                    className = UTF8_GET_STRING(classNameId);
+                    classNameLength = UTF8_GET_LENGTH(classNameId);
+
+                    cN = FIND_CLASS(className,classNameLength);
+                    if (cN == INVALID_CLASS_ID)
+                    {
+                        CLASSNOTFOUNDERR(className,classNameLength);
+                    }
 
                     if (second.UInt == NULLOBJECT.UInt)
                     {
@@ -1129,12 +1145,23 @@ void interpreter_run()                                        /* in: classNumber
                     }
                     else
                     {
-                        cN = second.stackObj.classNumber;
-                        if (!findFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                        /*if(cN != second.stackObj.classNumber)
                         {
-                            FIELDNOTFOUNDERR(fieldName,
-                                             getAddr(cN,CP(cN,getU2(cN,CP(cN,getU2(cN,CP(cN,BYTECODEREF) + 1)) + 1)) + 3));
+                            const u2 classId = second.stackObj.classNumber;
+                            const u2 classInfoId = getU2(classId,cs[classId].this_class);
+                            const u2 classNameId = getU2(classId,CP(classId,classInfoId) + 1);
+                            const char* cclassName = getAddr(classId,CP(classId,classNameId) + 3);
+
+                            //PRINTF("CLASS ERROR %d != %d -> %s,%s\n",cN,classId,className,cclassName);
+                        }*/
+                        const u2 fieldClassId = cN;
+                        cN = second.stackObj.classNumber;
+                        //should be find field by nam and class
+                        if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                        {//class name can't be correct
+                            FIELDNOTFOUNDERR(fieldName,className);
                         }
+                        //PRINTF("Field %d + %d\n",second.stackObj.pos,fN);
                         /* jetzt hab ich alles*/
                         /* den Typ*/
                         /* die Stelle auf dem heap*/
@@ -1182,11 +1209,18 @@ void interpreter_run()                                        /* in: classNumber
                 local = opStackGetSpPos() - findNumArgs(cN,BYTECODEREF) - 1;
                 /* get cN from.stackObjRef*/
                 /*  get method from cN or superclasses*/
-                methodName = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
-                methodNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
+                //ex: invokestatic #39;
+                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(BYTECODEREF);
+                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(methodNameAndTypeId);
+
+                methodName = UTF8_GET_STRING(methodNameId);
+                methodNameLength = UTF8_GET_LENGTH(methodNameId);
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
-                methodDescr = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
-                methodDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+
+                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(methodNameAndTypeId);
+
+                methodDescr = UTF8_GET_STRING(methodDescrId);;
+                methodDescrLength = UTF8_GET_LENGTH(methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
                 className = NULL;
@@ -1222,7 +1256,7 @@ void interpreter_run()                                        /* in: classNumber
                 }/*INVOKESPECIAL*/
                 else
                 {
-                    const u2 classInfo = METHODREF_GET_CLASS(BYTECODEREF);//1 ctpool tag u1
+                    const u2 classInfo = METHODREF_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
                     const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
 
                     className = UTF8_GET_STRING(classNameId);
@@ -1327,19 +1361,24 @@ void interpreter_run()                                        /* in: classNumber
                 local = (u2) opStackGetSpPos() - findNumArgs(cN,BYTECODEREF);
 
 
-                const u2 classInfo = METHODREF_GET_CLASS(BYTECODEREF);//1 ctpool tag u1
+                const u2 classInfo = METHODREF_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
                 const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
 
                 className = UTF8_GET_STRING(classNameId);
                 classNameLength = UTF8_GET_LENGTH(classNameId);
 
-                methodName = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 3);
-                methodNameLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 1)) + 1);
-                methodDescr = (char*) getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 3);
-                methodDescrLength = getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,CP(cN, BYTECODEREF) + 3)) + 3)) + 1);
+                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(BYTECODEREF);
+                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(methodNameAndTypeId);
 
-                if (!findMethod(className, classNameLength, methodName,
-                                methodNameLength, methodDescr, methodDescrLength))
+                methodName = UTF8_GET_STRING(methodNameId);
+                methodNameLength = UTF8_GET_LENGTH(methodNameId);
+
+                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(methodNameAndTypeId);
+                methodDescr = UTF8_GET_STRING(methodDescrId);;
+                methodDescrLength = UTF8_GET_LENGTH(methodDescrId);
+                DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
+
+                if (!findMethod(className, classNameLength, methodName, methodNameLength, methodDescr, methodDescrLength))
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }

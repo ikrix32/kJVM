@@ -77,7 +77,7 @@ u2 _i;\
 #endif
 
 #ifndef DEBUG
-#undef DDEBUG_VM
+#undef DEBUG_VM
 #endif
 
 #ifdef DEBUG_VM

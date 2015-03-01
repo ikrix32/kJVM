@@ -13,6 +13,7 @@
 #define __i386__ 1
 #undef DEBUG
 
+//#define DEBUG_VM
 //#define DEBUG_CLASS_LOADING
 
 #define BOOTSTRAP_BINARIES

@@ -19,7 +19,7 @@ u1 findClass(const char* name,const u1 len);
 u1 findSuperClass(const u1 classId);
 u1 findNumArgs(const u1 classId,const u2 method);
 u2 findMaxLocals(const u1 classId,const u1 methodId);
-u1 findFieldByName(const char* fieldName,const u1 fieldNameLength,
+u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLength,
                    const char* fieldDescr,const u1 fieldDescrLength);
 u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength,
                       const char* fieldDescr,const u1 fieldDescrLength);

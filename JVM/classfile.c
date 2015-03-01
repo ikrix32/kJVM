@@ -117,39 +117,42 @@ u2 findMaxLocals(const u1 classId,const u1 methodId)                            
 /* in cN fieldName fieldDescr*/
 /* out cN, fN of normal field in object (non static, non final primitive fields)*/
 /* return 1 -> found */
-u1 findFieldByName(const char* fieldName,const u1 fieldNameLength,
+u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLength,
                    const char* fieldDescr, const u1 fieldDescrLength)
 {
     fN = 0;
     do
     {
-        u1	found = 0;
-        const u1 numFields = getU2(cN,cs[cN].fields_count);
-        for (u1 i = 0; i < numFields; ++i)
+        //if(cN == classId)
         {
-            const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-            const u1 isNotObject= STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
-
-            if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
-                continue; // ignore static and non static primitive finals
-
-            if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
-                continue;// ignore static
-
-            const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
-
-            if(fieldNameLength == getU2(cN,fieldname + 1)
-            && STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3), getU2(cN,fieldname + 1)) == 0
-            && fieldDescrLength == getU2(cN,fielddescr + 1)
-            && STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3), getU2(cN,fielddescr + 1)) == 0)
+            u1	found = 0;
+            const u1 numFields = getU2(cN,cs[cN].fields_count);
+            for (u1 i = 0; i < numFields; ++i)
             {
-                found = 1;
-                break;
+                const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
+                const u1 isNotObject= STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+
+                if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
+                    continue; // ignore static and non static primitive finals
+
+                if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
+                    continue;// ignore static
+
+                const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
+
+                if(fieldNameLength == getU2(cN,fieldname + 1)
+                && STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3), getU2(cN,fieldname + 1)) == 0
+                && fieldDescrLength == getU2(cN,fielddescr + 1)
+                && STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3), getU2(cN,fielddescr + 1)) == 0)
+                {
+                    found = 1;
+                    break;
+                }
+                fN++;
             }
-            fN++;
+            if (found )
+                return 1;
         }
-        if (found )
-            return 1;
     } while (findSuperClass(cN));
     return 0;
 }
@@ -348,16 +351,14 @@ u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
     {
-        const u2 c_pool = cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].this_class)]+ 1)];
-        const u1 cclassnameLength=getU2(classId,c_pool + 1);
-
-        //printf("Searching: i=%d x=%d,y=%d c_pool=%d\n",i,x,y,c_pool);
-        //printf("Searching: %s,%d - crt %s\n",className,classNameLength,cclassName);
+        const u2 classInfoId = getU2(classId,cs[classId].this_class);
+        const u2 classNameId = getU2(classId,CP(classId,classInfoId) + 1);
+        const u2 cclassnameLength=getU2(classId,CP(classId,classNameId) + 1);
 
         if (classNameLength != (u2) cclassnameLength)
             continue;
 
-        const char* cclassName = getAddr(classId,c_pool + 3);
+        const char* cclassName = getAddr(classId,CP(classId,classNameId) + 3);
         if (STRNCMPRAMFLASH(className,cclassName, classNameLength) == 0)
         {
             //printf("\nclass:%s id:%d \n",className,cN);
