@@ -42,6 +42,7 @@
 		4E1035B71AA1403200BF56D5 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../PLATFORMS/LINUX/debug.h; sourceTree = "<group>"; };
 		4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InputStream.h; sourceTree = "<group>"; };
 		4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_PrintStream.h; sourceTree = "<group>"; };
+		4E1035BA1AA66C1700BF56D5 /* mikrokernel_dbg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mikrokernel_dbg.h; sourceTree = "<group>"; };
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
 		4E86B1FF1A92C58A00B66AF0 /* java_lang_Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Object.h; sourceTree = "<group>"; };
@@ -144,6 +145,7 @@
 		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				4E1035BA1AA66C1700BF56D5 /* mikrokernel_dbg.h */,
 				4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */,
 				4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */,
 				4E86B2021A92C8DD00B66AF0 /* java_lang_ArithmeticException.h */,
