@@ -14,6 +14,12 @@
 #include "classloader.h"
 
 #ifdef BOOTSTRAP_BINARIES
+
+#ifdef ENABLE_KCLASS_FORMAT
+static const char* microkernel[] =
+#include "mikrokernel_dbg.h"
+#endif
+
 static const u1 java_lang_ObjectBin[] =
 #include "java_lang_Object.h"
 

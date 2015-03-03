@@ -121,40 +121,45 @@ u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLeng
                    const char* fieldDescr, const u1 fieldDescrLength)
 {
     fN = 0;
+    u1  class = cN;
+    u1	found = 0;
+
+    u1 f = 0;
     do
     {
-        //if(cN == classId)
+        const u1 numFields = getU2(cN,cs[cN].fields_count);
+        for (u1 i = 0; i < numFields; ++i)
         {
-            u1	found = 0;
-            const u1 numFields = getU2(cN,cs[cN].fields_count);
-            for (u1 i = 0; i < numFields; ++i)
+            const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
+            const u1 isNotObject= STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+
+            if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
+                continue; // ignore static and non static primitive finals
+
+            if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
+                continue;// ignore static
+
+            const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
+
+            if(fieldNameLength == getU2(cN,fieldname + 1)
+            && STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3), getU2(cN,fieldname + 1)) == 0
+            && fieldDescrLength == getU2(cN,fielddescr + 1)
+            && STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3), getU2(cN,fielddescr + 1)) == 0)
             {
-                const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-                const u1 isNotObject= STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
-
-                if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
-                    continue; // ignore static and non static primitive finals
-
-                if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
-                    continue;// ignore static
-
-                const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
-
-                if(fieldNameLength == getU2(cN,fieldname + 1)
-                && STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3), getU2(cN,fieldname + 1)) == 0
-                && fieldDescrLength == getU2(cN,fielddescr + 1)
-                && STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3), getU2(cN,fielddescr + 1)) == 0)
-                {
-                    found = 1;
-                    break;
-                }
-                fN++;
+                fN = f;
+                class = cN;
+                found = 1;
+                //break;
             }
-            if (found )
-                return 1;
+            f++;
         }
+        if (found == 1 && cN == classId)
+            break;
     } while (findSuperClass(cN));
-    return 0;
+    if(found == 1){
+        cN = class;
+    }
+    return found;
 }
 
 
@@ -452,6 +457,11 @@ void analyzeConstantPool(const u1 classId)
         cs[classId].constant_pool[n] = pc;
         switch (getU1(classId,0))
         {
+            case CONSTANT_KClass:/*    16 */
+            {
+                DEBUG_CL_PRINTF("\tcp %d\t:Class\t\t-> ID:\t%d\n",n,getU2(classId,pc));
+                pc += 2;
+            }break;
             case CONSTANT_Class:/*    7 */
             {
                 DEBUG_CL_PRINTF("\tcp %d\t:Class\t\t-> name:\t%d\n",n,getU2(classId,pc));
@@ -709,8 +719,8 @@ void analyzeFields(const u1 classId)
         heapSetElement(toSlot( (u4) 0), heapPos + n + 1);
 
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDSTATICCLASSOBJECT;
-    HEAPOBJECTMARKER(heapPos).mutex=MUTEXNOTBLOCKED;
-    HEAPOBJECTMARKER(heapPos).rootCheck=1;
+    HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
+    HEAPOBJECTMARKER(heapPos).rootCheck = 1;
     HEAPOBJECTMARKER(heapPos).magic= OBJECTMAGIC;
 
     cs[classId].classInfo.stackObj.pos = heapPos;

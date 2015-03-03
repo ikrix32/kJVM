@@ -171,6 +171,8 @@
 #define   CONSTANT_NameAndType          12
 #define   CONSTANT_Utf8                     1
 
+#define   CONSTANT_KClass                    16
+
 #define     ACC_PUBLIC              0x0001        //Declared public; may be accessed from outside its package.
 #define     ACC_PRIVATE         0x0002            //Declared private; accessible only within the defining class.
 #define     ACC_PROTECTED   0x0004                //Declared protected; may be accessed within subclasses.
@@ -189,6 +191,24 @@
 #define     T_SHORT             0x9               // aaray type boolean
 #define     T_INT                   0xa           // aaray type boolean
 #define     T_LONG              0xb               // aaray type boolean
+
+
+#define GET_TAG(x) getU1(cN,CP(cN, x))
+
+#define METHODREF_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define METHODREF_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+
+#define FIELDINFO_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define FIELDINFO_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+
+
+#define NAMEANDTYPE_GET_NAMEID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
+#define NAMEANDTYPE_GET_DESCRIPTIONID(x) getU2(cN,CP(cN, x) + 3)//1 = sizeof(tag) + sizeof(nameId)
+
+#define CLASSINFO_GET_NAMEID(classInfoId) getU2(cN,CP(cN, classInfoId) + 1)//1 = sizeof(tag)
+
+#define UTF8_GET_LENGTH(id) getU2(cN,CP(cN, id) + 1);// 1 = sizeof(tag)
+#define UTF8_GET_STRING(id) (char*)getAddr(cN,CP(cN, id) + 3);//3 = sizeof(tag) + sizeof(classNameLength)
 
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)

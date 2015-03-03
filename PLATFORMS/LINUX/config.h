@@ -18,6 +18,8 @@
 
 #define BOOTSTRAP_BINARIES
 
+//#define ENABLE_KCLASS_FORMAT
+
 #define ENABLE_TESTS
 
 //#define USE_STACK_MACROS
