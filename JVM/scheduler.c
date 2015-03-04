@@ -262,7 +262,7 @@ void createThread (void)
         {
             if (findMethodByName(cN,"run", 3, "()V", 3))
                 break;
-            if (!findSuperClass(cN))
+            if ((cN = findSuperClass(cN)) == INVALID_CLASS_ID)
                 errorExit(123, "run method not found");
         }
         *(t->methodStackBase + 0) = (u2) 0;

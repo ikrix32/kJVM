@@ -155,7 +155,7 @@ u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLeng
         }
         if (found == 1 && cN == classId)
             break;
-    } while (findSuperClass(cN));
+    } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
     if(found == 1){
         cN = class;
     }
@@ -196,7 +196,7 @@ u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength, // for nor
         }
         if (found)
             return 1;
-    } while (findSuperClass(cN));
+    } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
     return 0;
 }
 
@@ -318,24 +318,18 @@ u1* findMethodByMethodNumber(const u1 classId,const u1 methodId)/*mb jf  in: met
 /* in cN out cN */
 u1 findSuperClass(const u1 classId)
 {
-    u2 classInfoId = getU2(classId,cs[classId].this_class);
-    u2 classNameId = CLASSINFO_GET_NAMEID(classId,classInfoId);
+    const u2 supperClassInfoId = getU2(classId,cs[classId].super_class);
 
-    u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
-    char* className = UTF8_GET_STRING(classId, classNameId);
+    if (supperClassInfoId == 0)
+        return INVALID_CLASS_ID;/* cN is class Object */
 
-    if (16 == classNameLength
-    &&  STRNCMPRAMFLASH("java/lang/Object", className, 16) == 0)
-        return 0;/* cN is class Object */
 
-    classInfoId = getU2(classId,cs[classId].super_class);
-    classNameId = CLASSINFO_GET_NAMEID(classId,classInfoId);
+    const u2 classNameId = CLASSINFO_GET_NAMEID(classId,supperClassInfoId);
 
-    classNameLength = UTF8_GET_LENGTH(classId, classNameId);
-    className = UTF8_GET_STRING(classId, classNameId);
+    const u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
+    const char* className = UTF8_GET_STRING(classId, classNameId);
 
-    cN = FIND_CLASS(className,classNameLength);
-    return 1;
+    return FIND_CLASS(className,classNameLength);;
 }
 
 

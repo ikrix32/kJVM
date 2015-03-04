@@ -1558,7 +1558,7 @@ void interpreter_run()                                        /* in: classNumber
                         fN++;
                     }
 
-                } while (findSuperClass(cN));
+                } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 cN=methodStackPop();
                 u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
                 first.stackObj.pos=heapPos;
