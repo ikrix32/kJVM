@@ -195,20 +195,20 @@
 
 #define GET_TAG(x) getU1(cN,CP(cN, x))
 
-#define METHODREF_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
-#define METHODREF_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+#define METHODREF_GET_CLASSINFOID(classId,x) getU2(classId,CP(classId, x) + 1)//1 = sizeof(tag)
+#define METHODREF_GET_NAME_AND_TYPEID(classId,x) getU2(classId,CP(classId, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
 
-#define FIELDINFO_GET_CLASSINFOID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
-#define FIELDINFO_GET_NAME_AND_TYPEID(x) getU2(cN,CP(cN, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
+#define FIELDINFO_GET_CLASSINFOID(classId,x) getU2(classId,CP(classId, x) + 1)//1 = sizeof(tag)
+#define FIELDINFO_GET_NAME_AND_TYPEID(classId,x) getU2(classId,CP(classId, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
 
 
-#define NAMEANDTYPE_GET_NAMEID(x) getU2(cN,CP(cN, x) + 1)//1 = sizeof(tag)
-#define NAMEANDTYPE_GET_DESCRIPTIONID(x) getU2(cN,CP(cN, x) + 3)//1 = sizeof(tag) + sizeof(nameId)
+#define NAMEANDTYPE_GET_NAMEID(classId,x) getU2(classId,CP(classId, x) + 1)//1 = sizeof(tag)
+#define NAMEANDTYPE_GET_DESCRIPTIONID(classId,x) getU2(classId,CP(classId, x) + 3)//1 = sizeof(tag) + sizeof(nameId)
 
-#define CLASSINFO_GET_NAMEID(classInfoId) getU2(cN,CP(cN, classInfoId) + 1)//1 = sizeof(tag)
+#define CLASSINFO_GET_NAMEID(classId,classInfoId) getU2(classId,CP(classId, classInfoId) + 1)//1 = sizeof(tag)
 
-#define UTF8_GET_LENGTH(id) getU2(cN,CP(cN, id) + 1);// 1 = sizeof(tag)
-#define UTF8_GET_STRING(id) (char*)getAddr(cN,CP(cN, id) + 3);//3 = sizeof(tag) + sizeof(classNameLength)
+#define UTF8_GET_LENGTH(classId,id) getU2(classId,CP(classId, id) + 1);// 1 = sizeof(tag)
+#define UTF8_GET_STRING(classId,id) (char*)getAddr(classId,CP(classId, id) + 3);//3 = sizeof(tag) + sizeof(classNameLength)
 
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)

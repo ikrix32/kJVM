@@ -63,14 +63,14 @@ public class KJVMExporter {
 			String mikrokernelFile = folder.getAbsolutePath() +"/mikrokernel_dbg.h";
 			System.out.println("Write microkernel header:"+mikrokernelFile);
 			BufferedWriter fos = new BufferedWriter(new FileWriter(new File(mikrokernelFile)));
-			fos.write("static char* classNames[] = {\n");
+			fos.write("{\n");
 			for (int i = 0; i < m_classes.size(); i++) 
 			{
 				ClassFile classFile = m_classes.get(i);
 				String className = classFile.getFullClassName();
 				fos.write("\t\t\t\""+className+"\",\n ");
 				replaceClassNameIdWithClassId(cPK, classFile);
-				exportClassFile(folder+"/"+className.replace(".", "_")+".h",classFile);
+				exportClassFile(folder+"/"+className.replace(".", "_")+"_k.h",classFile);
 			}
 			fos.write("};\n");
 			fos.flush();

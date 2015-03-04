@@ -43,6 +43,34 @@
 		4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InputStream.h; sourceTree = "<group>"; };
 		4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_PrintStream.h; sourceTree = "<group>"; };
 		4E1035BA1AA66C1700BF56D5 /* mikrokernel_dbg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mikrokernel_dbg.h; sourceTree = "<group>"; };
+		4E1035BB1AA682E900BF56D5 /* java_io_InputStream_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_InputStream_k.h; sourceTree = "<group>"; };
+		4E1035BC1AA682E900BF56D5 /* java_io_PrintStream_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_io_PrintStream_k.h; sourceTree = "<group>"; };
+		4E1035BD1AA682E900BF56D5 /* java_lang_ArithmeticException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArithmeticException_k.h; sourceTree = "<group>"; };
+		4E1035BE1AA682E900BF56D5 /* java_lang_ArrayIndexOutOfBoundsException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ArrayIndexOutOfBoundsException_k.h; sourceTree = "<group>"; };
+		4E1035BF1AA682E900BF56D5 /* java_lang_Boolean_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Boolean_k.h; sourceTree = "<group>"; };
+		4E1035C01AA682E900BF56D5 /* java_lang_Byte_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Byte_k.h; sourceTree = "<group>"; };
+		4E1035C11AA682EA00BF56D5 /* java_lang_Character_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Character_k.h; sourceTree = "<group>"; };
+		4E1035C21AA682EA00BF56D5 /* java_lang_CharSequence_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_CharSequence_k.h; sourceTree = "<group>"; };
+		4E1035C31AA682EA00BF56D5 /* java_lang_ClassCastException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_ClassCastException_k.h; sourceTree = "<group>"; };
+		4E1035C41AA682EA00BF56D5 /* java_lang_Error_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Error_k.h; sourceTree = "<group>"; };
+		4E1035C51AA682EA00BF56D5 /* java_lang_Exception_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Exception_k.h; sourceTree = "<group>"; };
+		4E1035C61AA682EA00BF56D5 /* java_lang_Float_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Float_k.h; sourceTree = "<group>"; };
+		4E1035C71AA682EA00BF56D5 /* java_lang_IllegalArgumentException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_IllegalArgumentException_k.h; sourceTree = "<group>"; };
+		4E1035C81AA682EA00BF56D5 /* java_lang_Integer_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Integer_k.h; sourceTree = "<group>"; };
+		4E1035C91AA682EA00BF56D5 /* java_lang_InterruptedException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_InterruptedException_k.h; sourceTree = "<group>"; };
+		4E1035CA1AA682EA00BF56D5 /* java_lang_Math_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Math_k.h; sourceTree = "<group>"; };
+		4E1035CB1AA682EA00BF56D5 /* java_lang_NullPointerException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_NullPointerException_k.h; sourceTree = "<group>"; };
+		4E1035CC1AA682EA00BF56D5 /* java_lang_Object_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Object_k.h; sourceTree = "<group>"; };
+		4E1035CD1AA682EA00BF56D5 /* java_lang_Runtime_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Runtime_k.h; sourceTree = "<group>"; };
+		4E1035CE1AA682EA00BF56D5 /* java_lang_RuntimeException_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_RuntimeException_k.h; sourceTree = "<group>"; };
+		4E1035CF1AA682EA00BF56D5 /* java_lang_Short_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Short_k.h; sourceTree = "<group>"; };
+		4E1035D01AA682EA00BF56D5 /* java_lang_String_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_String_k.h; sourceTree = "<group>"; };
+		4E1035D11AA682EA00BF56D5 /* java_lang_StringBuffer_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_StringBuffer_k.h; sourceTree = "<group>"; };
+		4E1035D21AA682EA00BF56D5 /* java_lang_StringBuilder_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_StringBuilder_k.h; sourceTree = "<group>"; };
+		4E1035D31AA682EA00BF56D5 /* java_lang_System_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_System_k.h; sourceTree = "<group>"; };
+		4E1035D41AA682EA00BF56D5 /* java_lang_Thread_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Thread_k.h; sourceTree = "<group>"; };
+		4E1035D51AA682EA00BF56D5 /* java_lang_Throwable_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Throwable_k.h; sourceTree = "<group>"; };
+		4E1035D61AA682EA00BF56D5 /* java_PlatForm_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_PlatForm_k.h; sourceTree = "<group>"; };
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
 		4E86B1FF1A92C58A00B66AF0 /* java_lang_Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = java_lang_Object.h; sourceTree = "<group>"; };
@@ -145,6 +173,34 @@
 		4E86B1E21A92C58A00B66AF0 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				4E1035BB1AA682E900BF56D5 /* java_io_InputStream_k.h */,
+				4E1035BC1AA682E900BF56D5 /* java_io_PrintStream_k.h */,
+				4E1035BD1AA682E900BF56D5 /* java_lang_ArithmeticException_k.h */,
+				4E1035BE1AA682E900BF56D5 /* java_lang_ArrayIndexOutOfBoundsException_k.h */,
+				4E1035BF1AA682E900BF56D5 /* java_lang_Boolean_k.h */,
+				4E1035C01AA682E900BF56D5 /* java_lang_Byte_k.h */,
+				4E1035C11AA682EA00BF56D5 /* java_lang_Character_k.h */,
+				4E1035C21AA682EA00BF56D5 /* java_lang_CharSequence_k.h */,
+				4E1035C31AA682EA00BF56D5 /* java_lang_ClassCastException_k.h */,
+				4E1035C41AA682EA00BF56D5 /* java_lang_Error_k.h */,
+				4E1035C51AA682EA00BF56D5 /* java_lang_Exception_k.h */,
+				4E1035C61AA682EA00BF56D5 /* java_lang_Float_k.h */,
+				4E1035C71AA682EA00BF56D5 /* java_lang_IllegalArgumentException_k.h */,
+				4E1035C81AA682EA00BF56D5 /* java_lang_Integer_k.h */,
+				4E1035C91AA682EA00BF56D5 /* java_lang_InterruptedException_k.h */,
+				4E1035CA1AA682EA00BF56D5 /* java_lang_Math_k.h */,
+				4E1035CB1AA682EA00BF56D5 /* java_lang_NullPointerException_k.h */,
+				4E1035CC1AA682EA00BF56D5 /* java_lang_Object_k.h */,
+				4E1035CD1AA682EA00BF56D5 /* java_lang_Runtime_k.h */,
+				4E1035CE1AA682EA00BF56D5 /* java_lang_RuntimeException_k.h */,
+				4E1035CF1AA682EA00BF56D5 /* java_lang_Short_k.h */,
+				4E1035D01AA682EA00BF56D5 /* java_lang_String_k.h */,
+				4E1035D11AA682EA00BF56D5 /* java_lang_StringBuffer_k.h */,
+				4E1035D21AA682EA00BF56D5 /* java_lang_StringBuilder_k.h */,
+				4E1035D31AA682EA00BF56D5 /* java_lang_System_k.h */,
+				4E1035D41AA682EA00BF56D5 /* java_lang_Thread_k.h */,
+				4E1035D51AA682EA00BF56D5 /* java_lang_Throwable_k.h */,
+				4E1035D61AA682EA00BF56D5 /* java_PlatForm_k.h */,
 				4E1035BA1AA66C1700BF56D5 /* mikrokernel_dbg.h */,
 				4E1035B81AA14D9700BF56D5 /* java_io_InputStream.h */,
 				4E1035B91AA14D9700BF56D5 /* java_io_PrintStream.h */,

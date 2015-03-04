@@ -969,24 +969,24 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN_OPC("getstatic ");       /*mb jf ... corrected funtion*/
                 methodStackPush(cN);
 
-                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
 
-                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                fieldName = UTF8_GET_STRING(nameId);
-                fieldNameLength = UTF8_GET_LENGTH(nameId);
+                fieldName = UTF8_GET_STRING(cN,nameId);
+                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
-                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
 
-                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
-                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                className = UTF8_GET_STRING(classNameId);
-                classNameLength = UTF8_GET_LENGTH(classNameId);
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 cN = FIND_CLASS(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
@@ -1010,23 +1010,23 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN_OPC("putstatic -> stack in static field");
                 methodStackPush(cN);
 
-                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
 
-                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                fieldName = UTF8_GET_STRING(nameId);
-                fieldNameLength = UTF8_GET_LENGTH(nameId);
+                fieldName = UTF8_GET_STRING(cN,nameId);
+                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
-                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
-                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);
-                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                className = UTF8_GET_STRING(classNameId);
-                classNameLength = UTF8_GET_LENGTH(classNameId);
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 cN = FIND_CLASS(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
@@ -1051,25 +1051,25 @@ void interpreter_run()                                        /* in: classNumber
                 methodStackPush(cN);
                 first = opStackPop();
 
-                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
-                const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
+                const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                fieldName = UTF8_GET_STRING(nameId);
-                fieldNameLength = UTF8_GET_LENGTH(nameId);
+                fieldName = UTF8_GET_STRING(cN,nameId);
+                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
-                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
                 /* FindClass provides only the class in which the field is used */
                 /* Not the class is defined in the field (can be a super class) */
                 /* Now it's even better in the stack object to determine the class number */
-                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);
-                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                className = UTF8_GET_STRING(classNameId);
-                classNameLength = UTF8_GET_LENGTH(classNameId);
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 //krix - findclass before
                 cN = FIND_CLASS(className,classNameLength);
@@ -1096,23 +1096,23 @@ void interpreter_run()                                        /* in: classNumber
                     first = opStackPop();         /*mb jf doesn't work without variable ?!?!*/
                     second = opStackPop();
 
-                    const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(BYTECODEREF);
-                    const u2 nameId = NAMEANDTYPE_GET_NAMEID(nameAndTypeId);
+                    const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
+                    const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                    fieldName = UTF8_GET_STRING(nameId);
-                    fieldNameLength = UTF8_GET_LENGTH(nameId);
+                    fieldName = UTF8_GET_STRING(cN,nameId);
+                    fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
-                    const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(nameAndTypeId);
+                    const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                    fieldDescr = UTF8_GET_STRING(fieldDescriptionId);
-                    fieldDescrLength = UTF8_GET_LENGTH(fieldDescriptionId);
+                    fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                    fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
 
-                    const u2 classInfo = FIELDINFO_GET_CLASSINFOID(BYTECODEREF);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                    const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                    className = UTF8_GET_STRING(classNameId);
-                    classNameLength = UTF8_GET_LENGTH(classNameId);
+                    className = UTF8_GET_STRING(cN,classNameId);
+                    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                     cN = FIND_CLASS(className,classNameLength);
                     if (cN == INVALID_CLASS_ID)
@@ -1173,17 +1173,17 @@ void interpreter_run()                                        /* in: classNumber
                 /* get cN from.stackObjRef*/
                 /*  get method from cN or superclasses*/
                 //ex: invokestatic #39;
-                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(BYTECODEREF);
-                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(methodNameAndTypeId);
+                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
+                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
 
-                methodName = UTF8_GET_STRING(methodNameId);
-                methodNameLength = UTF8_GET_LENGTH(methodNameId);
+                methodName = UTF8_GET_STRING(cN,methodNameId);
+                methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
                 DEBUGPRINTLNSTRING(methodName, methodNameLength);
 
-                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(methodNameAndTypeId);
+                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
 
-                methodDescr = UTF8_GET_STRING(methodDescrId);
-                methodDescrLength = UTF8_GET_LENGTH(methodDescrId);
+                methodDescr = UTF8_GET_STRING(cN,methodDescrId);
+                methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
                 className = NULL;
@@ -1209,21 +1209,21 @@ void interpreter_run()                                        /* in: classNumber
                         cN = opStackGetValue(local).stackObj.classNumber;
 
                     const u2 classInfo = getU2(cN,cs[cN].this_class);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                    className = UTF8_GET_STRING(classNameId);
-                    classNameLength = UTF8_GET_LENGTH(classNameId);
+                    className = UTF8_GET_STRING(cN,classNameId);
+                    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                     //className = (char*) getAddr(cN, cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[classInfo] + 1)] + 3);
                     //classNameLength = getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[classInfo] + 1)] + 1);
                 }/*INVOKESPECIAL*/
                 else
                 {
-                    const u2 classInfo = METHODREF_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                    const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                    className = UTF8_GET_STRING(classNameId);
-                    classNameLength = UTF8_GET_LENGTH(classNameId);
+                    className = UTF8_GET_STRING(cN,classNameId);
+                    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
                 }
                 //bh DEBUGPRINTLNSTRING(className,classNameLength);
                 if (!findMethod(className, classNameLength, methodName,methodNameLength, methodDescr, methodDescrLength))
@@ -1323,21 +1323,21 @@ void interpreter_run()                                        /* in: classNumber
                 /*bh2007*/
                 local = (u2) opStackGetSpPos() - k;
 
-                const u2 classInfo = METHODREF_GET_CLASSINFOID(BYTECODEREF);//1 ctpool tag u1
-                const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+                const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
-                className = UTF8_GET_STRING(classNameId);
-                classNameLength = UTF8_GET_LENGTH(classNameId);
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(BYTECODEREF);
-                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(methodNameAndTypeId);
+                const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
+                const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
 
-                methodName = UTF8_GET_STRING(methodNameId);
-                methodNameLength = UTF8_GET_LENGTH(methodNameId);
+                methodName = UTF8_GET_STRING(cN,methodNameId);
+                methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
 
-                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(methodNameAndTypeId);
-                methodDescr = UTF8_GET_STRING(methodDescrId);;
-                methodDescrLength = UTF8_GET_LENGTH(methodDescrId);
+                const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
+                methodDescr = UTF8_GET_STRING(cN,methodDescrId);;
+                methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
                 if (!findMethod(className, classNameLength, methodName, methodNameLength, methodDescr, methodDescrLength))
@@ -1526,13 +1526,13 @@ void interpreter_run()                                        /* in: classNumber
                 methodStackPush(cN);
                 methodStackPush(mN);
 
-                const u2 classNameId = CLASSINFO_GET_NAMEID(BYTECODEREF);
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,BYTECODEREF);
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
 #else
-                className = UTF8_GET_STRING(classNameId);
-                classNameLength = UTF8_GET_LENGTH(classNameId);
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
                 
                 cN = FIND_CLASS(className,classNameLength);
 
@@ -1778,10 +1778,10 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     /* the cast's target class */
                     const u2 targetclass = getU2(cN,0);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(targetclass);
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
-                    char* classname = UTF8_GET_STRING(classNameId);
-                    u2 len = UTF8_GET_LENGTH(classNameId);
+                    char* classname = UTF8_GET_STRING(cN,classNameId);
+                    u2 len = UTF8_GET_LENGTH(cN,classNameId);
 
                     //char *classname = getAddr(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+3);
                     //int len = getU2(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+1);
@@ -1865,10 +1865,10 @@ void interpreter_run()                                        /* in: classNumber
                 char performcheck = 1;
                 if (first.UInt != NULLOBJECT.UInt)
                 {
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(targetclass);
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
-                    char* classname = UTF8_GET_STRING(classNameId);
-                    u2 len = UTF8_GET_LENGTH(classNameId);
+                    char* classname = UTF8_GET_STRING(cN,classNameId);
+                    u2 len = UTF8_GET_LENGTH(cN,classNameId);
 
                     /* we have to make some dirty hacks here
                      since we are not storing typing informations for arrays */
@@ -2102,11 +2102,11 @@ void interpreter_run()                                        /* in: classNumber
 /* else cN is the super class of former cN which has target as super class.*/
 void subCheck(const u2 target,const u2 classInfo)
 {
-    const u2 classNameId = CLASSINFO_GET_NAMEID(classInfo);
+    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
     methodStackPush(cN);
 
-    className = UTF8_GET_STRING(classNameId);
-    classNameLength = UTF8_GET_LENGTH(classNameId);
+    className = UTF8_GET_STRING(cN,classNameId);
+    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
     cN = FIND_CLASS(className, classNameLength);
     if (!checkInstance(target))
@@ -2281,9 +2281,9 @@ void handleException()
         methodStackPush(cN);
 
         const u2 classInfo = getU2(cN,cur_catch + 8);
-        const u2 classNameId =  CLASSINFO_GET_NAMEID(classInfo);
-        className = UTF8_GET_STRING(classNameId);
-        classNameLength = UTF8_GET_LENGTH(classNameId);
+        const u2 classNameId =  CLASSINFO_GET_NAMEID(cN,classInfo);
+        className = UTF8_GET_STRING(cN,classNameId);
+        classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
         cN = FIND_CLASS(className,classNameLength);
         if (cN == INVALID_CLASS_ID)

@@ -318,13 +318,23 @@ u1* findMethodByMethodNumber(const u1 classId,const u1 methodId)/*mb jf  in: met
 /* in cN out cN */
 u1 findSuperClass(const u1 classId)
 {
-    if (16 == getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].this_class)] + 1)] + 1) &&
-        STRNCMPRAMFLASH("java/lang/Object", getAddr(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].this_class)] + 1)] + 3), 16) == 0)
+    u2 classInfoId = getU2(classId,cs[classId].this_class);
+    u2 classNameId = CLASSINFO_GET_NAMEID(classId,classInfoId);
+
+    u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
+    char* className = UTF8_GET_STRING(classId, classNameId);
+
+    if (16 == classNameLength
+    &&  STRNCMPRAMFLASH("java/lang/Object", className, 16) == 0)
         return 0;/* cN is class Object */
 
-    cN = FIND_CLASS(
-               getAddr(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].super_class)] + 1)] + 3),
-               getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].super_class)] + 1)] + 1));
+    classInfoId = getU2(classId,cs[classId].super_class);
+    classNameId = CLASSINFO_GET_NAMEID(classId,classInfoId);
+
+    classNameLength = UTF8_GET_LENGTH(classId, classNameId);
+    className = UTF8_GET_STRING(classId, classNameId);
+
+    cN = FIND_CLASS(className,classNameLength);
     return 1;
 }
 
