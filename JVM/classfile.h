@@ -25,9 +25,6 @@ u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength,
                       const char* fieldDescr,const u1 fieldDescrLength);
 u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
                          const char* fieldDescr,const u1 fieldDescrLength);
-u1 findMethod(const char* className, const u1 classNameLength,
-              const char* methodName, const u1 methodNameLength,
-              const char* methodDescr, const u1 methodDescrLength);
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,
                     const u1 methodDescrLength);
 u1 findMethodByNameFlash(const u1 classId,const char* name, const u1 len,

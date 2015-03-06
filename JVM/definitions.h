@@ -244,7 +244,9 @@
 #define FIND_CLASS findClass
 #define FIND_METHOD_BYNAME findMethodByName
 #endif
+
 #define INVALID_CLASS_ID 0xff
+#define INVALID_METHOD_ID 0xff
 
 #ifdef AVR8
 #define STRNCMP strncmpRamFlash

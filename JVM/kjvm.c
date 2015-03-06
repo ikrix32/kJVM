@@ -69,7 +69,8 @@ void vm_init() /* read, analyze classfiles and fill structures*/
 s1 vm_run(const u1 classId){
     //PRINTF("start clinit from classsId %d\n",classId);
     cN = classId;
-    if (findMethodByName(cN,"main", 4, "([Ljava/lang/String;)V", 22))
+    mN = FIND_METHOD_BYNAME(cN,"main", 4, "([Ljava/lang/String;)V", 22);
+    if (mN != INVALID_METHOD_ID)
     {
         //PRINTF("  -> run <main> :\n");
         opStackPush(toSlot((u4) 0));           /* args parameter to main (should be a string array)*/

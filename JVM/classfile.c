@@ -233,34 +233,6 @@ u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
 
 }
 
-
-u1 findMethod(const char* className, const u1 classNameLength,
-              const char* methodName, const u1 methodNameLength,
-              const char* methodDescr, const u1 methodDescrLength)
-{
-    // all args in flash for arduinomega
-    /*in cN, out: cN, mN*/
-    /* recursive down to object*/
-    //printf("%4x %4x %4x %4x\n", 0x8000+(unsigned int)className/2,classNameLength,0x8000+ (unsigned int)methodName/2,methodNameLength);
-    cN = FIND_CLASS(className, classNameLength);
-    if (cN == INVALID_CLASS_ID)
-    {
-        CLASSNOTFOUNDERR((const char*) className, classNameLength);
-    }
-
-    /* out: mN */
-    if (FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength))
-        return 1;
-    else if (classNameLength == 16 && STRNCMPRAMFLASH("java/lang/Object", className, classNameLength) == 0)
-    {
-        return 0;/* not found*/
-    } else
-        return findMethod(getAddr(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,cs[cN].super_class)) + 1)) + 3),
-                          getU2(cN,CP(cN, getU2(cN,CP(cN, getU2(cN,cs[cN].super_class)) + 1)) + 1),
-                          methodName, methodNameLength, methodDescr, methodDescrLength);
-}
-
-
 #ifdef AVR8
 u1 findMethodByNameFlash(const u1 classId,const char* name, const u1 len, const char* methodDescr, const u1 methodDescrLength)
 {
@@ -283,26 +255,36 @@ u1 findMethodByNameFlash(const u1 classId,const char* name, const u1 len, const 
 }
 #endif
 
-u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,
-                    const u1 methodDescrLength)
+//Returns methodId(mN)
+u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,const u1 methodDescrLength)
 {
     /* in: classNumber cN, out: methodNumber mN */
     /* non recursiv*/
-    for (mN = 0; mN < getU2(classId,cs[classId].methods_count); mN++)
-        if (len == getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 2)] + 1))
-            if (STRNCMPRAMFLASH(name,(char*) getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 2)] + 3),
-                                             getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 2)] + 1)) == 0)
+    for (u1 methodId = 0; methodId < getU2(classId,cs[classId].methods_count); methodId++)
+    {
+        const u2 methodNameId = getU2(classId,METHODBASE(classId, methodId) + 2);
+        const u2 methodNameLen = UTF8_GET_LENGTH(classId, methodNameId);
+        if (len == methodNameLen)
+        {
+            const char* methodName = UTF8_GET_STRING(classId, methodNameId);
+            if (STRNCMPRAMFLASH(name,methodName,methodNameLen) == 0)
             {
                 if (methodDescr != NULL)
                 {
-                    if (methodDescrLength == getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 4)] + 1))
-                        if (STRNCMPRAMFLASH(methodDescr,(char*) getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 4)] + 3),
-                                                                getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, mN) + 4)] + 1)) == 0)
-                            return 1;
+                    const u2 methodDescriptorId = getU2(classId,METHODBASE(classId, methodId) + 4);
+                    const u2 methodDescriptorLength = UTF8_GET_LENGTH(classId, methodDescriptorId);
+                    if (methodDescrLength == methodDescriptorLength)
+                    {
+                        const char* methodDescriptorStr = UTF8_GET_STRING(classId, methodDescriptorId);
+                        if (STRNCMPRAMFLASH(methodDescr,methodDescriptorStr,methodDescriptorLength) == 0)
+                            return methodId;
+                    }
                 } else
-                    return 1;
+                    return methodId;
             }
-    return 0;
+        }
+    }
+    return INVALID_METHOD_ID;
 }
 
 
@@ -313,23 +295,24 @@ u1* findMethodByMethodNumber(const u1 classId,const u1 methodId)/*mb jf  in: met
     return getAddr(classId,CP(classId, methodNameAddr) + 3); /* return pointer to field value in class cN at address methodNameAddress*/
 }
 
-
-/* return 1 found, 0 -> super class ist object */
-/* in cN out cN */
+// Returns super class id, param: class id
 u1 findSuperClass(const u1 classId)
 {
     const u2 supperClassInfoId = getU2(classId,cs[classId].super_class);
 
     if (supperClassInfoId == 0)
-        return INVALID_CLASS_ID;/* cN is class Object */
-
+        return INVALID_CLASS_ID;
 
     const u2 classNameId = CLASSINFO_GET_NAMEID(classId,supperClassInfoId);
 
+#ifdef ENABLE_KCLASS_FORMAT
+    return classNameId;//in kclass format nameId was replaced with classId
+#else
     const u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
     const char* className = UTF8_GET_STRING(classId, classNameId);
 
-    return FIND_CLASS(className,classNameLength);;
+    return FIND_CLASS(className,classNameLength);
+#endif
 }
 
 

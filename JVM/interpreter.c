@@ -984,7 +984,9 @@ void interpreter_run()                                        /* in: classNumber
 
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
+#ifdef ENABLE_KCLASS_FORMAT
+                cN = classNameId;
+#else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
@@ -993,6 +995,7 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
+#endif
 
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
                 {
@@ -1024,7 +1027,9 @@ void interpreter_run()                                        /* in: classNumber
 
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
+#ifdef ENABLE_KCLASS_FORMAT
+                cN = classNameId;
+#else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
@@ -1033,7 +1038,7 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
-
+#endif
                 if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                 {
                     FIELDNOTFOUNDERR(fieldName,className);
@@ -1068,6 +1073,9 @@ void interpreter_run()                                        /* in: classNumber
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
+#ifdef ENABLE_KCLASS_FORMAT
+                cN = classNameId;
+#else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
@@ -1077,6 +1085,7 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
+#endif
                 const u2 fieldClassId = cN;
                 cN = first.stackObj.classNumber;
                 if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
@@ -1110,7 +1119,9 @@ void interpreter_run()                                        /* in: classNumber
 
                     const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
+#ifdef ENABLE_KCLASS_FORMAT
+                    cN = classNameId;
+#else
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
@@ -1119,7 +1130,7 @@ void interpreter_run()                                        /* in: classNumber
                     {
                         CLASSNOTFOUNDERR(className,classNameLength);
                     }
-
+#endif
                     if (second.UInt == NULLOBJECT.UInt)
                     {
                         pc += 2;
@@ -1186,10 +1197,8 @@ void interpreter_run()                                        /* in: classNumber
                 methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
-                className = NULL;
-
                 if(opStackGetValue(local).UInt == NULLOBJECT.UInt)
-                {
+                {//todo - fix throw of null pointer exception
                     //cN = methodStackPop();
                     NULLPOINTEREXCEPTION;
                     BREAK;
@@ -1200,33 +1209,40 @@ void interpreter_run()                                        /* in: classNumber
                     /*bh2008*/
                     if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
                     {
-                        cN = FIND_CLASS("java/lang/String", 16);
-                        if (cN == INVALID_CLASS_ID)
-                        {
-                            CLASSNOTFOUNDERR("java/lang/String", 16);
-                        }
+#ifdef ENABLE_KCLASS_FORMAT
+                        const u1 STRING_CLASS_ID = 9;
+                        cN = STRING_CLASS_ID;//todo - export ID's for microkernel classes
+#else
+                        className = "java/lang/String";
+                        classNameLength = 16;
+                        cN = FIND_CLASS(className, classNameLength);
+#endif
                     } else/*bh2007*/
                         cN = opStackGetValue(local).stackObj.classNumber;
-
-                    const u2 classInfo = getU2(cN,cs[cN].this_class);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
-                    className = UTF8_GET_STRING(cN,classNameId);
-                    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-
-                    //className = (char*) getAddr(cN, cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[classInfo] + 1)] + 3);
-                    //classNameLength = getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[classInfo] + 1)] + 1);
                 }/*INVOKESPECIAL*/
                 else
                 {
                     const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
+#ifdef ENABLE_KCLASS_FORMAT
+                    cN = classNameId;
+#else
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+                    cN = FIND_CLASS(className, classNameLength);
+#endif
                 }
+                if (cN == INVALID_CLASS_ID)
+                {
+                    CLASSNOTFOUNDERR(className, classNameLength);
+                }
+
+                do{
+                    mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
+                }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
+
                 //bh DEBUGPRINTLNSTRING(className,classNameLength);
-                if (!findMethod(className, classNameLength, methodName,methodNameLength, methodDescr, methodDescrLength))
+                if (mN == INVALID_METHOD_ID)
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }
@@ -1340,7 +1356,17 @@ void interpreter_run()                                        /* in: classNumber
                 methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
-                if (!findMethod(className, classNameLength, methodName, methodNameLength, methodDescr, methodDescrLength))
+                cN = FIND_CLASS(className, classNameLength);
+                if (cN == INVALID_CLASS_ID)
+                {
+                    CLASSNOTFOUNDERR((const char*) className, classNameLength);
+                }
+
+                do{
+                    mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
+                }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
+
+                if (mN == INVALID_METHOD_ID)
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }
@@ -2228,8 +2254,10 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
         heapSetElement(toSlot((u4) 0), heapPos + i + 1);
     }
 
-    /*	if (!findMethodByName("<init>", 6, "()V", 3)) {
-     METHODNOTFOUNDERR("<init>", identifier);
+    /*
+     mN = FIND_METHOD_BYNAME("<init>", 6, "()V", 3);
+     if (mN == INVALID_METHOD_ID) {
+        METHODNOTFOUNDERR("<init>", identifier);
      }
 
      #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!

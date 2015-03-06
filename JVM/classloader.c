@@ -39,7 +39,8 @@ u1 classLoader_loadClass(const u1* bin,const u4 binSize)
 
 void classLoader_clinitClass(const u1 classId){
     //initialize class
-    if (findMethodByName(classId,"<clinit>", 8, "()V", 3))
+    mN = FIND_METHOD_BYNAME(classId,"<clinit>", 8, "()V", 3);
+    if (mN != INVALID_METHOD_ID)
     {
         opStackPush(cs[classId].classInfo);
         opStackSetSpPos(findMaxLocals(classId,mN));
