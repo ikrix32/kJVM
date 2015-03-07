@@ -1183,7 +1183,7 @@ void interpreter_run()                                        /* in: classNumber
                 local = opStackGetSpPos() - k - 1;
                 /* get cN from.stackObjRef*/
                 /*  get method from cN or superclasses*/
-                //ex: invokestatic #39;
+                //ex: INVOKEVIRTUAL #39;
                 const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
 
@@ -1232,11 +1232,12 @@ void interpreter_run()                                        /* in: classNumber
                     cN = FIND_CLASS(className, classNameLength);
 #endif
                 }
+#ifndef ENABLE_KCLASS_FORMAT
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR(className, classNameLength);
                 }
-
+#endif
                 do{
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
@@ -1339,11 +1340,8 @@ void interpreter_run()                                        /* in: classNumber
                 /*bh2007*/
                 local = (u2) opStackGetSpPos() - k;
 
-                const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
@@ -1356,12 +1354,17 @@ void interpreter_run()                                        /* in: classNumber
                 methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
+#ifdef ENABLE_KCLASS_FORMAT
+                cN = classNameId;
+#else
+                className = UTF8_GET_STRING(cN,classNameId);
+                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
                 cN = FIND_CLASS(className, classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR((const char*) className, classNameLength);
                 }
-
+#endif
                 do{
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
@@ -1794,8 +1797,8 @@ void interpreter_run()                                        /* in: classNumber
             CASE(CHECKCAST):
             {
                 DEBUGPRINTLN_OPC("checkcast");
-                /* In general, we try to cast as much as possible.*/
-                /* Only if we perfectly know that this cast is invalid, break it.*/
+                // In general, we try to cast as much as possible.
+                // Only if we perfectly know that this cast is invalid, break it.
                 first = opStackPeek();
                 char performcheck = 1;
                 char invalidcast = 0;
@@ -1804,68 +1807,73 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     /* the cast's target class */
                     const u2 targetclass = getU2(cN,0);
+                    const u1 typeTag = GET_TAG(targetclass);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
-                    char* classname = UTF8_GET_STRING(cN,classNameId);
-                    u2 len = UTF8_GET_LENGTH(cN,classNameId);
-
-                    //char *classname = getAddr(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+3);
-                    //int len = getU2(cN,CP(cN, getU2(cN,CP(cN,targetclass)+1))+1);
-
-                    /* we have to make some dirty hacks here
-                     since we are not storing typing informations for arrays */
-                    if (/*getU1(classname)=='['*/*classname == '[')
+                    u2 target = INVALID_CLASS_ID;
+#ifdef ENABLE_KCLASS_FORMAT
+                    if(typeTag == CONSTANT_KClass)
+                    {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
+                        target = classNameId;
+                    }else
+#endif  
                     {
-                        while (/*getU1(classname)=='['*/'[' == *classname)
-                        {
-                            /* we hope to get useful information
-                             from the objects stored in the array.
-                             this only takes the first object in the array,
-                             yet it could be extended to gathering
-                             all stored object's typing informations */
-                            if (first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt || HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
-                            {
-                                invalidcast = 1;
-                                performcheck = 0;
-                                break;
-                            }
-                            first = heapGetElement(first.stackObj.pos + 1);
-                            /* remove the leading '[' */
-                            --len;
-                            ++classname;
-                        }
-                        if (first.UInt == NULLOBJECT.UInt)
-                        {
-                            performcheck = 0;
-                        }
-                        /* A class identifier is Lclassname; */
-                        if (
-                            //getU1(classname)=='L'
-                            'L' == *classname
-                            )
-                        {
-                            len -= 2;
-                            ++classname;
-                        }
-                        else
-                        {
-                            /* a primitive type */
-                            performcheck = 0;
-                        }
-                    }
+                        char* classname = UTF8_GET_STRING(cN,classNameId);
+                        u2 len = UTF8_GET_LENGTH(cN,classNameId);
 
+                        // we have to make some dirty hacks here
+                        //since we are not storing typing informations for arrays
+                        if (*classname == '[')//getU1(classname)=='[')
+                        {
+                            while ('[' == *classname)//getU1(classname)=='['
+                            {
+                                // we hope to get useful information
+                                //from the objects stored in the array.
+                                //this only takes the first object in the array,
+                                //yet it could be extended to gathering
+                                //all stored object's typing informations
+                                if( first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
+                                ||  HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
+                                {
+                                    invalidcast = 1;
+                                    performcheck = 0;
+                                    break;
+                                }
+                                first = heapGetElement(first.stackObj.pos + 1);
+                                // remove the leading '['
+                                --len;
+                                ++classname;
+                            }
+                            if (first.UInt == NULLOBJECT.UInt)
+                            {
+                                performcheck = 0;
+                            }
+                            // A class identifier is Lclassname;
+                            if ('L' == *classname)
+                            {
+                                len -= 2;
+                                ++classname;
+                            }
+                            else
+                            {   // a primitive type
+                                performcheck = 0;
+                            }
+                        }
+                        target = FIND_CLASS(classname, len);
+                    }
                     if (performcheck == 1)
                     {
                         methodStackPush(cN);
                         methodStackPush(mN);
-                        cN = FIND_CLASS(classname, len);
-                        if (cN == INVALID_CLASS_ID)
+#ifndef ENABLE_KCLASS_FORMAT
+                        if (target == INVALID_CLASS_ID)
                         {
+                            const char* classname = UTF8_GET_STRING(cN,classNameId);
                             CLASSNOTFOUNDERR(classname,len);
                         }
-                        u2 target = cN;
+#endif
                         cN = first.stackObj.classNumber;
-                        if (!checkInstance(target))
+                        if (!checkInstance(cN,target))
                         {
                             invalidcast = 1;
                         }
@@ -1891,70 +1899,78 @@ void interpreter_run()                                        /* in: classNumber
                 char performcheck = 1;
                 if (first.UInt != NULLOBJECT.UInt)
                 {
+                    const u1 typeTag = GET_TAG(targetclass);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
-                    char* classname = UTF8_GET_STRING(cN,classNameId);
-                    u2 len = UTF8_GET_LENGTH(cN,classNameId);
-
-                    /* we have to make some dirty hacks here
-                     since we are not storing typing informations for arrays */
-                    if (/*getU1(classname)=='['*/*classname == '[')
+                    u2 target = INVALID_CLASS_ID;
+#ifdef ENABLE_KCLASS_FORMAT
+                    if(typeTag == CONSTANT_KClass)
+                    {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
+                        target = classNameId;
+                    }else
+#endif
                     {
-                        while (
-                               //getU1(classname)=='['
-                               '[' == *classname
-                               )
+
+                        char* classname = UTF8_GET_STRING(cN,classNameId);
+                        u2 len = UTF8_GET_LENGTH(cN,classNameId);
+
+                        // we have to make some dirty hacks here
+                        //since we are not storing typing informations for arrays
+                        if (*classname == '[')//getU1(classname)=='[')
                         {
-                            /* we hope to get useful information
-                             from the objects stored in the array.
-                             this only takes the first object in the array,
-                             yet it could be extended to gathering
-                             all stored object's typing informations */
-                            if (first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt || HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
+                            while ('[' == *classname)//getU1(classname)=='[')
+                            {
+                                // we hope to get useful information
+                                // from the objects stored in the array.
+                                // this only takes the first object in the array,
+                                // yet it could be extended to gathering
+                                // all stored object's typing informations
+                                if (first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
+                                || HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
+                                {
+                                    performcheck = 0;
+                                    opStackPush(toSlot((u4)0));
+                                    break;
+                                }
+                                first = heapGetElement(first.stackObj.pos + 1);
+                                // remove the leading '['
+                                --len;
+                                ++classname;
+                            }
+                            if (first.UInt == NULLOBJECT.UInt)
                             {
                                 performcheck = 0;
-                                opStackPush(toSlot((u4)0));
-                                break;
+                                opStackPush(toSlot((u4)1));
                             }
-                            first = heapGetElement(first.stackObj.pos + 1);
-                            /* remove the leading '[' */
-                            --len;
-                            ++classname;
+                            // A class identifier is Lclassname;
+                            if ('L' == *classname)//getU1(classname)=='L')
+                            {
+                                len -= 2;
+                                ++classname;
+                            }
+                            else
+                            {
+                                // a primitive type
+                                performcheck = 0;
+                                opStackPush(toSlot((u4)1));
+                            }
                         }
-                        if (first.UInt == NULLOBJECT.UInt)
-                        {
-                            performcheck = 0;
-                            opStackPush(toSlot((u4)1));
-                        }
-                        /* A class identifier is Lclassname; */
-                        if (
-                            //getU1(classname)=='L'
-                            'L' == *classname
-                            )
-                        {
-                            len -= 2;
-                            ++classname;
-                        }
-                        else
-                        {
-                            /* a primitive type */
-                            performcheck = 0;
-                            opStackPush(toSlot((u4)1));
-                        }
+                        target = FIND_CLASS(classname, len);
                     }
 
                     if (performcheck == 1)
                     {
                         methodStackPush(cN);
                         methodStackPush(mN);
-                        cN = FIND_CLASS(classname, len);
-                        if (cN == INVALID_CLASS_ID)
+#ifndef ENABLE_KCLASS_FORMAT
+                        if (target == INVALID_CLASS_ID)
                         {
+                            const char* classname = UTF8_GET_STRING(cN,classNameId);
                             CLASSNOTFOUNDERR(classname,len);
                         }
-                        u2 target = cN;
+#endif
                         cN = first.stackObj.classNumber;
-                        if (checkInstance(target))
+                        if (checkInstance(cN,target))
                         {
                             opStackPush(toSlot((u4)1));
                         }
@@ -1962,8 +1978,8 @@ void interpreter_run()                                        /* in: classNumber
                         {
                             opStackPush(toSlot((u4)0));
                         }
-                        mN=methodStackPop();
-                        cN=methodStackPop();
+                        mN = methodStackPop();
+                        cN = methodStackPop();
                     }
                     else
                     {
@@ -2126,50 +2142,54 @@ void interpreter_run()                                        /* in: classNumber
 /* generalized single comparison of target class with class at addr in cN's constant pool.i*/
 /* keeps cN unchanged if target is no super class of cN.*/
 /* else cN is the super class of former cN which has target as super class.*/
-void subCheck(const u2 target,const u2 classInfo)
+u2 subCheck(const u2 classId,const u2 target,const u2 superClass)
 {
-    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-    methodStackPush(cN);
-
-    className = UTF8_GET_STRING(cN,classNameId);
-    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-
-    cN = FIND_CLASS(className, classNameLength);
-    if (!checkInstance(target))
+    const u2 classNameId = CLASSINFO_GET_NAMEID(classId,superClass);
+#ifdef ENABLE_KCLASS_FORMAT
+    const u2 superClassId = classNameId;
+#else
+    className = UTF8_GET_STRING(classId,classNameId);
+    classNameLength = UTF8_GET_LENGTH(classId,classNameId);
+    const u2 superClassId = FIND_CLASS(className, classNameLength);
+#endif
+    if (checkInstance(superClassId,target))
     {
-        cN = methodStackPop();
+        return superClassId;
     }
-    else
-    {
-        methodStackPop();
-    }
+
+    return classId;
 }
 
 
-/* receives object's class via cN and target class as parameter*/
+/* receives object's class via classId and target class as parameter*/
 /* returns true / false*/
-u1 checkInstance(const u2 target)
+u1 checkInstance(const u2 classId,const u2 target)
 {
-    if (cN != 0 && cN != target)
+    u2 retClassId = classId;
+    if (retClassId != 0 && retClassId != target)
     {
-        /* trying the super class.*/
-        if (getU2(cN,cs[cN].super_class) > 0)
+        const u2 superClass = getU2(retClassId,cs[retClassId].super_class);
+        // trying the super class.
+        if (superClass > 0)
         {
-            subCheck(target, getU2(cN,cs[cN].super_class));
+            retClassId = subCheck(classId,target, superClass);
         }
+
         /* trying the interfaces.*/
-        if (cN != 0 && cN != target)
+        if (retClassId != 0 && retClassId != target)
         {
-            u2 n = getU2(cN,cs[cN].interfaces_count);
+            u2 n = getU2(retClassId,cs[retClassId].interfaces_count);
             if(n > 0){
-                while (--n && cN != target)
+                while (--n && retClassId != target)
                 {
-                    subCheck(target, getU2(cN,cs[cN].interfaces + n * 2));
+                    const u2 interface = getU2(retClassId,cs[retClassId].interfaces + n * 2);
+                    retClassId = subCheck(retClassId,target, interface);
                 }
             }
         }
     }
-    return (target == cN);
+
+    return (target == retClassId);
 }
 
 
@@ -2223,27 +2243,25 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
 
     methodStackPush(cN);
     methodStackPush(mN);
-
 #ifdef DEBUG
     if (strlen(identifier) != length)
     {
         PRINTF("ERROR: Wrong length for %s\n", identifier);
     }
 #endif
-
-    /* Create a class of the given type*/
+    //todo - kclass format Create a class of the given type
     cN = FIND_CLASS(identifier, length);
     if (cN == INVALID_CLASS_ID)
     {
         CLASSNOTFOUNDERR(identifier, length);
     }
 
-    /* + marker*/
+    // + marker
     u2 heapPos = getFreeHeapSpace(getU2(cN,cs[cN].fields_count) + 1);
     first.stackObj.pos = heapPos;
     first.stackObj.magic = OBJECTMAGIC;
     first.stackObj.classNumber = cN;
-    opStackPush(first);                           /* reference to stackObject on opStack*/
+    opStackPush(first);// reference to stackObject on opStack
 
     HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
     HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
@@ -2283,10 +2301,10 @@ void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
 //BH AM not tested
 void handleException()
 {
-    /* this is actually the class we have to catch*/
+    // this is actually the class we have to catch
     u1 classNumberFromPushedObject = opStackPeek().stackObj.classNumber;
 
-    /* number of catches the try block has*/
+    // number of catches the try block has
     u2 n = getU2(cN,METHODCODEEXCEPTIONBASE(cN, mN));
 
     DEBUGPRINTLN_OPC("trying to catch class number %d", classNumberFromPushedObject);
@@ -2295,7 +2313,7 @@ void handleException()
     {
         u2 cur_catch = METHODCODEEXCEPTIONBASE(cN, mN) + 8 * i;
 
-        /* checking if catch range is usable */
+        // checking if catch range is usable
         if (pc - getStartPC(cN,mN) - 1 < getU2(cN,cur_catch + 2) || pc - getStartPC(cN,mN) - 1 >= getU2(cN,cur_catch + 4))
         {
             DEBUGPRINTLN_OPC("pc: %d", pc - getStartPC(cN,mN) - 1);
@@ -2305,31 +2323,35 @@ void handleException()
             continue;
         }
 
-        /* checking whether the catch's catched class is in the code exception table*/
+        // checking whether the catch's catched class is in the code exception table
         methodStackPush(cN);
 
         const u2 classInfo = getU2(cN,cur_catch + 8);
         const u2 classNameId =  CLASSINFO_GET_NAMEID(cN,classInfo);
+#ifdef ENABLE_KCLASS_FORMAT
+        cN = classNameId;
+#else
         className = UTF8_GET_STRING(cN,classNameId);
         classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
         cN = FIND_CLASS(className,classNameLength);
+
         if (cN == INVALID_CLASS_ID)
         {
             DEBUGPRINTLN_OPC("Exception class not found:  %d\n", cN);
             cN = methodStackPop();
-            continue;                             /* class is not in the class table - broken code.*/
+            continue;// class is not in the class table - broken code.
         }
-
-        /* Ya well, this is the catched class's number in code exception table*/
+#endif
+        // Ya well, this is the catched class's number in code exception table
         u1 classNumberInCodeExceptionTable = cN;
         DEBUGPRINTLN_OPC("classNumberInCodeExceptionTable: %d",
                      classNumberInCodeExceptionTable);
 
         cN = classNumberFromPushedObject;
 
-        /* start catching */
-        if (checkInstance(classNumberInCodeExceptionTable))
+        // start catching
+        if (checkInstance(cN,classNumberInCodeExceptionTable))
         {
             DEBUGPRINTLN_OPC("catching!");
             cN = methodStackPop();
@@ -2339,7 +2361,7 @@ void handleException()
         cN = methodStackPop();
     }
     
-    /* keine catch clause gefunden, also weiter im nächsten stack frame*/
+    // no catch clause found, so skip to the next stack frame
     if (methodStackEmpty())
     {
         DEBUGPRINTLN_OPC("we are thru, this was the top frame");
