@@ -27,32 +27,14 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 
 import com.iceq.KJVMExporter;
-
-import net.sf.rej.java.ClassFile;
+import com.iceq.KJVMExporter.KClass;
 
 public class KJVMExporterUI extends JPanel {
 	File m_save = new File("save.txt");
 	KJVMExporterUI m_instance = null;
 	KJVMExporter m_exporter;
-
-	Vector<ClassTableElement> m_classes = new Vector<ClassTableElement>();
-
-	private boolean DEBUG = true;
-
-	protected class ClassTableElement {
-		public ClassFile m_class;
-		public String 	m_name;
-		public boolean	m_export;
-
-		public ClassTableElement(ClassFile classFile) {
-			m_class = classFile;
-			m_name = classFile.getFullClassName();
-			m_export = true;
-		}
-	}
 
 	public KJVMExporterUI() {
 		super(new GridLayout(1, 0));
@@ -61,17 +43,78 @@ public class KJVMExporterUI extends JPanel {
 
 		m_exporter = new KJVMExporter();
 
-		JFileChooser fd = new JFileChooser();
+		JSplitPane mainSplitPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane microKernelSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+
+		createMicroKernelInterface(microKernelSplitPanel);
 		
-		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		mainSplitPanel.add(microKernelSplitPanel);
+		JSplitPane appSplitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		
+		createAppInterface(appSplitPanel);
+		
+		mainSplitPanel.add(appSplitPanel);
+		add(mainSplitPanel);
+	}
+
+	void createMicroKernelInterface(JSplitPane splitPanel) {
+		JFileChooser fd = new JFileChooser();
 
 		JPanel panel = new JPanel();
 
-		JButton addKernelFiles = new JButton("AddMicroKernel");
+		JButton loadMicro = new JButton("Load");
+		loadMicro.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				fd.setDialogType(JFileChooser.OPEN_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fd.setDialogTitle("Add microkernel class or file set.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int i = fd.showDialog(m_instance, "Open");
+				if (i == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+
+					setCurrentPath(selectedFile.getParentFile()
+							.getAbsolutePath());
+					m_exporter.loadPackage(selectedFile,true);
+				}
+			}
+		});
+		panel.add(loadMicro);
+
+		JButton saveMicro = new JButton("Save");
+		saveMicro.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fd.setDialogType(JFileChooser.SAVE_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fd.setDialogTitle("Save microkernel.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int res = fd.showDialog(m_instance, "Save");
+				if (res == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+
+					setCurrentPath(selectedFile.getParentFile()
+							.getAbsolutePath());
+					m_exporter.savePackage(selectedFile,true);
+				}
+			}
+		});
+		panel.add(saveMicro);
+
+		JButton addKernelFiles = new JButton("Add Class");
 		addKernelFiles.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) 
-			{	
+			public void actionPerformed(ActionEvent e) {
 				fd.setDialogType(JFileChooser.OPEN_DIALOG);
 				fd.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				fd.setDialogTitle("Add microkernel class or file set.");
@@ -90,14 +133,13 @@ public class KJVMExporterUI extends JPanel {
 						setCurrentPath(selectedFile.getParentFile()
 								.getAbsolutePath());
 
-					m_exporter.load(selectedFile);
-					setMicroKernelClasses(m_exporter.getClassFiles());
+					m_exporter.load(selectedFile,true);
 				}
 			}
 		});
 		panel.add(addKernelFiles);
 
-		JButton exportKernelFiles = new JButton("Export MicroKernel");
+		JButton exportKernelFiles = new JButton("Export");
 		exportKernelFiles.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -113,29 +155,24 @@ public class KJVMExporterUI extends JPanel {
 				if (res == JFileChooser.APPROVE_OPTION) {
 					final File selectedFile = fd.getSelectedFile();
 
-					/*if (selectedFile.isDirectory())
-						setCurrentPath(selectedFile.getAbsolutePath());
-					else
-						setCurrentPath(selectedFile.getParentFile()
-								.getAbsolutePath());*/
-				
-					Vector<ClassFile> kernelClasses = new Vector<ClassFile>();
-					for(int i = 0; i < m_classes.size();i++){
-						if(m_classes.get(i).m_export){
-							kernelClasses.add(m_classes.get(i).m_class);
-						}
-					}
-					m_exporter.exportMicroKernel(selectedFile,kernelClasses);
+					/*
+					 * if (selectedFile.isDirectory())
+					 * setCurrentPath(selectedFile.getAbsolutePath()); else
+					 * setCurrentPath(selectedFile.getParentFile()
+					 * .getAbsolutePath());
+					 */
+
+					m_exporter.exportMicroKernel(selectedFile);
 				}
 			}
 		});
 		panel.add(exportKernelFiles);
-		
+
 		splitPanel.add(panel);
 
-		JTable table = new JTable(new MyTableModel());
+		JTable table = new JTable(new MyTableModel(true));
 		table.setDragEnabled(true);
-		table.setTransferHandler(new TableTransferHandler());
+		table.setTransferHandler(new TableTransferHandler(true));
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
 
@@ -144,20 +181,140 @@ public class KJVMExporterUI extends JPanel {
 
 		// Add the scroll pane to this panel.
 		splitPanel.add(scrollPane);
-		add(splitPanel);
+	}
+	
+	void createAppInterface(JSplitPane splitPanel) {
+		JFileChooser fd = new JFileChooser();
+		JPanel panel = new JPanel();
+		JButton loadPackage = new JButton("Load");
+		loadPackage.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				fd.setDialogType(JFileChooser.OPEN_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fd.setDialogTitle("Add microkernel class or file set.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int i = fd.showDialog(m_instance, "Open");
+				if (i == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+
+					setCurrentPath(selectedFile.getParentFile()
+							.getAbsolutePath());
+					m_exporter.loadPackage(selectedFile,false);
+				}
+			}
+		});
+		panel.add(loadPackage);
+
+		JButton savePacakge = new JButton("Save");
+		savePacakge.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fd.setDialogType(JFileChooser.SAVE_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fd.setDialogTitle("Save microkernel.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int res = fd.showDialog(m_instance, "Save");
+				if (res == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+
+					setCurrentPath(selectedFile.getParentFile()
+							.getAbsolutePath());
+					m_exporter.savePackage(selectedFile,false);
+				}
+			}
+		});
+		panel.add(savePacakge);
+
+		JButton addPackageFiles = new JButton("Add Class");
+		addPackageFiles.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fd.setDialogType(JFileChooser.OPEN_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				fd.setDialogTitle("Add microkernel class or file set.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int i = fd.showDialog(m_instance, "Open");
+				if (i == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+
+					if (selectedFile.isDirectory())
+						setCurrentPath(selectedFile.getAbsolutePath());
+					else
+						setCurrentPath(selectedFile.getParentFile()
+								.getAbsolutePath());
+
+					m_exporter.load(selectedFile,false);
+				}
+			}
+		});
+		panel.add(addPackageFiles);
+
+		JButton exportPackageFiles = new JButton("Export");
+		exportPackageFiles.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fd.setDialogType(JFileChooser.SAVE_DIALOG);
+				fd.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fd.setDialogTitle("Export Project classes.");
+
+				String crtPath = getCurrentPath();
+				if (crtPath != null)
+					fd.setCurrentDirectory(new File(crtPath));
+
+				int res = fd.showDialog(m_instance, "Save");
+				if (res == JFileChooser.APPROVE_OPTION) {
+					final File selectedFile = fd.getSelectedFile();
+					
+					m_exporter.exportClasses(selectedFile);
+				}
+			}
+		});
+		panel.add(exportPackageFiles);
+
+		splitPanel.add(panel);
+
+		JTable table = new JTable(new MyTableModel(false));
+		table.setDragEnabled(true);
+		table.setTransferHandler(new TableTransferHandler(false));
+		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+		table.setFillsViewportHeight(true);
+
+		// Create the scroll pane and add the table to it.
+		JScrollPane scrollPane = new JScrollPane(table);
+
+		// Add the scroll pane to this panel.
+		splitPanel.add(scrollPane);
 	}
 
-	protected void setMicroKernelClasses(Vector<ClassFile> classes) {
-		m_classes.clear();
-		
-		for (int i = 0; i < classes.size(); i++) {
-			m_classes.add(new ClassTableElement(classes.get(i)));
-		}
-	}
-
-	class MyTableModel extends AbstractTableModel {
+	class MyTableModel extends AbstractTableModel 
+	{
 		private String[] columnNames = { "ID", "Export", "Class" };
-
+		private boolean m_kernel;
+		MyTableModel(boolean isKernel){
+			m_kernel = isKernel;
+		}
+		
+		private Vector<KClass> getClasses(){
+			if(m_kernel)
+				return m_exporter.getMicroKernelClassFiles();
+			else
+				return m_exporter.getProjectClassFiles();
+		}
+		
 		@Override
 		public int getColumnCount() {
 			return columnNames.length;
@@ -165,7 +322,7 @@ public class KJVMExporterUI extends JPanel {
 
 		@Override
 		public int getRowCount() {
-			return m_classes.size();
+			return getClasses().size();
 		}
 
 		@Override
@@ -178,10 +335,10 @@ public class KJVMExporterUI extends JPanel {
 			if (col == 0)
 				return row;
 			if (col == 1)
-				return m_classes.get(row).m_export;
+				return getClasses().get(row).m_export;
 
 			if (col == 2)
-				return m_classes.get(row).m_name;
+				return getClasses().get(row).m_name;
 			return "UNKNOWN COLUMN";
 		}
 
@@ -215,14 +372,8 @@ public class KJVMExporterUI extends JPanel {
 		 */
 		@Override
 		public void setValueAt(Object value, int row, int col) {
-			if (DEBUG) {
-				System.out.println("Setting value at " + row + "," + col
-						+ " to " + value + " (an instance of "
-						+ value.getClass() + ")");
-			}
-
 			if (col == 1)
-				m_classes.get(row).m_export = (Boolean) value;
+				getClasses().get(row).m_export = (Boolean) value;
 
 			fireTableCellUpdated(row, col);
 		}
@@ -284,8 +435,19 @@ public class KJVMExporterUI extends JPanel {
 	 * example.
 	 */
 
-	class TableTransferHandler extends TransferHandler {
-
+	class TableTransferHandler extends TransferHandler 
+	{
+		boolean m_kernel;
+		TableTransferHandler(boolean iskernel){
+			m_kernel = iskernel;
+		}
+		private Vector<KClass> getClasses(){
+			if(m_kernel)
+				return m_exporter.getMicroKernelClassFiles();
+			else
+				return m_exporter.getProjectClassFiles();
+		}
+		
 		public int getSourceActions(JComponent c) {
 			return DnDConstants.ACTION_MOVE;
 		}
@@ -323,18 +485,19 @@ public class KJVMExporterUI extends JPanel {
 
 			String data;
 			try {
-				data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
+				data = (String) support.getTransferable().getTransferData(
+						DataFlavor.stringFlavor);
 			} catch (UnsupportedFlavorException e) {
 				return false;
 			} catch (IOException e) {
 				return false;
 			}
 			int sourceRow = Integer.parseInt(data);
-			ClassTableElement elem = m_classes.get(sourceRow);
+			KClass elem = getClasses().get(sourceRow);
 
-			m_classes.remove(sourceRow);
-			m_classes.insertElementAt(elem, row);
-
+			getClasses().remove(sourceRow);
+			getClasses().insertElementAt(elem, row);
+			((AbstractTableModel) table.getModel()).fireTableDataChanged();
 			return true;
 		}
 

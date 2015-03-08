@@ -39,6 +39,10 @@ GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
 
 #endif
 
+#ifdef USE_MICROKERNEL
+#include "microkernel.h"
+#endif
+
 #define fieldName       name
 #define fieldNameLength     nameLength
 //#define lengthArray     nameLength
@@ -986,6 +990,8 @@ void interpreter_run()                                        /* in: classNumber
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
+                className = getClassName(cN);
+                classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1029,6 +1035,8 @@ void interpreter_run()                                        /* in: classNumber
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
+                className = getClassName(cN);
+                classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1075,6 +1083,8 @@ void interpreter_run()                                        /* in: classNumber
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
+                className = getClassName(cN);
+                classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1121,6 +1131,8 @@ void interpreter_run()                                        /* in: classNumber
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                     cN = classNameId;
+                    className = getClassName(cN);
+                    classNameLength = stringLength(className);
 #else
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1210,8 +1222,9 @@ void interpreter_run()                                        /* in: classNumber
                     if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
                     {
 #ifdef ENABLE_KCLASS_FORMAT
-                        const u1 STRING_CLASS_ID = 9;
-                        cN = STRING_CLASS_ID;//todo - export ID's for microkernel classes
+                        cN = JAVA_LANG_STRING_CLASS_ID();
+                        className = getClassName(cN);
+                        classNameLength = stringLength(className);
 #else
                         className = "java/lang/String";
                         classNameLength = 16;
@@ -1226,6 +1239,8 @@ void interpreter_run()                                        /* in: classNumber
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                     cN = classNameId;
+                    className = getClassName(cN);
+                    classNameLength = stringLength(className);
 #else
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1307,12 +1322,13 @@ void interpreter_run()                                        /* in: classNumber
                     }
                 }
 #endif
-                /* no synchronized,or I have the lock*/
+                /* no synchronized,or I have the lock */
                 /* now call method*/
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
-                    if ((cs[cN].nativeFunction != NULL) && (cs[cN].nativeFunction[mN]
-                                                            != NULL))
+                    int a = (cs[cN].nativeFunction != NULL);
+                    int b = (cs[cN].nativeFunction[mN] != NULL);
+                    if ( a && b)
                     {
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
@@ -1321,7 +1337,7 @@ void interpreter_run()                                        /* in: classNumber
                     }
                     else
                     {
-                        errorExit(-3, "native method not found cN: %d mN: %d", cN, mN);
+                        errorExit(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
                     }
                 }
                 pc = getStartPC(cN,mN);
@@ -1356,6 +1372,8 @@ void interpreter_run()                                        /* in: classNumber
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
+                className = getClassName(cN);
+                classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1559,6 +1577,8 @@ void interpreter_run()                                        /* in: classNumber
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = classNameId;
+                className = getClassName(cN);
+                classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
@@ -1588,6 +1608,7 @@ void interpreter_run()                                        /* in: classNumber
                     }
 
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
+                
                 cN=methodStackPop();
                 u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
                 first.stackObj.pos=heapPos;
@@ -1604,8 +1625,7 @@ void interpreter_run()                                        /* in: classNumber
                 mN = methodStackPop();
                 cN = methodStackPop();
                 /* className*/
-                DEBUGPRINTLNSTRING(getAddr(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1)) + 3),
-                                   getU2(cN,CP(cN, getU2(cN,CP(cN,BYTECODEREF) + 1 )) + 1));
+                DEBUGPRINTLNSTRING(className,classNameLength);
 
             }BREAK;
             CASE(NEWARRAY):
@@ -2238,22 +2258,20 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
  ** Realizes an interpreter-raised Exception
  */
 //BH AM not tested
-void raiseExceptionFromIdentifier(const char *identifier, const u1 length)
+void raiseExceptionFromIdentifier(const Exception exception)
 {
 
     methodStackPush(cN);
     methodStackPush(mN);
-#ifdef DEBUG
-    if (strlen(identifier) != length)
-    {
-        PRINTF("ERROR: Wrong length for %s\n", identifier);
-    }
-#endif
+
+    extern u2 getExceptionClassId(const Exception exception);
+    cN = getExceptionClassId(exception);
+
     //todo - kclass format Create a class of the given type
-    cN = FIND_CLASS(identifier, length);
+    //cN = FIND_CLASS(identifier, length);
     if (cN == INVALID_CLASS_ID)
     {
-        CLASSNOTFOUNDERR(identifier, length);
+        CLASSNOTFOUNDERR("Undefined Exception",19);
     }
 
     // + marker
@@ -2345,8 +2363,7 @@ void handleException()
 #endif
         // Ya well, this is the catched class's number in code exception table
         u1 classNumberInCodeExceptionTable = cN;
-        DEBUGPRINTLN_OPC("classNumberInCodeExceptionTable: %d",
-                     classNumberInCodeExceptionTable);
+        DEBUGPRINTLN_OPC("classNumberInCodeExceptionTable: %d",classNumberInCodeExceptionTable);
 
         cN = classNumberFromPushedObject;
 
@@ -2366,7 +2383,14 @@ void handleException()
     {
         DEBUGPRINTLN_OPC("we are thru, this was the top frame");
         cN = classNumberFromPushedObject;
-        UNHANDLEDEXCEPTIONERR((char *) getAddr(cN,cs[cN].constant_pool[getU2(cN,cs[cN].constant_pool[getU2(cN,cs[cN].this_class)] + 1)] + 3));
+        const u2 classInfo = getU2(cN,cs[cN].this_class);
+        const u2 classNameId =  CLASSINFO_GET_NAMEID(cN,classInfo);
+#ifdef ENABLE_KCLASS_FORMAT
+        className = getClassName(classNameId);
+#else
+        className = UTF8_GET_STRING(cN,classNameId);
+#endif
+        UNHANDLEDEXCEPTIONERR(className);
     }
     else
     {

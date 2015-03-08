@@ -14,8 +14,9 @@ void analyzeClass(const u1 classId);
 void analyzeConstantPool(const u1 classId);
 void analyzeMethods(const u1 classId);
 void analyzeFields(const u1 classId);
-
+//#ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* name,const u1 len);
+//#endif
 u1 findSuperClass(const u1 classId);
 u1 findNumArgs(const u1 classId,const u2 method);
 u2 findMaxLocals(const u1 classId,const u1 methodId);

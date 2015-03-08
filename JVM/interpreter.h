@@ -229,7 +229,7 @@
 
 void interpreter_run(void);
 u1  checkInstance(const u2 classId,const u2 target);
-void raiseExceptionFromIdentifier(const char identifier[], const u1 length);
+void raiseExceptionFromIdentifier(const Exception exception);
 void handleException(void);
 u2 subCheck(const u2 classId,const u2 target,const u2 addr);
 

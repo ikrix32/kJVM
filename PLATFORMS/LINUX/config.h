@@ -16,9 +16,10 @@
 //#define DEBUG_VM
 //#define DEBUG_CLASS_LOADING
 
-#define BOOTSTRAP_BINARIES
+#define USE_MICROKERNEL
 
-//#define ENABLE_KCLASS_FORMAT
+#define ENABLE_KCLASS_FORMAT
+#define DEBUG_KCLASS//native methods don't work without this
 
 #define ENABLE_TESTS
 

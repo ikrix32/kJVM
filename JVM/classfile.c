@@ -339,18 +339,18 @@ u1 findClassFlash(const char* className,const u1 classNameLength)
 }
 #endif
 
+//#ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
     {
         const u2 classInfoId = getU2(classId,cs[classId].this_class);
-        const u2 classNameId = getU2(classId,CP(classId,classInfoId) + 1);
-        const u2 cclassnameLength=getU2(classId,CP(classId,classNameId) + 1);
-
+        const u2 classNameId = CLASSINFO_GET_NAMEID(classId,classInfoId);
+        const u2 cclassnameLength = UTF8_GET_LENGTH(classId,classNameId);
         if (classNameLength != (u2) cclassnameLength)
             continue;
 
-        const char* cclassName = getAddr(classId,CP(classId,classNameId) + 3);
+        const char* cclassName = UTF8_GET_STRING(classId, classNameId);
         if (STRNCMPRAMFLASH(className,cclassName, classNameLength) == 0)
         {
             //printf("\nclass:%s id:%d \n",className,cN);
@@ -359,7 +359,7 @@ u1 findClass(const char* className,const u1 classNameLength)
     }
     return INVALID_CLASS_ID;
 }
-
+//#endif
 
 void analyzeClass(const u1 classId)
 {
@@ -547,20 +547,31 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
         pc += 8;
         if (a == 0)
         {
+            const u2 classInfoId = getU2(classId,cs[classId].this_class);
+            const u2 classNameId = CLASSINFO_GET_NAMEID(classId, classInfoId);
+#ifdef ENABLE_KCLASS_FORMAT
+            //todo - implement new native method dispach
+            extern char* getClassName(const u2 classId);
+            const char* className = getClassName(classNameId);
+            const u2 classNameLength=stringLength(className);
+#else
+            const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);
+            const char* className = UTF8_GET_STRING(classId,classNameId);
+#endif
             for (int i = 0; i < numNativeClassNames; i++)
-                if (!STRNCMPRAMFLASH(nativeClassNames[i],
-                     (char*) getAddr(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].this_class)] + 1)] + 3),
-                     getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].constant_pool[getU2(classId,cs[classId].this_class)] + 1)] + 1)))
+            {
+                if (!STRNCMPRAMFLASH(nativeClassNames[i],className,classNameLength))
                 {
                     cs[classId].nativeFunction = (functionForNativeMethodType*) funcArray[i];
                     break;
                 }
+            }
             continue;                             /* native method*/
         }
         //Code(var), Exception(var),Synthetic (4),Signature,Deprecated(4)
         for (int m = 0; m < a; m++)                   /* attributes of method*/
         {
-            const char* adr = getAddr(classId,cs[classId].constant_pool[getU2(classId,0)] + 1 + 2);
+            const char* adr = getAddr(classId,CP(classId,getU2(classId,0)) + 1 + 2);
             if (STRNCMPRAMFLASH("Code", adr, 4) == 0)
             {
                 DEBUG_CL_PRINTF("\t\tCode: attribute_length: %d\n",getU4(classId,pc));
@@ -591,7 +602,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
                 //LineNumberTable(var),LocalVariableTable(var),StackMapTable
                 for (int i = 0; i < h; i++)
                 {
-                    const char* addr = getAddr(classId,cs[classId].constant_pool[getU2(classId,0)] + 3);
+                    const char* addr = getAddr(classId,CP(classId,getU2(classId,0)) + 3);
                     if (STRNCMPRAMFLASH("LineNumberTable", addr, 15) == 0)
                     {
                         pc = getU4(classId,0) + pc;
@@ -660,7 +671,7 @@ void analyzeFields(const u1 classId)
         DEBUG_CL_PRINTF("\tfield %d\tname: %d\n",n,getU2(classId,pc+2));
         DEBUG_CL_PRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(classId,pc+4));
         DEBUG_CL_PRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(classId,pc+6));
-        const u2 fielddescr = cs[classId].constant_pool[getU2(classId,cs[classId].field_info[n] + 4)];
+        const u2 fielddescr = CP(classId,getU2(classId,cs[classId].field_info[n] + 4));
         const u1 isNotObject= STRNCMPRAMFLASH("L",(const char*) getAddr(classId,fielddescr + 3), 1);
 
         //printf("classId %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(classId,fielddescr + 3),fN);
@@ -669,12 +680,12 @@ void analyzeFields(const u1 classId)
             fN++;
 
         pc += 6;
-        const u2 a = getU2(classId,0);                             // num field attribute
-                                                  // ConstantValue(6),Synthetic(4),Signature(6) ,Deprecated(4)
+        const u2 a = getU2(classId,0);           // num field attribute
+                                                 // ConstantValue(6),Synthetic(4),Signature(6) ,Deprecated(4)
         for (int cur_a = 0; cur_a < a; ++cur_a)  // field attributes
         {
             const u2 attribute_name_index = getU2(classId,0);
-            const u1 attribute_name = cs[classId].constant_pool[attribute_name_index];
+            const u1 attribute_name = CP(classId,attribute_name_index);
             const u4 attribute_length = getU4(classId,0);
 
             if (STRNCMPRAMFLASH("ConstantValue", getAddr(classId,attribute_name + 3), 13) == 0)	// nothing to do for jvm
@@ -722,7 +733,7 @@ u2 getStartPC(const u1 classId,const u1 methodId)                               
     /* number of attributes*/
     for (u2 i = 0; i < getU2(classId,METHODBASE(classId, methodId) + 6); i++)
     {
-        if (STRNCMPRAMFLASH("Code",getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)] + 3), 4) == 0)
+        if (STRNCMPRAMFLASH("Code",getAddr(classId,CP(classId,getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)) + 3), 4) == 0)
             return (u2) METHODBASE(classId, methodId) + 8 + 14 + attrLength;
         /*+attrLength;		????*/
         attrLength = getU4(classId,METHODBASE(classId, methodId) + 8) + 6;

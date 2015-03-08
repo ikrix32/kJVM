@@ -1,16 +1,16 @@
 package com.iceq.gui;
 
-import net.sf.rej.java.ClassFile;
+import com.iceq.KJVMExporter.KClass;
 
 public class DbgClassInfo {
-	public String name;
-	public String fieldNames[];
-	public String methodNames[];
+	public KClass m_class;
+	public String m_fieldNames[];
+	public String m_methodNames[];
 	
 	private DbgClassPackageInfo m_package;
 	
-	public DbgClassInfo(DbgClassPackageInfo pack,ClassFile classFile) {
+	public DbgClassInfo(DbgClassPackageInfo pack,KClass classFile) {
 		m_package = pack;
-		name = classFile.getFullClassName();
+		m_class = classFile;
 	}
 }

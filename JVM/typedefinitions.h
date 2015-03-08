@@ -122,4 +122,14 @@ typedef struct
     functionForNativeMethodType* nativeFunction;
     slot classInfo;
 } classStructure;
+
+typedef enum {
+    ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION = 0,
+    NEGATIVE_ARRAY_SIZE_EXCEPTION,
+    NULL_POINTER_EXCEPTION,
+    ARITHMETIC_EXCEPTION,
+    CLASS_CAST_EXCEPTION,
+    ILLEGAL_MONITOR_STATE_EXCEPTION,
+}Exception;
+
 #endif

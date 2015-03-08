@@ -12,8 +12,8 @@
 #define AVR8_FLASH_JAVA_BASE    0x0000            // +rampz;16k boot classes in flash	-> 0x8000 in words
 #define AVR8_FLASH_APP_BASE     0xcc00            // +rampz;6k application classes	-> 0xe600
 // UC3A is evk1100
-#define UC3A_FLASH_BASE     0x80000000            // internal 512 KB flash
-//#define UC3A_FLASH_JAVA_BASE	0x80040000	// boot classes in flash
+#define UC3A_FLASH_BASE         0x80000000        // internal 512 KB flash
+//#define UC3A_FLASH_JAVA_BASE	0x80040000        // boot classes in flash
 #define UC3A_FLASH_JAVA_BASE    0x80038000        // boot classes in flash
 #define UC3A_SDRAM_BASE     0xD0000000
 #define UC3A_SDRAM_JAVA_BASE    0xD0200000        // application classes, heap, opstack methodstack
@@ -108,12 +108,12 @@
 
 //mb jf
 #ifndef TINYBAJOS_EXCEPTION
-#define ARRAYINDEXOUTOFBOUNDSEXCEPTION raiseExceptionFromIdentifier("java/lang/ArrayIndexOutOfBoundsException", 40)
-#define NEGATIVEARRAYSIZEEXCEPTION raiseExceptionFromIdentifier("java/lang/NegativeArraySizeException", 36)
-#define NULLPOINTEREXCEPTION raiseExceptionFromIdentifier("java/lang/NullPointerException", 30)
-#define ARITHMETICEXCEPTION raiseExceptionFromIdentifier("java/lang/ArithmeticException", 29)
-#define CLASSCASTEXCEPTION raiseExceptionFromIdentifier("java/lang/ClassCastException", 28)
-#define ILLEGALMONITORSTATEEXCEPTION raiseExceptionFromIdentifier("java/lang/IllegalMonitorStateException", 38)
+#define ARRAYINDEXOUTOFBOUNDSEXCEPTION raiseExceptionFromIdentifier(ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION)
+#define NEGATIVEARRAYSIZEEXCEPTION raiseExceptionFromIdentifier(NEGATIVE_ARRAY_SIZE_EXCEPTION)
+#define NULLPOINTEREXCEPTION raiseExceptionFromIdentifier(NULL_POINTER_EXCEPTION)
+#define ARITHMETICEXCEPTION raiseExceptionFromIdentifier(ARITHMETIC_EXCEPTION)
+#define CLASSCASTEXCEPTION raiseExceptionFromIdentifier(CLASS_CAST_EXCEPTION)
+#define ILLEGALMONITORSTATEEXCEPTION raiseExceptionFromIdentifier(ILLEGAL_MONITOR_STATE_EXCEPTION)
 
 #define DNOTSUPPORTED errorExit(-2, "Double precision primitive data types (double and long) are not supported.\n")
 #define CLASSNOTFOUNDERR(classname,classnamelength) {errorExit(-3, "Class '%s' not found.\n", classname);}
@@ -208,7 +208,7 @@
 #define CLASSINFO_GET_NAMEID(classId,classInfoId) getU2(classId,CP(classId, classInfoId) + 1)//1 = sizeof(tag)
 
 #define UTF8_GET_LENGTH(classId,id) getU2(classId,CP(classId, id) + 1);// 1 = sizeof(tag)
-#define UTF8_GET_STRING(classId,id) (char*)getAddr(classId,CP(classId, id) + 3);//3 = sizeof(tag) + sizeof(classNameLength)
+#define UTF8_GET_STRING(classId,id) (char*)getAddr(classId,CP(classId, id) + 3)//3 = sizeof(tag) + sizeof(classNameLength)
 
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)

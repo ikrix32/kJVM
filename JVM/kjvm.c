@@ -50,7 +50,10 @@ void vm_init() /* read, analyze classfiles and fill structures*/
     methodStackSetSpPos(0);
 #endif
 
-    loadBootstrapClasses();
+#ifdef USE_MICROKERNEL
+    extern void loadMicroKernel(void);
+    loadMicroKernel();
+#endif
 
     DEBUGPRINTHEAP;
 
