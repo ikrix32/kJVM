@@ -1,28 +1,49 @@
 package tests;
+
 public class ArrayTest {
-    public static int a=7;
-    public static int b=3;
-    public static int c=2;
-    static byte array[]={77,99,44};    
-    private static int multiply(int y,int z)
-    {
-        return y*z;
-    }
-    private static int subtract(int s,int w)
-    {
-        return s-w;
-    }
-    private static int divide(int b,int n)
-    {
-        return (b%n);
-    }
-	public static void main(String[] args)
-	{
-		int f=-5;
-		int sum=a+b+f;
-		int div=sum/c;
-		int res=multiply(sum, div);
-		int sub=subtract(sum, div);
-		int rem=divide(array[0],sub);
+	public static int a = 2;
+	public static int b = 3;
+	public static int c = 7;
+	static byte array[] = { 20, 32, 44 };
+
+	private static byte[] multiply(final byte[] arr, int z) {
+		byte[] result = new byte[arr.length]; 
+		for(int i = 0; i < arr.length;i++)
+			result[i] =(byte)(arr[i] * z);
+		return result;
+	}
+
+	private static byte[] subtract(final byte[] arr, int w) {
+		byte[] result = new byte[arr.length]; 
+		for(int i = 0; i < arr.length;i++)
+			result[i] =(byte)(arr[i] - w);
+		return result;
+	}
+
+	private static byte[] divide(final byte[] arr, int n) {
+		byte[] result = new byte[arr.length]; 
+		for(int i = 0; i < arr.length;i++)
+			result[i] =(byte)(arr[i] / n);
+		return result;
+	}
+	
+	private static String arrayToString(final byte[] arr){
+		String s = "[";
+		for(int i = 0; i < arr.length;i++){
+			s += arr[i];
+			if(i < arr.length - 1)
+				s += ",";
+		}
+		s += "]";
+		return s;
+	}
+
+	public static void main(String[] args) {
+		byte[] arr = multiply(array, a);
+		System.out.println(""+arrayToString(array)+" * "+a+" = "+arrayToString(arr));
+		arr = subtract(array, b);
+		System.out.println(""+arrayToString(array)+" - "+b+" = "+arrayToString(arr));
+		arr = divide(array, c);
+		System.out.println(""+arrayToString(array)+" / "+c+" = "+arrayToString(arr));
 	}
 }

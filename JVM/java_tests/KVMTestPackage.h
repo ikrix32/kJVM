@@ -63,6 +63,13 @@ static const u1 tests_ArraySizeBin[] =
 #include "tests_ArraySize.h"
 #endif
 
+static const u1 tests_ArrayTestBin[] =
+#ifdef ENABLE_KCLASS_FORMAT
+#include "tests_ArrayTest_k.h"
+#else
+#include "tests_ArrayTest.h"
+#endif
+
 static const u1 tests_InheritanceABin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_InheritanceA_k.h"
@@ -122,12 +129,13 @@ static const u1* testBinaries[] =
 	tests_StringAndHeapTestBin,
 	tests_SwitchBin,
 	tests_ArraySizeBin,
+	tests_ArrayTestBin,
 	tests_InheritanceABin,
 	tests_InheritanceBBin,
 	tests_InheritanceBin,
 	tests_FloatTestBin,
 	tests_QuickSortBin,
-	tests_ErathostenesBin,
+    tests_ErathostenesBin,
 	tests_DivByZeroBin,
 };
 
@@ -141,6 +149,7 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_StringAndHeapTestBin),
 	sizeof(tests_SwitchBin),
 	sizeof(tests_ArraySizeBin),
+	sizeof(tests_ArrayTestBin),
 	sizeof(tests_InheritanceABin),
 	sizeof(tests_InheritanceBBin),
 	sizeof(tests_InheritanceBin),
@@ -160,6 +169,7 @@ static const char* testNames[] =
 	"tests/StringAndHeapTest",
 	"tests/Switch",
 	"tests/ArraySize",
+	"tests/ArrayTest",
 	"tests/InheritanceA",
 	"tests/InheritanceB",
 	"tests/Inheritance",

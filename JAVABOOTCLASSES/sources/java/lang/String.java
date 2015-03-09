@@ -98,32 +98,41 @@ public final class String implements CharSequence {
 	 * 
 	 * @return the String that represents the object
 	 **/
+	public static String valueOf(Object aObj) {
+		return aObj == null ? "null" : aObj.toString();
+	}
 
-	/*
-	 * Not worth the bytes *
-	 * 
-	 * public static String valueOf (Object aObj) { return aObj == null ? "null"
-	 * : aObj.toString(); }
-	 * 
-	 * public static String valueOf(int n) { return Integer.toString(n); }
-	 * 
-	 * public static String valueOf(float f) { return Float.toString(f); }
-	 * 
-	 * public static String valueOf(char c) { return Character.toString(c); }
-	 * 
-	 * public static String valueOf(boolean b) { return Boolean.toString(b); }
-	 * 
-	 * public static String copyValueOf(char[] data) { return new String(data);
-	 * }
-	 * 
-	 * public static String valueOf(char[] data) { return new String(data); }
-	 * 
-	 * public static String copyValueOf(char[] data, int offset, int count) {
-	 * return new String(data, offset, count); }
-	 * 
-	 * public static String valueOf(char[] data, int offset, int count) { return
-	 * new String(data, offset, count); }
-	 */
+	public static String valueOf(int n) {
+		return Integer.toString(n);
+	}
+
+	public static String valueOf(float f) {
+		return Float.toString(f);
+	}
+
+	public static String valueOf(char c) {
+		return Character.toString(c);
+	}
+
+	public static String valueOf(boolean b) {
+		return Boolean.toString(b);
+	}
+
+	public static String copyValueOf(char[] data) {
+		return new String(data);
+	}
+
+	public static String valueOf(char[] data) {
+		return new String(data);
+	}
+
+	public static String copyValueOf(char[] data, int offset, int count) {
+		return new String(data, offset, count);
+	}
+
+	public static String valueOf(char[] data, int offset, int count) {
+		return new String(data, offset, count);
+	}
 
 	/**
 	 * Returns itself.
