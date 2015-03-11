@@ -155,7 +155,7 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_InheritanceBin),
 	sizeof(tests_FloatTestBin),
 	sizeof(tests_QuickSortBin),
-	sizeof(tests_ErathostenesBin),
+    sizeof(tests_ErathostenesBin),
 	sizeof(tests_DivByZeroBin),
 };
 
@@ -175,7 +175,7 @@ static const char* testNames[] =
 	"tests/Inheritance",
 	"tests/FloatTest",
 	"tests/QuickSort",
-	"tests/Erathostenes",
+    "tests/Erathostenes",
 	"tests/DivByZero",
 };
 
