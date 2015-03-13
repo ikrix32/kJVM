@@ -13,13 +13,14 @@
 #include <avr/pgmspace.h>
 #endif
 #include "heap.h"
+
 /* heap */
 void heapInit()
 {
 #if (AVR8||LINUX||AVR32LINUX)
     if ((heapBase = ( slot*)malloc(sizeof(slot) * (size_t)MAXHEAP))==NULL)
     {
-#ifdef AVR8                               // change all avr8 string to flash strings gives more data ram space for java!!
+#ifdef AVR8 // change all avr8 string to flash strings gives more data ram space for java!!
         printf_P(PSTR("malloc error\n"));
 #else
         printf("malloc error\n");
@@ -27,7 +28,7 @@ void heapInit()
         exit(-1);                                 /* heap fixed size!!*/
     }
 #else
-    /* make it better*/
+    // make it better
     heapBase = (slot*) ((u4)(appClassFileBase + MAXBYTECODE));
 #endif
     while (heapTop > 0)
@@ -53,36 +54,54 @@ inline u2 getNextHeapObjectPos(const u2 pos)
     return ((pos + HEAPOBJECTMARKER(pos).length) < heapTop) ? pos + HEAPOBJECTMARKER(pos).length : (heapTop + 1);
 }
 
+u2 getHeapFreeSpace(){
+    u2 nextElementPos = 0;
+    u2 oldElementPos = 0;
+    while ((nextElementPos = getNextHeapObjectPos(oldElementPos)) < heapTop)
+    {
+        if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
+        && (HEAPOBJECTMARKER(oldElementPos).status == HEAPFREESPACE))
+        {
+            HEAPOBJECTMARKER(oldElementPos).length += HEAPOBJECTMARKER(nextElementPos).length;
+        } else
+            oldElementPos = nextElementPos;
+    }
+    if (HEAPOBJECTMARKER(oldElementPos).status == HEAPFREESPACE) {
+        heapTop -= HEAPOBJECTMARKER(oldElementPos).length;
+    }
+
+    return MAXHEAP - heapTop;
+}
 
 u2 getFreeHeapSpace(const u2 length)
 {
-    /* erkennnen circularer referencen on heap ohne bezug zu opstack !!*/
+    // circulars are recognizable reference on heap without regard to opstack !!!
     if ((heapTop + length - 1) < MAXHEAP)
     {
-        HEAPOBJECTMARKER(heapTop).length = length; // get exact length slots
+        HEAPOBJECTMARKER(heapTop).length = length;// get exact length slots
         heapTop += length;
         return heapTop - length;
-    }                                             /* free space on heap*/
+    }// free space on heap
     u2 nextElementPos = 0;
-    do                                            /* first fit*/
+    do// first fit
     {
         if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
         && ((HEAPOBJECTMARKER(nextElementPos).length) >= length))	{
             return nextElementPos;	// may be get more space than length
-        }                /* first fit	 */
+        }// first fit
     } while ((nextElementPos = getNextHeapObjectPos(nextElementPos)) < heapTop);
 
     checkObjects();
-    /* noch mal probieren*/
+    // try again
     nextElementPos = 0;
     do
     {
         if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
             && ((HEAPOBJECTMARKER(nextElementPos).length) >= length))
-            return nextElementPos;                /* first fit	 */
+            return nextElementPos;// first fit
     } while ((nextElementPos = getNextHeapObjectPos(nextElementPos)) < heapTop);
 
-    /* verschmelzen=merge free heap space to bigger blocks*/
+    //  merge free heap space to bigger blocks
     int schmelz;
 
     verbosePrintf("Heap merge\n");
@@ -127,9 +146,9 @@ u2 getFreeHeapSpace(const u2 length)
 
 void checkObjects()
 {
-    /* static objects or objects in opstack (root objects) or objects, referenced by other objects (circular??)*/
-    /* ob das reicht?*/
-    /* ich markiere heapobjekte (rootCheck=1), die anderen geben ich zum abschu� frei!!*/
+    //static objects or objects in opstack (root objects) or objects, referenced by other objects (circular??)
+    // Will this be enough?
+    // Do I bump heap objects (rootCheck = 1), the other I give abschu free !!
     u2 nextElementPos = 0;
 #ifndef TINYBAJOS_MULTITASKING
     ThreadControlBlock* tCB;
@@ -138,13 +157,13 @@ void checkObjects()
     {
         HEAPOBJECTMARKER(nextElementPos).rootCheck = 0;
         if((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-        || (HEAPOBJECTMARKER(nextElementPos).status == HEAPALLOCATEDSTATICCLASSOBJECT))   /* empty or static*/
+        || (HEAPOBJECTMARKER(nextElementPos).status == HEAPALLOCATEDSTATICCLASSOBJECT))// empty or static
         {
             HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
             continue;
         }
 #ifndef TINYBAJOS_MULTITASKING
-        for (u1 i = 0; i < (MAXPRIORITY); i++)       //searching for root objects on stack
+        for (int i = 0; i < (MAXPRIORITY); i++)//searching for root objects on stack
         {
             tCB = threadPriorities[i].cb;
             const int max = (threadPriorities[i].count);
@@ -184,10 +203,10 @@ void checkObjects()
         }
 #endif
     } while ((nextElementPos = getNextHeapObjectPos(nextElementPos)) < heapTop);
-    /* alle Objekte von den stacks erreichbar (root elements)	markiert	*/
-    /* jetzt suche ich nur noch im heap*/
-    /* markierte objekte können referencen zu anderen objekten halten*/
-    /* diese markiere ich auch, solange bis ich keins mehr finde*/
+    // All objects are selected from the stacks accessible (root element)
+    // Now I am looking only in the heap
+    // Marked objects can referencen keep other objects
+    // This I mark also, until I find none left
     u1 stillAConcatedObject = 0;
     do
     {
@@ -198,7 +217,7 @@ void checkObjects()
             if (HEAPOBJECTMARKER(nextElementPos).rootCheck == 1)
             {
                 /* seraching for "objects in root-objects"*/
-                for (u1 i = 1; i < HEAPOBJECTMARKER(nextElementPos).length; i++)
+                for (int i = 1; i < HEAPOBJECTMARKER(nextElementPos).length; i++)
                     if((HEAPOBJECT(nextElementPos + i).stackObj.magic == OBJECTMAGIC)
                     &&  HEAPOBJECT(nextElementPos + i).UInt != NULLOBJECT.UInt && canItBeAnObject(HEAPOBJECT(nextElementPos + i).stackObj.pos)
                     && (HEAPOBJECTMARKER(HEAPOBJECT(nextElementPos + i).stackObj.pos).magic == OBJECTMAGIC)
@@ -217,7 +236,6 @@ void checkObjects()
         if (!HEAPOBJECTMARKER(nextElementPos).rootCheck)
             HEAPOBJECTMARKER(nextElementPos).status = HEAPFREESPACE;
 }
-
 
 u1 canItBeAnObject(const u2 pos)
 {

@@ -37,6 +37,11 @@ u1 classLoader_loadClass(const u1* bin,const u4 binSize)
     return classId;
 }
 
+void unloadLastClass(){
+    numClasses--;
+    crtByteCodeSize -= cs[numClasses].classFileLength;
+}
+
 void classLoader_clinitClass(const u1 classId){
     //initialize class
     mN = FIND_METHOD_BYNAME(classId,"<clinit>", 8, "()V", 3);

@@ -1,12 +1,8 @@
-/*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-/* fuer lehrzwecke,...*/
-/* 14.8.06 sie lief das erste mal durch (in Unix)*/
-/* april 2007-> threads, scheduling, funtionsüberladung, native-dispatch*/
-/* mai 2007 -> garbage collection, exception handling*/
-/* jan08 synchronized, wait notify*/
+// For educational purposes, ...
+// 08.14.06 it was first shown by (in Unix)
+// April 2007-> threads scheduling, funtion süberladung, native-dispatch
+// Mai 2007 -> garbage collection, exception handling
+// synchronized, wait notify
 #include <stdio.h>
 #include <stdlib.h>
 //#include <math.h>
@@ -26,16 +22,16 @@
 #include <avr/pgmspace.h>
 
 #define GETSTARTPC(offset)  ((strncmpRamFlash(  "Code",\
-getAddr(cN,cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
-4)==0)? (u2)METHODBASE(cN,mN)+8+14+offset :\
-GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
+getAddr(cN,cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3), 4) == 0)\
+? (u2)METHODBASE(cN,mN) + 8 + 14 + offset\
+: GETSTARTPC(offset + getU4(METHODBASE(cN,mN) + 8) + 6))
 
 #else
 
 #define GETSTARTPC(offset)  ((strncmp(  "Code",\
-getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN)+8+offset)]+3  ),\
-4)==0)? (u2)METHODBASE(cN,mN)+8+14+offset :\
-GETSTARTPC(offset+getU4(METHODBASE(cN,mN)+8)+6))
+getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) == 0)\
+? (u2)METHODBASE(cN,mN) + 8 + 14 + offset \
+: GETSTARTPC(offset + getU4(METHODBASE(cN,mN) + 8) + 6))
 
 #endif
 
@@ -60,17 +56,16 @@ static slot third;
 static slot fourth;
 static char*className;
 static u2   classNameLength;
-static char*name;                                /* field or method*/
+static char*name;                                // field or method
 static u2   nameLength;
-static char*descr;                               /* field or method*/
+static char*descr;                               // field or method
 static u2   descrLength;
-/* static u1	numFields; <-- not used?*/
-//static u2 i, j, k;
-//static s2 count;
+// static u1	numFields; <-- not used?
+// static u2 i, j, k;
+// static s2 count;
 
-void interpreter_run()                                        /* in: classNumber,  methodNumber cN, mN*/
-{
-    //u1 code, byte1, byte2;
+void interpreter_run() // in: classNumber,  methodNumber cN, mN
+{   //u1 code, byte1, byte2;
     //u2 heapPos;
     pc = getStartPC(cN,mN);
 
@@ -348,10 +343,10 @@ void interpreter_run()                                        /* in: classNumber
             CASE(BIPUSH):
             {
                 DEBUGPRINTLN_OPC("BIPUSH  -> push\t...,=> %d",(s1)byte1);
-                /* BIPUSH is defined as follows:*/
-                /* reads a signed 8 bit constant from byte1,*/
-                /* extends it to int signed (32bit)*/
-                /* and saves it on stack*/
+                // BIPUSH is defined as follows:
+                // reads a signed 8 bit constant from byte1,
+                // extends it to int signed (32bit)
+                // and saves it on stack
                 opStackPush(toSlot(((getU1(cN,pc) & 0x80) >> 7) * 0xffffff80 | (getU1(cN,0) & 0x7f)));
             }BREAK;
             CASE(SIPUSH):
@@ -366,9 +361,9 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     first.stackObj.magic = CPSTRINGMAGIC;
                     first.stackObj.classNumber = cN;
-                    first.stackObj.pos = (u2)(/*((u2)cN <<8)*/+byte1);
+                    first.stackObj.pos = (u2)(byte1);//((u2)cN <<8));
                     opStackPush(first);
-                } else /* int or float const value on stack*/
+                } else // int or float const value on stack
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN_OPC(",=> x%x", opStackPeek().UInt);
             }BREAK;
@@ -418,7 +413,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(CALOAD):
             CASE(SALOAD):
             {
-                const s2 count = (s2)opStackPop().Int;     /*mb jf*/
+                const s2 count = (s2)opStackPop().Int;
                 first = opStackPop();
 #ifdef DEBUG
                 if(code == IALOAD) DEBUGPRINTLN_OPC("iaload");
@@ -488,15 +483,15 @@ void interpreter_run()                                        /* in: classNumber
             {
 #ifdef DEBUG
                if(code == IASTORE) DEBUGPRINTLN_OPC("iastore stack -> local");
-                        /*mb jf		//float*/
+                //float
                 if(code == FASTORE) DEBUGPRINTLN_OPC("fastore");
-                        /*mb jf		//float*/
+                //float
                 if(code == AASTORE) DEBUGPRINTLN_OPC("fastore");
-                        /*mb jf		//byte or boolean*/
+                //byte or boolean
                 if(code == BASTORE) DEBUGPRINTLN_OPC("bastore");
-                        /*mb jf		//char*/
+                //char
                 if(code == CASTORE) DEBUGPRINTLN_OPC("castore");
-                        /*mb jf		//short*/
+                //short
                 if(code == SASTORE) DEBUGPRINTLN_OPC("sastore");
 #endif
                 second = opStackPop();
@@ -608,13 +603,13 @@ void interpreter_run()                                        /* in: classNumber
             CASE(ISUB):
             {
                 DEBUGPRINTLN_OPC("ISUB");
-                first = opStackPop();             /*mb fj changed substraction order*/
+                first = opStackPop(); // mb fj changed substraction order
                 opStackPoke(toSlot((opStackPeek().Int - first.Int)));
             }BREAK;
             CASE(FSUB):
             {
                 DEBUGPRINTLN_OPC("Fsub");
-                first = opStackPop();             /*mb fj changed substraction order*/
+                first = opStackPop(); // mb fj changed substraction order
                 opStackPoke(toSlot((opStackPeek().Float - first.Float)));
             }BREAK;
             CASE(IMUL):
@@ -630,7 +625,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(IDIV):
             {
                 DEBUGPRINTLN_OPC("IDIV");
-                first = opStackPop();             /*mb fj changed dividend order*/
+                first = opStackPop(); // mb fj changed dividend order
                 if (first.Int == 0)
                     ARITHMETICEXCEPTION;
                 else
@@ -639,7 +634,7 @@ void interpreter_run()                                        /* in: classNumber
             CASE(FDIV):
             {
                 DEBUGPRINTLN_OPC("FDIV");
-                first = opStackPop();             /*mb fj changed dividend order*/
+                first = opStackPop(); //mb fj changed dividend order
                 if (first.Float == 0.0)
                     ARITHMETICEXCEPTION;
                 else
@@ -712,12 +707,12 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IINC):
             {
-                DEBUGPRINTLN_OPC("IINC");             /*mb, jf*/
-                /* position*/
+                DEBUGPRINTLN_OPC("IINC");
+                // position
                 opStackSetValue((u2)(local + byte1),
-                                /* old value*/
-                                toSlot((s4)(opStackGetValue(local + byte1).Int + (s4) (s1) byte2)));         /* add const*/
-                pc += 2;                          /* to skip the index + const*/
+                                // old value
+                                toSlot((s4)(opStackGetValue(local + byte1).Int + (s4) (s1) byte2)));// add const
+                pc += 2;        // to skip the index + const
 
             }BREAK;
             CASE(I2F):
@@ -758,7 +753,7 @@ void interpreter_run()                                        /* in: classNumber
                 else if (first.Float > second.Float)
                 {
                     opStackPush(toSlot((s4) 1));
-                }                                 /* corrected by al june 08*/
+                }// corrected by al june 08
                 else if (first.Float == second.Float)
                 {
                     opStackPush(toSlot((s4) 0));
@@ -770,138 +765,138 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(IFEQ):
             {
-                DEBUGPRINTLN_OPC("ifeq");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifeq");
                 if (opStackPop().Int == 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2; // to skip the jump-adress
             }BREAK;
             CASE(IFNULL):
             {
                 DEBUGPRINTLN_OPC("ifnull");
                 if (opStackPop().UInt == NULLOBJECT.UInt)
-                    pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
+                    pc += BYTECODEREF - 1; // add offset to pc at ifnull-address
                 else
-                    pc += 2;                      /* skip branch bytes*/
+                    pc += 2;               // skip branch bytes
             }BREAK;
             CASE(IFNONNULL):
             {
-                DEBUGPRINTLN_OPC("ifnonnull");        /* mb jf*/
+                DEBUGPRINTLN_OPC("ifnonnull");
                 if (opStackPop().UInt != NULLOBJECT.UInt)
-                    pc += BYTECODEREF - 1;        /* add offset to pc at ifnull-address*/
+                    pc += BYTECODEREF - 1;  // add offset to pc at ifnull-address
                 else
-                    pc += 2;                      /* skip branch bytes*/
+                    pc += 2;                // skip branch bytes
             }BREAK;
             CASE(IFNE):
             {
-                DEBUGPRINTLN_OPC("ifne");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifne");
                 if (opStackPop().Int != 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                 // to skip the jump-adress
             }BREAK;
             CASE(IFLT):
             {
-                DEBUGPRINTLN_OPC("iflt");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("iflt");
                 if (opStackPop().Int < 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                  // to skip the jump-adress
             }BREAK;
             CASE(IFLE):
             {
-                DEBUGPRINTLN_OPC("ifle");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifle");
                 if (opStackPop().Int <= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                   // to skip the jump-adress
             }BREAK;
             CASE(IFGT):
             {
-                DEBUGPRINTLN_OPC("ifgt");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifgt");
                 if (opStackPop().Int > 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                    // to skip the jump-adress
             }BREAK;
             CASE(IFGE):
             {
-                DEBUGPRINTLN_OPC("ifge");             /*mb, jf*/
+                DEBUGPRINTLN_OPC("ifge");
                 if (opStackPop().Int >= 0)
                     pc += (s2)((byte1 << 8) | (byte2)) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                     // to skip the jump-adress
             }BREAK;
-            CASE(IF_ACMPEQ): DEBUGPRINTLN_OPC("if_acmpeq");        /*mb, jf*/
+            CASE(IF_ACMPEQ): DEBUGPRINTLN_OPC("if_acmpeq");
             CASE(IF_ICMPEQ):
             {
-                DEBUGPRINTLN_OPC("if_icmpeq");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpeq");
                 if (opStackPop().Int == opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
-            CASE(IF_ACMPNE): DEBUGPRINTLN_OPC("if_acmpne");        /*mb, jf*/
+                CASE(IF_ACMPNE): DEBUGPRINTLN_OPC("if_acmpne");
             CASE(IF_ICMPNE):
             {
-                DEBUGPRINTLN_OPC("if_icmpne");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpne");
                 if (opStackPop().Int != opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
             CASE(IF_ICMPLT):
             {
-                DEBUGPRINTLN_OPC("if_icmplt");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmplt");
                 /*???*/
                 if (opStackPop().Int > opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
             CASE(IF_ICMPGE):
             {
-                DEBUGPRINTLN_OPC("if_icmpge");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpge");
                 if (opStackPop().Int <= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
             CASE(IF_ICMPGT):
             {
-                DEBUGPRINTLN_OPC("if_icmpgt");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmpgt");
                 if (opStackPop().Int < opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
             CASE(IF_ICMPLE):
             {
-                DEBUGPRINTLN_OPC("if_icmple");        /*mb, jf*/
+                DEBUGPRINTLN_OPC("if_icmple");
                 if (opStackPop().Int >= opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
-                    pc += 2;                      /* to skip the jump-adress*/
+                    pc += 2;                      // to skip the jump-adress
             }BREAK;
             CASE(GOTO):
             {
-                DEBUGPRINTLN_OPC("goto");             /* mb, jf*/
+                DEBUGPRINTLN_OPC("goto");
                 pc += (s2) BYTECODEREF - 1;
             }BREAK;
             CASE(JSR):
             {
-                DEBUGPRINTLN_OPC("jsr");              /* mb, jf*/
+                DEBUGPRINTLN_OPC("jsr");
                 opStackPush(toSlot((u4)(pc + 2)));
                 pc += (s2) BYTECODEREF - 1;
             }BREAK;
             CASE(RET):
             {
-                DEBUGPRINTLN_OPC("ret");              /* mb, jf*/
+                DEBUGPRINTLN_OPC("ret");
                 pc = opStackGetValue(local + getU1(cN,0)).UInt;
             }BREAK;
             CASE(TABLESWITCH):
             {
-                DEBUGPRINTLN_OPC("tableswitch");      /* mb, jf*/
+                DEBUGPRINTLN_OPC("tableswitch");
                 {
                     /*
                      aa		tableswitch
@@ -915,18 +910,18 @@ void interpreter_run()                                        /* in: classNumber
                      */
 
                     u2 startPc = --pc;
-                    u2 relPc = pc - getStartPC(cN,mN); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
+                    u2 relPc = pc - getStartPC(cN,mN); //pcMethodStart;	//calculate relative PC for ByteCode in Method
                     u4 windex = opStackPop().Int;
-                    /* next pc as multiple of 4 --> skip padding bytes*/
+                    // next pc as multiple of 4 --> skip padding bytes
                     relPc = (u2)((relPc + 4) & 0xfffc);
-                    pc = relPc + getStartPC(cN,mN);    /*pcMethodStart;	// set pc to begin of default address*/
+                    pc = relPc + getStartPC(cN,mN);  //pcMethodStart;	// set pc to begin of default address
                     u4 offset = getU4(cN,0);         //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));	// default offset
                     u4 lowbyte = getU4(cN,0);        //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
                     u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
                     if (lowbyte <= windex && windex <= highbyte)
                     {
                         u4 tableoffset = windex - lowbyte;
-                        pc += tableoffset * 4;    /* skip 4 byte of previous address(es)*/
+                        pc += tableoffset * 4;       // skip 4 byte of previous address(es)
                         offset = getU4(cN,0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
                     }
                     pc = startPc + offset;
@@ -934,7 +929,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(LOOKUPSWITCH):
             {
-                DEBUGPRINTLN_OPC("lookupswitch");     /* mb, jf*/
+                DEBUGPRINTLN_OPC("lookupswitch");
                 {
                     /*
                      ab          lookupswitch
@@ -947,13 +942,13 @@ void interpreter_run()                                        /* in: classNumber
                      0  0  0 20  offset
                      */
                     u2 startPc = --pc;
-                    u2 relPc = pc - getStartPC(cN,mN); /*pcMethodStart;	//calculate relative PC for ByteCode in Method*/
+                    u2 relPc = pc - getStartPC(cN,mN); // pcMethodStart;	//calculate relative PC for ByteCode in Method
                     u4 key = opStackPop().Int;
 
-                    /* next pc as multiple of 4 from address of 0xab (lookupswitch)*/
+                    // next pc as multiple of 4 from address of 0xab (lookupswitch)
                     relPc = (u2)((relPc + 4) & 0xfffc);
-                    pc = relPc + getStartPC(cN,mN);    /* pcMethodStart;	// set pc to begin of default address*/
-                    u4 offset = getU4(cN,0);         /* default offset*/
+                    pc = relPc + getStartPC(cN,mN);     // pcMethodStart;	// set pc to begin of default address
+                    u4 offset = getU4(cN,0);            // default offset
                     u4 matches;
                     for (matches = getU4(cN,0); matches > 0; --matches)
                     {
@@ -970,7 +965,7 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(GETSTATIC):
             {
-                DEBUGPRINTLN_OPC("getstatic ");       /*mb jf ... corrected funtion*/
+                DEBUGPRINTLN_OPC("getstatic ");       //mb jf ... corrected funtion
                 methodStackPush(cN);
 
                 const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
@@ -986,10 +981,10 @@ void interpreter_run()                                        /* in: classNumber
                 fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
 
-                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = classNameId;
+                cN = getClassIndex(classNameId);
                 className = getClassName(cN);
                 classNameLength = stringLength(className);
 #else
@@ -1007,7 +1002,7 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     FIELDNOTFOUNDERR(fieldName,className);
                 }
-                /* got position in constant pool --> results in position on heap*/
+                // got position in constant pool --> results in position on heap
                 DEBUGPRINTLNSTRING(fieldName, fieldNameLength);
                 opStackPush(heapGetElement(cs[cN].classInfo.stackObj.pos + fN + 1));
                 pc += 2;
@@ -1015,7 +1010,7 @@ void interpreter_run()                                        /* in: classNumber
 
             }BREAK;
             CASE(PUTSTATIC):
-            {   /*mb jf*/
+            {
                 DEBUGPRINTLN_OPC("putstatic -> stack in static field");
                 methodStackPush(cN);
 
@@ -1034,7 +1029,7 @@ void interpreter_run()                                        /* in: classNumber
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = classNameId;
+                cN = getClassIndex(classNameId);
                 className = getClassName(cN);
                 classNameLength = stringLength(className);
 #else
@@ -1055,7 +1050,7 @@ void interpreter_run()                                        /* in: classNumber
                 heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
                 pc += 2;
 
-                cN = methodStackPop();            /* restore cN*/
+                cN = methodStackPop();            // restore cN
                 // end PUTSTATIC
             }BREAK;
             CASE(GETFIELD):
@@ -1075,21 +1070,20 @@ void interpreter_run()                                        /* in: classNumber
                 fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
                 fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
-                /* FindClass provides only the class in which the field is used */
-                /* Not the class is defined in the field (can be a super class) */
-                /* Now it's even better in the stack object to determine the class number */
+                // FindClass provides only the class in which the field is used
+                // Not the class is defined in the field (can be a super class)
+                // Now it's even better in the stack object to determine the class number
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = classNameId;
+                cN = getClassIndex(classNameId);
                 className = getClassName(cN);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-                //krix - findclass before
                 cN = FIND_CLASS(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
@@ -1112,7 +1106,7 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLN_OPC("putfield -> stack to heap");
                 methodStackPush(cN);
                 {
-                    first = opStackPop();         /*mb jf doesn't work without variable ?!?!*/
+                    first = opStackPop();         //mb jf doesn't work without variable ?!?!
                     second = opStackPop();
 
                     const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
@@ -1130,7 +1124,7 @@ void interpreter_run()                                        /* in: classNumber
                     const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-                    cN = classNameId;
+                    cN = getClassIndex(classNameId);
                     className = getClassName(cN);
                     classNameLength = stringLength(className);
 #else
@@ -1161,7 +1155,7 @@ void interpreter_run()                                        /* in: classNumber
 
                         if (STRNCMPRAMFLASH( "B",fieldDescr, 1) == 0)
                         {
-                            /* Truncate Integer input for Byte output */
+                            //Truncate Integer input for Byte output
                             first.Int = first.Int & 0x000000ff;
                         }
                         heapSetElement(first, second.stackObj.pos + fN + 1);
@@ -1188,13 +1182,13 @@ void interpreter_run()                                        /* in: classNumber
                     pc += 2;
                 methodStackPush(pc);
                 const int k = findNumArgs(cN,BYTECODEREF);
-                /*(BYTECODEREF)-1));*/
+                // (BYTECODEREF)-1));
                 methodStackPush((opStackGetSpPos() - k - 1));
-                /* method resolution*/
-                /* nachdenken ->mhrmals benutzt*/
+                // method resolution
+                // nachdenken ->mhrmals benutzt
                 local = opStackGetSpPos() - k - 1;
-                /* get cN from.stackObjRef*/
-                /*  get method from cN or superclasses*/
+                // get cN from.stackObjRef
+                //  get method from cN or superclasses
                 //ex: INVOKEVIRTUAL #39;
                 const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
@@ -1218,11 +1212,10 @@ void interpreter_run()                                        /* in: classNumber
 
                 if ((code == INVOKEVIRTUAL) || (code == INVOKEINTERFACE))
                 {
-                    /*bh2008*/
                     if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
                     {
 #ifdef ENABLE_KCLASS_FORMAT
-                        cN = JAVA_LANG_STRING_CLASS_ID();
+                        cN = getClassIndex(JAVA_LANG_STRING_CLASS_ID());
                         className = getClassName(cN);
                         classNameLength = stringLength(className);
 #else
@@ -1230,15 +1223,15 @@ void interpreter_run()                                        /* in: classNumber
                         classNameLength = 16;
                         cN = FIND_CLASS(className, classNameLength);
 #endif
-                    } else/*bh2007*/
+                    } else
                         cN = opStackGetValue(local).stackObj.classNumber;
-                }/*INVOKESPECIAL*/
+                }// INVOKESPECIAL
                 else
                 {
-                    const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);//1 ctpool tag u1
+                    const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-                    cN = classNameId;
+                    cN = getClassIndex(classNameId);
                     className = getClassName(cN);
                     classNameLength = stringLength(className);
 #else
@@ -1270,11 +1263,11 @@ void interpreter_run()                                        /* in: classNumber
                 {
                     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex == MUTEXNOTBLOCKED)
                     {
-                        /* mutex is free, I (the thread) have not the mutex and I can get the mutex for the object*/
+                        // mutex is free, I (the thread) have not the mutex and I can get the mutex for the object
                         currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-                        HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex = MUTEXBLOCKED;       /* get the lock*/
+                        HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex = MUTEXBLOCKED;// get the lock
                         int i = 0;
-                        /* I had not the mutex for this object (but perhaps for others), now I have the look*/
+                        // I had not the mutex for this object (but perhaps for others), now I have the look
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
                                 continue;
@@ -1286,12 +1279,11 @@ void interpreter_run()                                        /* in: classNumber
                             errorExit(-1, "too many locks\n");
 
                         }
-                        /* entry for this object in the array of mutexed objects for the thread*/
-                        /* count (before 0)*/
+                        // entry for this object in the array of mutexed objects for the thread
+                        // count (before 0)
                         currentThreadCB->lockCount[i] = 1;
-                        currentThreadCB->hasMutexLockForObject[i] = opStackGetValue(
-                                                                                    local);
-                    }                             /* mutex is blocked, is it my mutex ? have I always the lock ?*/
+                        currentThreadCB->hasMutexLockForObject[i] = opStackGetValue(local);
+                    }// mutex is blocked, is it my mutex ? have I always the lock ?
                     else
                     {
                         int i = 0;
@@ -1299,36 +1291,34 @@ void interpreter_run()                                        /* in: classNumber
                             if (currentThreadCB->hasMutexLockForObject[i].UInt == opStackGetValue(local).UInt)
                                 break;
 
-                        /* another thread has the lock*/
+                        // another thread has the lock
                         if (i == MAXLOCKEDTHREADOBJECTS)
                         {
-                            /*mutex blocked*/
+                            // mutex blocked
                             currentThreadCB->state = THREADMUTEXBLOCKED;
                             currentThreadCB->isMutexBlockedOrWaitingForObject = opStackGetValue(local);
-                            /* thread sleeps, try it later*/
-                            /*(BYTECODEREF)+1); //native!!!*/
+                            // thread sleeps, try it later
+                            // (BYTECODEREF)+1); //native!!!
                             opStackSetSpPos(methodStackPop() + k + 1);
-                            /* before invoke*/
+                            // before invoke
                             pc = methodStackPop() - 1;
                             mN = methodStackPop();
                             cN = methodStackPop();
                             local = methodStackPop();
                             break;
-                        }                         /* let the scheduler work*/
-                        else
-                        /* yes I have lock*/
-                        /* count*/
+                        }// let the scheduler work
+                        else// yes I have lock count
                             currentThreadCB->lockCount[i]++;
                     }
                 }
 #endif
-                /* no synchronized,or I have the lock */
-                /* now call method*/
+                // no synchronized,or I have the lock
+                // now call method
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
-                    int a = (cs[cN].nativeFunction != NULL);
-                    int b = (cs[cN].nativeFunction[mN] != NULL);
-                    if ( a && b)
+                    printf("Invoke native method:%s->%s[%s]\n",className,methodName,methodDescr);
+
+                    if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
@@ -1344,16 +1334,15 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(INVOKESTATIC):
             {
-                DEBUGPRINT_OPC("invoke static: ");    /* a static method*/
+                DEBUGPRINT_OPC("invoke static: ");// a static method
                 methodStackPush(local);
                 methodStackPush(cN);
                 methodStackPush(mN);
                 methodStackPush(pc);
                 const int k = findNumArgs(cN,BYTECODEREF);
-                /*(BYTECODEREF));*/
+                // (BYTECODEREF));
                 methodStackPush(opStackGetSpPos() - k);
-                /* method resolution*/
-                /*bh2007*/
+                // method resolution
                 local = (u2) opStackGetSpPos() - k;
 
                 const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
@@ -1371,7 +1360,7 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
 
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = classNameId;
+                cN = getClassIndex(classNameId);
                 className = getClassName(cN);
                 classNameLength = stringLength(className);
 #else
@@ -1398,19 +1387,11 @@ void interpreter_run()                                        /* in: classNumber
 #ifndef TINYBAJOS_MULTITASKING
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
                 {
-                    /*
-                     #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
-                     printf_P(PSTR("invoke sync static %04x %d %d\n"),cs[cN].classInfo,cN,mN);
-                     #else
-                     printf("invoke sync static %04x %d %d\n",cs[cN].classInfo,cN,mN);
-                     #endif
-                     */
-
                     if (HEAPOBJECTMARKER(cs[cN].classInfo.stackObj.pos).mutex
                         == MUTEXNOTBLOCKED)
                     {
                         currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-                        HEAPOBJECTMARKER(cs[cN].classInfo.stackObj.pos).mutex   = MUTEXBLOCKED;       /* get the lock*/
+                        HEAPOBJECTMARKER(cs[cN].classInfo.stackObj.pos).mutex   = MUTEXBLOCKED;// get the lock
                         int i = 0;
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
@@ -1420,49 +1401,45 @@ void interpreter_run()                                        /* in: classNumber
                         if (i == MAXLOCKEDTHREADOBJECTS)
                         {
                             errorExit(-1, "too many locks\n");
-                        }
-                        /* count*/
+                        }// count
                         currentThreadCB->lockCount[i] = 1;
                         currentThreadCB->hasMutexLockForObject[i] = cs[cN].classInfo;
-                    }                             /* mutex ==0*/
+                    }// mutex == 0
                     else
                     {
                         int i = 0;
-                        /* have I always the lock ?*/
+                        // have I always the lock ?
                         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                             if (currentThreadCB->hasMutexLockForObject[i].UInt == cs[cN].classInfo.UInt)
                                 break;
 
                         if (i == MAXLOCKEDTHREADOBJECTS)
-                        {
-                            /*mutex blocked*/
+                        {   // mutex blocked
                             currentThreadCB->state = THREADMUTEXBLOCKED;
                             currentThreadCB->isMutexBlockedOrWaitingForObject
                             = cs[cN].classInfo;
-                            /* thread sleeps, try it later*/
-                            /*(BYTECODEREF));*/
+                            // thread sleeps, try it later
+                            // (BYTECODEREF));
                             opStackSetSpPos(methodStackPop() + k);
-                            /* before invoke*/
+                            // before invoke
                             pc = methodStackPop() - 1;
                             if (code == INVOKEINTERFACE)
                                 pc -= 2;
                             mN = methodStackPop();
                             cN = methodStackPop();
                             local = methodStackPop();
-                            break;                /* let the scheduler work*/
-                        } else
-                        /* yes I have the lock*/
-                        /* count*/
+                            break;  // let the scheduler work
+                        } else      // yes I have the lock count
                             currentThreadCB->lockCount[i]++;
                     }
                 }
 #endif
-                /* no synchronized,or I have the lock*/
-                /* now call the method*/
+                // no synchronized,or I have the lock
+                // now call the method
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
-                    if ((cs[cN].nativeFunction != NULL) && (cs[cN].nativeFunction[mN]
-                                                            != NULL))
+                    if ((cs[cN].nativeFunction != NULL)
+                    && (cs[cN].nativeFunction[mN] != NULL))
                     {
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
@@ -1497,21 +1474,21 @@ void interpreter_run()                                        /* in: classNumber
 #ifndef TINYBAJOS_MULTITASKING
                 if (getU2(cN,METHODBASE(cN,mN))&ACC_SYNCHRONIZED)
                 {
-                    /* have I always the lock ?*/
+                    // have I always the lock ?
                     if (getU2(cN,METHODBASE(cN,mN))&ACC_STATIC)
                         first=cs[cN].classInfo;
                     else first=opStackGetValue(local);
 
                     int i = 0;
-                    /* must be in*/
+                    // must be in
                     for ( i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
                         if ((currentThreadCB->hasMutexLockForObject[i]).UInt==first.UInt) break;
-                    /* fertig*/
+                    // fertig
                     if (currentThreadCB->lockCount[i]>1) currentThreadCB->lockCount[i]--;
-                    else                          /* last lock*/
+                    else // last lock
                     {
                         currentThreadCB->lockCount[i]=0;
-                        /* give lock free*/
+                        // give lock free
                         currentThreadCB->hasMutexLockForObject[i]=NULLOBJECT;
                         currentThreadCB->isMutexBlockedOrWaitingForObject=NULLOBJECT;
                         HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXNOTBLOCKED;
@@ -1525,10 +1502,9 @@ void interpreter_run()                                        /* in: classNumber
                             myTCB=threadPriorities[i].cb;
                             for(k = 0; k < max; k++)
                             {
-                                if ((myTCB->isMutexBlockedOrWaitingForObject.UInt==first.UInt)&&
-                                    (myTCB->state==THREADMUTEXBLOCKED))
+                                if ((myTCB->isMutexBlockedOrWaitingForObject.UInt==first.UInt)
+                                &&  (myTCB->state==THREADMUTEXBLOCKED))
                                 {
-                                    /*!!*/
                                     myTCB->state=THREADNOTBLOCKED;
                                     myTCB->isMutexBlockedOrWaitingForObject=NULLOBJECT;
                                 }
@@ -1539,8 +1515,7 @@ void interpreter_run()                                        /* in: classNumber
                 }
 #endif
                 if (methodStackEmpty())
-                {
-                    /*mb jf if not <clinit> you're done :-D*/
+                {   //mb jf if not <clinit> you're done :-D
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
                     {
                         DEBUGPRINTLN_OPC(" from <clinit>");
@@ -1558,7 +1533,7 @@ void interpreter_run()                                        /* in: classNumber
                         break;
                     }
                 }
-                first=opStackPop();               /*ret val*/
+                first=opStackPop();// ret val
                 opStackSetSpPos(methodStackPop());
                 pc = methodStackPop()+2;
                 mN = methodStackPop();
@@ -1576,7 +1551,7 @@ void interpreter_run()                                        /* in: classNumber
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,BYTECODEREF);
 
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = classNameId;
+                cN = getClassIndex(classNameId);
                 className = getClassName(cN);
                 classNameLength = stringLength(className);
 #else
@@ -1610,27 +1585,27 @@ void interpreter_run()                                        /* in: classNumber
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 
                 cN=methodStackPop();
-                u2 heapPos=getFreeHeapSpace(fN + 1);/* + marker*/       /* allocate on heap places for stackObject fields*/
+                u2 heapPos=getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
                 first.stackObj.classNumber=cN;
                 DEBUGPRINTLN_OPC(" -> push %x\n",heapPos);
-                opStackPush(first);               /* reference to.stackObject on opStack*/
+                opStackPush(first);               //reference to.stackObject on opStack
                 HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-                for (int i = 0; i < fN; i++)        /* initialize the heap elements*/
+                for (int i = 0; i < fN; i++)        // initialize the heap elements
                     heapSetElement(toSlot((u4)0), heapPos + i + 1);
 
                 mN = methodStackPop();
                 cN = methodStackPop();
-                /* className*/
+                // className
                 DEBUGPRINTLNSTRING(className,classNameLength);
 
             }BREAK;
             CASE(NEWARRAY):
             {
-                DEBUGPRINTLN_OPC("newarray");         /* mb jf*/
+                DEBUGPRINTLN_OPC("newarray");
                 s2 count = (s2)opStackPop().UInt;
                 if (count < 0)
                 {
@@ -1641,7 +1616,7 @@ void interpreter_run()                                        /* in: classNumber
                     ARRAYINDEXOUTOFBOUNDSEXCEPTION;
                 }
 
-                /* + marker*/
+                // + marker
                 u2 heapPos=getFreeHeapSpace(count + 1);
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
@@ -1651,61 +1626,43 @@ void interpreter_run()                                        /* in: classNumber
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
                 heapPos++;
-                switch (byte1)                    /* array type, init array with 0 on heap*/
+                switch (byte1) // array type, init array with 0 on heap
                 {
                     case T_BOOLEAN:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot((u4)0),heapPos++);
-                    }break;
                     case T_CHAR:
+                    case T_BYTE:
+                    case T_SHORT:
+                    case T_INT:
                     {
                         for (int i = 0; i < count; i++)
                             heapSetElement(toSlot((u4)0),heapPos++);
                     }break;
+
                     case T_FLOAT:
                     {
                         for (int i = 0; i < count; i++)
                             heapSetElement(toSlot(0.f),heapPos++);
                     }break;
                     case T_DOUBLE:
-                    {
-                        DNOTSUPPORTED;
-                    }break;
-                    case T_BYTE:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot((u4)0),heapPos++);
-                    }break;
-                    case T_SHORT:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot((u4)0),heapPos++);
-                    }break;
-                    case T_INT:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot((u4)0),heapPos++);
-                    }break;
                     case T_LONG:
                     {
                         DNOTSUPPORTED;
                     }break;
-                }                                 /* switch*/
-                pc++;                             /* skip type*/
+                }     // switch
+                pc++; // skip type
             }BREAK;
             CASE(ANEWARRAY):
             {
-                DEBUGPRINTLN_OPC("anewarray");        /* mb jf*/
-                pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
+                DEBUGPRINTLN_OPC("anewarray");
+                pc+=2;                          // index into the constant_pool.no verification
                 s2 *cnt = (s2 *) malloc(sizeof(s2));
                 *cnt = 0;
-                opStackPush(createDims(1, cnt));  /* call recursive function to allocate heap for arrays*/
+                opStackPush(createDims(1, cnt));// call recursive function to allocate heap for arrays
                 free (cnt);
             }BREAK;
             CASE(ARRAYLENGTH):
             {
-                DEBUGPRINTLN_OPC("arraylength");      /* mb jf*/
+                DEBUGPRINTLN_OPC("arraylength");
                 first = opStackPop();
                 if (first.UInt == NULLOBJECT.UInt)
                 {
@@ -1724,62 +1681,60 @@ void interpreter_run()                                        /* in: classNumber
                 if ( HEAPOBJECTMARKER(first.stackObj.pos).mutex==MUTEXNOTBLOCKED)
                 {
                     int i = 0;
-                    /* get the lock*/
+                    // get the lock
                     HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXBLOCKED;
                     for (i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
-                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt!=NULLOBJECT.UInt)
+                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt != NULLOBJECT.UInt)
                             continue;
                         else break;
                     if (i == MAXLOCKEDTHREADOBJECTS)
                     {
                         errorExit(-1, "too many locks\n");
-                    }
-                    /* count*/
+                    }// count
                     currentThreadCB->lockCount[i] = 1;
                     currentThreadCB->hasMutexLockForObject[i] = first;
                 }
-                else                              /* mutex ==0*/
+                else // mutex == 0
                 {
                     int i = 0;
-                    /* have I always the lock ?*/
+                    // have I always the lock ?
                     for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
                         if (currentThreadCB->hasMutexLockForObject[i].UInt == first.UInt)
                             break;
                     if (i == MAXLOCKEDTHREADOBJECTS)
-                    {
-                        /*mutex blocked*/
+                    {   // mutex blocked
                         currentThreadCB->state=THREADMUTEXBLOCKED;
                         currentThreadCB->isMutexBlockedOrWaitingForObject=first;
-                        /* thread sleeps, try it later*/
+                        // thread sleeps, try it later
                         opStackSetSpPos(methodStackPop() + findNumArgs(cN,BYTECODEREF) + 1);
-                        pc = pc-1;                /* before monitorenter*/
-                        break;                    /* let the scheduler work*/
+                        pc = pc-1;                // before monitorenter
+                        break;                    // let the scheduler work
                     }
-                    else                          /* yes I have lock*/
-                    /* count*/
+                    else                          // yes I have lock
+                        // count
                         currentThreadCB->lockCount[i]++;
                 }
 #else
                 DNOTSUPPORTED;
 #endif
             }BREAK;
-            CASE(MONITOREXIT):                 /* have I always the lock ?*/
+                CASE(MONITOREXIT):                 // have I always the lock ?
             {
 #ifndef TINYBAJOS_MULTITASKING
                 first=opStackPop();
 
                 int i = 0;
-                /* must be in*/
+                // must be in
                 for (i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
                     if (currentThreadCB->hasMutexLockForObject[i].UInt == first.UInt)
                         break;
 
-                /* fertig*/
+                // fertig
                 if (currentThreadCB->lockCount[i] > 1) currentThreadCB->lockCount[i]--;
                 else
                 {
                     currentThreadCB->lockCount[i] = 0;
-                    /* give lock free*/
+                    // give lock free
                     currentThreadCB->hasMutexLockForObject[i] = NULLOBJECT;
                     HEAPOBJECTMARKER(opStackGetValue(first.stackObj.pos).UInt).mutex = MUTEXNOTBLOCKED;
 
@@ -1794,7 +1749,7 @@ void interpreter_run()                                        /* in: classNumber
                             {
                                 /*!!*/
                                 myTCB->state = THREADNOTBLOCKED;
-                                /*myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;*/
+                                //myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;
                             }
                             myTCB=myTCB->succ;
                         }
@@ -1822,10 +1777,9 @@ void interpreter_run()                                        /* in: classNumber
                 first = opStackPeek();
                 char performcheck = 1;
                 char invalidcast = 0;
-                /* a nullobject can always be casted */
+                // a nullobject can always be casted
                 if (first.UInt != NULLOBJECT.UInt)
-                {
-                    /* the cast's target class */
+                {   // the cast's target class
                     const u2 targetclass = getU2(cN,0);
                     const u1 typeTag = GET_TAG(targetclass);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
@@ -2013,68 +1967,67 @@ void interpreter_run()                                        /* in: classNumber
             }BREAK;
             CASE(WIDE):
             {
-                DEBUGPRINTLN_OPC("wide");             /* mb jf*/
-                /* not tested because so many locals are hard to implement on purpose  14.12.2006*/
-                u2 nextOp = getU1(cN,0);             /* which operation to extend?*/
+                DEBUGPRINTLN_OPC("wide");
+                // not tested because so many locals are hard to implement on purpose  14.12.2006
+                u2 nextOp = getU1(cN,0); // which operation to extend?
                 s2 count = getU2(cN,0);
 
-                /* if load operation...*/
+                // if load operation...
                 if (ILOAD <= nextOp && nextOp <= DLOAD)
                 {
-                    /* embedded op code for load*/
+                    // embedded op code for load
                     opStackPush(opStackGetValue(local+count));
                 }
-                /* if store operation...*/
+                // if store operation...
                 if (ISTORE <= nextOp && nextOp <= DSTORE)
                 {
-                    /* embedded op code for store*/
+                    // embedded op code for store
                     opStackSetValue(local+count,opStackPop());
-                    /* write into locals (position, value from stack)*/
+                    // write into locals (position, value from stack)
                 }
-                if (nextOp == RET)                /* if ret operation...*/
-                {
-                    /* embedded op code for ret*/
-                    /*not tested because no exceptions implemented yet 14.12.2006*/
-                    /* the opcode of athrow is required*/
+                if (nextOp == RET) // if ret operation...
+                {   // embedded op code for ret
+                    // not tested because no exceptions implemented yet 14.12.2006
+                    // the opcode of athrow is required
                     u2 addr = opStackGetValue(local + count).UInt;
-                    pc = addr + getStartPC(cN,mN);       /*pcMethodStart;	//assumtion): the address is the relative address, absolute address may be required*/
+                    pc = addr + getStartPC(cN,mN);  //pcMethodStart;	//assumtion): the address is the relative address, absolute address may be required
                 }
-                if (nextOp == IINC)               /* if iinc operation...*/
+                if (nextOp == IINC)                 // if iinc operation...
                 {
-                    /* embedded op code for load*/
-                    u2 constB = getU2(cN,0);         /* constByte - only available with iinc in wide operation*/
-                    /* position*/
+                    // embedded op code for load
+                    u2 constB = getU2(cN,0);        // constByte - only available with iinc in wide operation
+                    // position
                     opStackSetValue((u2)(local + count),
-                                    /* old value*/
+                                    // old value
                                     toSlot((u4)(opStackGetValue(local + count).Int
-                                                + constB)));               /* add const*/
+                                                + constB))); // add const
                 }
             }BREAK;
             CASE(MULTIANEWARRAY):
             {
-                DEBUGPRINTLN_OPC("multianewarray");   /* mb jf*/
-                pc+=2;                            /* index into the constant_pool. Bajos performs no verification*/
-                u1 dim = getU1(cN,0);                /* dimensions*/
+                DEBUGPRINTLN_OPC("multianewarray");
+                pc+=2;                            // index into the constant_pool. Bajos performs no verification
+                u1 dim = getU1(cN,0);             // dimensions
 
                 s2 *local_cnt = (s2 *) malloc(sizeof(s2));
                 *local_cnt = 0;
-                /* call recursive function to allocate heap for arrays*/
+                // call recursive function to allocate heap for arrays
                 opStackPush(createDims(dim, local_cnt));
                 free (local_cnt);
             }BREAK;
             CASE(GOTO_W):
-            {   /* mb jf*/
+            {
                 DEBUGPRINTLN_OPC("goto_w (not tested)");
-                /* not tested because wide jumps are hard to implement on purpose  14.12.2006*/
+                // not tested because wide jumps are hard to implement on purpose  14.12.2006
                 u4 addr = getU4(cN,0);
-                pc = addr + getStartPC(cN,mN);          /*pcMethodStart; //assumtion: the address is the relative address, absolute address may be required*/
+                pc = addr + getStartPC(cN,mN);//pcMethodStart; //assumtion: the address is the relative address, absolute address may be required
 
             }BREAK;
             CASE(JSR_W):
-            {   /* mb jf*/
+            {
                 DEBUGPRINTLN_OPC("jsr_w (not tested)%d %d",byte1, byte2);
-                /* not tested because no exceptions implemented yet 14.12.2006*/
-                /* the opcode of athrow is required*/
+                // not tested because no exceptions implemented yet 14.12.2006
+                // the opcode of athrow is required
                 u4 my_addr = getU4(cN,0);
                 opStackPush(toSlot(my_addr));
             }BREAK;
@@ -2141,7 +2094,7 @@ void interpreter_run()                                        /* in: classNumber
                 DEBUGPRINT_OPC("code:%d",code);
                 DNOTSUPPORTED;
             }BREAK;
-        }/* switch*/
+        }// switch
 #ifdef USE_LABELS
         OPC_NEXT:
 				//const static void* LABEL1 = &&OPC_NEXT;
@@ -2159,14 +2112,14 @@ void interpreter_run()                                        /* in: classNumber
 }
 
 
-/* generalized single comparison of target class with class at addr in cN's constant pool.i*/
-/* keeps cN unchanged if target is no super class of cN.*/
-/* else cN is the super class of former cN which has target as super class.*/
+// generalized single comparison of target class with class at addr in cN's constant pool.i
+// keeps cN unchanged if target is no super class of cN.
+// else cN is the super class of former cN which has target as super class.
 u2 subCheck(const u2 classId,const u2 target,const u2 superClass)
 {
     const u2 classNameId = CLASSINFO_GET_NAMEID(classId,superClass);
 #ifdef ENABLE_KCLASS_FORMAT
-    const u2 superClassId = classNameId;
+    const u2 superClassId = getClassIndex(classNameId);
 #else
     className = UTF8_GET_STRING(classId,classNameId);
     classNameLength = UTF8_GET_LENGTH(classId,classNameId);
@@ -2181,8 +2134,8 @@ u2 subCheck(const u2 classId,const u2 target,const u2 superClass)
 }
 
 
-/* receives object's class via classId and target class as parameter*/
-/* returns true / false*/
+// receives object's class via classId and target class as parameter
+// returns true / false
 u1 checkInstance(const u2 classId,const u2 target)
 {
     u2 retClassId = classId;
@@ -2195,7 +2148,7 @@ u1 checkInstance(const u2 classId,const u2 target)
             retClassId = subCheck(classId,target, superClass);
         }
 
-        /* trying the interfaces.*/
+        // trying the interfaces.
         if (retClassId != 0 && retClassId != target)
         {
             u2 n = getU2(retClassId,cs[retClassId].interfaces_count);
@@ -2234,7 +2187,7 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
     }
     else
     {
-        /* + marker*/
+        // + marker
         u2 heapPos = getFreeHeapSpace(*dimSize + 1);
         act_array.stackObj.pos = heapPos;
         act_array.stackObj.magic = OBJECTMAGIC;
@@ -2254,9 +2207,7 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
 
 
 #ifndef TINYBAJOS_EXCEPTION
-/*
- ** Realizes an interpreter-raised Exception
- */
+// Realizes an interpreter-raised Exception
 //BH AM not tested
 void raiseExceptionFromIdentifier(const Exception exception)
 {
@@ -2265,10 +2216,8 @@ void raiseExceptionFromIdentifier(const Exception exception)
     methodStackPush(mN);
 
     extern u2 getExceptionClassId(const Exception exception);
-    cN = getExceptionClassId(exception);
+    cN = getClassIndex(getExceptionClassId(exception));
 
-    //todo - kclass format Create a class of the given type
-    //cN = FIND_CLASS(identifier, length);
     if (cN == INVALID_CLASS_ID)
     {
         CLASSNOTFOUNDERR("Undefined Exception",19);
@@ -2347,7 +2296,7 @@ void handleException()
         const u2 classInfo = getU2(cN,cur_catch + 8);
         const u2 classNameId =  CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-        cN = classNameId;
+        cN = getClassIndex(classNameId);
 #else
         className = UTF8_GET_STRING(cN,classNameId);
         classNameLength = UTF8_GET_LENGTH(cN,classNameId);

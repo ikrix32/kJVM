@@ -34,6 +34,24 @@ void setPin(int pin,bool on){
 #include "KVMTestPackage.h"
 #endif
 
+extern const char* getClassName(const u2 classId){
+#ifdef USE_MICROKERNEL
+    extern const int getNoMicroKernelClasses();
+    const int  noMicroClasses = getNoMicroKernelClasses();
+    if(classId < noMicroClasses)
+    {
+#ifdef DEBUG_KCLASS
+        extern const char* getMicroKernelClassName(const u2 classId);
+        return getMicroKernelClassName(classId);
+#else
+        return "kernelclass";
+#endif
+    }
+#endif
+    extern const char* testNames[];
+    return testNames[classId - noMicroClasses];
+}
+
 #ifdef TINYBAJOS
 void main() __attribute__ ((noreturn));
 void main()
@@ -71,8 +89,10 @@ void main()
 
             classLoader_clinitClass(classId);
 
-            vm_run(classId);//run main on last loaded class
+            if(vm_run(classId) == 0)//run main on last loaded class
+                unloadLastClass();
             printf("\n========== End %s =========\n",testNames[i]);
+            printf("Heap free space %d\n",getHeapFreeSpace());
         }
 #endif
 				

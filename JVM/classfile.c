@@ -306,7 +306,7 @@ u1 findSuperClass(const u1 classId)
     const u2 classNameId = CLASSINFO_GET_NAMEID(classId,supperClassInfoId);
 
 #ifdef ENABLE_KCLASS_FORMAT
-    return classNameId;//in kclass format nameId was replaced with classId
+    return getClassIndex(classNameId);//in kclass format nameId was replaced with classId
 #else
     const u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
     const char* className = UTF8_GET_STRING(classId, classNameId);
@@ -360,6 +360,17 @@ u1 findClass(const char* className,const u1 classNameLength)
     return INVALID_CLASS_ID;
 }
 //#endif
+
+u2 getClassIndex(u2 classId){
+    for (int i = 0; i < numClasses; i++) {
+        const u2 classInfoId = getU2(i,cs[i].this_class);
+        const u2 classNameId = CLASSINFO_GET_NAMEID(i,classInfoId);
+        if(classNameId == classId)
+            return i;
+    }
+    CLASSNOTFOUNDERR("aa",2);
+    return INVALID_CLASS_ID;
+}
 
 void analyzeClass(const u1 classId)
 {
@@ -552,7 +563,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
 #ifdef ENABLE_KCLASS_FORMAT
             //todo - implement new native method dispach
             extern char* getClassName(const u2 classId);
-            const char* className = getClassName(classNameId);
+            const char* className = getClassName(getClassIndex(classNameId));
             const u2 classNameLength=stringLength(className);
 #else
             const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);
