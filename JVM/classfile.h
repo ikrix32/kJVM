@@ -14,8 +14,9 @@ void analyzeClass(const u1 classId);
 void analyzeConstantPool(const u1 classId);
 void analyzeMethods(const u1 classId);
 void analyzeFields(const u1 classId);
+#ifdef ENABLE_KCLASS_FORMAT
 u2 getClassIndex(u2 classId);
-//#ifndef ENABLE_KCLASS_FORMAT
+#endif//#else
 u1 findClass(const char* name,const u1 len);
 //#endif
 u1 findSuperClass(const u1 classId);

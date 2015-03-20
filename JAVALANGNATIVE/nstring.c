@@ -2,10 +2,10 @@
  * FHW-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
  * See the file "license.terms" for information on usage and redistribution of this file.
  */
-/* C-functions for native methods*/
-/* native void method -> C-function ret value 0*/
-/* native non void method -> c-function ret value 1 (ret value on java -opStack)*/
-/* remember:*/
+/* C-functions for native methods */
+/* native void method -> C-function ret value 0 */
+/* native non void method -> c-function ret value 1 (ret value on java -opStack) */
+/* remember: */
 /* invokespecial Operand Stack*/
 /* ..., objectref, [arg0, [arg1 ...]] -> ...*/
 /* invokestatic: Operand Stack*/
@@ -29,7 +29,10 @@ char nativeStringLength()
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
-        opStackPush( toSlot( (u4) getU2(cN, CP( cN, getU2(cN,CP(cN, mySlot.stackObj.pos) + 1)) + 1)));
+
+        const u2 strPos = getU2(cN,CP(cN, mySlot.stackObj.pos) + 1);
+        const u2 strLen = UTF8_GET_LENGTH(cN,strPos);
+        opStackPush( toSlot( (u4)strLen));
         cN = methodStackPop();
     } else
         opStackPush(toSlot((u4) 0xffff));
@@ -44,7 +47,13 @@ char nativeCharAt()
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
-        opStackPush(toSlot((u4) getU1(cN,CP(cN,getU2(cN,CP(cN,mySlot.stackObj.pos) + 1)) + 3 + (u2) opStackGetValue(local + 1).UInt)));
+
+        const u2 charIndex = (u2) opStackGetValue(local + 1).UInt;
+
+        const u2 strPos = getU2(cN,CP(cN, mySlot.stackObj.pos) + 1);
+        //const char* str = UTF8_GET_STRING(cN, strPos);
+        const u2 strFirstChar = CP(cN,strPos) + 3;
+        opStackPush(toSlot((u4) getU1(cN, strFirstChar + charIndex)));
         cN = methodStackPop();
     } else
         opStackPush(toSlot((u4) 0));
@@ -60,15 +69,10 @@ int stringLength(const char* str){
 }
 
 char stringsNotEquals(const char* str1,const char* str2,const size_t len){
-    //int equals = 0;
     for(int i = 0; i < len;i++){
         if(str1[i] != str2[i]){
-            //equals = 1;
             return 1;
-            //break;
         }
     }
     return 0;
-    //PRINTF("equals:%d,strcmp:%d\n",equals,strncmp(str1,str2,len));
-    //return strncmp(str1,str2,len);
 }

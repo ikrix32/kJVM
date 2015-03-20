@@ -98,7 +98,7 @@ public final class Float {
 	private final float value;
 
 	public static native char[] floatToCharArray(float f);
-
+	
 	public static native float nativeParseFloat(char[] arr);
 
 	/**
@@ -213,6 +213,15 @@ public final class Float {
 	 * @return the <code>String</code> representing the <code>float</code>
 	 */
 	public static String toString(float f) {
+		/*System.out.println("f:"+f);
+		int n = (int)f;
+		int p = 100000 + (int)((f - n) * 100000);
+		//System.out.println("n:"+n+" p:"+p);
+		String dec = Integer.toString(n);
+		String prec= Integer.toString(p);
+		dec += "." + prec.substring(1, prec.length());
+		
+		return dec;*/
 		return new String(floatToCharArray(f));
 	}
 
@@ -303,6 +312,20 @@ public final class Float {
 	 * @since 1.2
 	 */
 	public static float parseFloat(String str) {
+		/*String dec = str;
+		String prec = null;
+		final int dotIndex = str.indexOf('.');
+		if(dotIndex >= 0){
+			dec = str.substring(0,dotIndex);
+		}
+		if(dotIndex < str.length() - 1)
+			prec= str.substring(dotIndex + 1,str.length());
+		
+		float result = Integer.parseInt(dec);
+		if(prec != null){
+			int p = Integer.parseInt(s)
+		}*/
+		
 		return nativeParseFloat(str.toCharArray());
 	}
 

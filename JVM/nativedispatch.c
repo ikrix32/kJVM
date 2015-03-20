@@ -16,6 +16,17 @@
 #include "interruptthread.h"
 #include "lock.h"
 #include "float.h"
+
+//krix
+#include "nativedispach.h"
+
+u1 nativeDispath(const char* methodName,const char* methodDescription){
+    printf("Calling native method:%s with description:%s\n",methodName,methodDescription);
+    return 1;
+}
+
+//end krix
+
 /* fill this array with classes containing native methods*/
 
 const char* nativeClassNames[] = {

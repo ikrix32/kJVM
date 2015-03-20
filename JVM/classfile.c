@@ -130,26 +130,40 @@ u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLeng
         const u1 numFields = getU2(cN,cs[cN].fields_count);
         for (u1 i = 0; i < numFields; ++i)
         {
-            const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-            const u1 isNotObject= STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+            const u2 crtFieldInfo = getU2(cN,cs[cN].field_info[i]);
+            const u2 crtFieldDescrId = getU2(cN,cs[cN].field_info[i] + 4);
 
-            if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
-                continue; // ignore static and non static primitive finals
+            //const u2 fielddescr = cs[cN].constant_pool[fieldDescrId];
 
-            if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
+            if (crtFieldInfo & ACC_FINAL){
+                const char* crtFieldDescr = UTF8_GET_STRING(cN, crtFieldDescrId);
+                const u1 isNotObject= STRNCMPRAMFLASH ("L",crtFieldDescr, 1);
+                if(isNotObject)
+                    continue; // ignore static and non static primitive finals
+            }
+
+            if (crtFieldInfo & ACC_STATIC)
                 continue;// ignore static
 
-            const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
+            const u2 crtFieldNameId = getU2(cN,cs[cN].field_info[i] + 2);
+            //const u2 fieldname = cs[cN].constant_pool[crtFieldNameId];
+            const u2 crtFieldNameLen = UTF8_GET_LENGTH(cN, crtFieldNameId);// getU2(cN,fieldname + 1);
+            const u2 crtFielsDescLen = UTF8_GET_LENGTH(cN, crtFieldDescrId);//getU2(cN,fielddescr + 1);
 
-            if(fieldNameLength == getU2(cN,fieldname + 1)
-            && STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3), getU2(cN,fieldname + 1)) == 0
-            && fieldDescrLength == getU2(cN,fielddescr + 1)
-            && STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3), getU2(cN,fielddescr + 1)) == 0)
+            if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
             {
-                fN = f;
-                class = cN;
-                found = 1;
-                //break;
+                const char* crtFieldName = UTF8_GET_STRING(cN, crtFieldNameId);
+                if(STRNCMPFLASHFLASH(fieldName,crtFieldName, fieldNameLength) == 0)
+                {
+                    const char* crtFieldDescr = UTF8_GET_STRING(cN, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
+                    if( STRNCMPFLASHFLASH(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
+                    {
+                        fN = f;
+                        class = cN;
+                        found = 1;
+                        //break;
+                    }
+                }
             }
             f++;
         }
@@ -339,7 +353,7 @@ u1 findClassFlash(const char* className,const u1 classNameLength)
 }
 #endif
 
-//#ifndef ENABLE_KCLASS_FORMAT
+//Todo - #ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
@@ -359,8 +373,7 @@ u1 findClass(const char* className,const u1 classNameLength)
     }
     return INVALID_CLASS_ID;
 }
-//#endif
-
+#ifdef ENABLE_KCLASS_FORMAT//#else
 u2 getClassIndex(u2 classId){
     for (int i = 0; i < numClasses; i++) {
         const u2 classInfoId = getU2(i,cs[i].this_class);
@@ -371,6 +384,7 @@ u2 getClassIndex(u2 classId){
     CLASSNOTFOUNDERR("aa",2);
     return INVALID_CLASS_ID;
 }
+#endif
 
 void analyzeClass(const u1 classId)
 {

@@ -16,6 +16,7 @@
 #include "heap.h"
 #include "interpreter.h"
 #include "scheduler.h"
+#include "nativedispach.h"
 
 #ifdef AVR8
 
@@ -359,10 +360,29 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 DEBUGPRINT_OPC("ldc  push\t...");
                 if (getU1(cN,CP(cN, getU1(cN,0))) == CONSTANT_String)
                 {
+#ifdef LOAD_STRING_CONSTANT_ON_HEAP
+                    const u2 strPos = getU2(cN,CP(cN, byte1) + 1);
+                    const u2 strLen = UTF8_GET_LENGTH(cN,strPos);
+                    const char* str = UTF8_GET_STRING(cN,strPos);
+
+                    u2 heapPos = getFreeHeapSpace(strLen + 1);         // char arr length + marker
+
+                    first.stackObj.pos = heapPos;
+                    first.stackObj.magic = OBJECTMAGIC;
+                    first.stackObj.arrayLength = (u1)strLen;         // char array length
+                    opStackPush(first);
+
+                    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;
+                    HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
+                    HEAPOBJECTMARKER(heapPos++).mutex = MUTEXNOTBLOCKED;
+                    for (u1 i = 0; i < strLen; i++)
+                        heapSetElement(toSlot((u4)(*(str + i))), heapPos++);
+#else
                     first.stackObj.magic = CPSTRINGMAGIC;
                     first.stackObj.classNumber = cN;
                     first.stackObj.pos = (u2)(byte1);//((u2)cN <<8));
                     opStackPush(first);
+#endif
                 } else // int or float const value on stack
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN_OPC(",=> x%x", opStackPeek().UInt);
@@ -985,7 +1005,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(cN);
+                className = getClassName(classNameId);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
@@ -1030,7 +1050,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(cN);
+                className = getClassName(classNameId);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
@@ -1078,7 +1098,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(cN);
+                className = getClassName(classNameId);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
@@ -1090,6 +1110,9 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
 #endif
+                if(cN == 29){
+                    //  printf("String class\n");
+                }
                 const u2 fieldClassId = cN;
                 cN = first.stackObj.classNumber;
                 if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
@@ -1125,7 +1148,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                     cN = getClassIndex(classNameId);
-                    className = getClassName(cN);
+                    className = getClassName(classNameId);
                     classNameLength = stringLength(className);
 #else
                     className = UTF8_GET_STRING(cN,classNameId);
@@ -1147,7 +1170,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     {
                         const u2 fieldClassId = cN;
                         cN = second.stackObj.classNumber;
-                        //should be find field by nam and class
+                        //should be find field by name and class
                         if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
                         {//class name can't be correct
                             FIELDNOTFOUNDERR(fieldName,className);
@@ -1216,7 +1239,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     {
 #ifdef ENABLE_KCLASS_FORMAT
                         cN = getClassIndex(JAVA_LANG_STRING_CLASS_ID());
-                        className = getClassName(cN);
+                        className = getClassName(JAVA_LANG_STRING_CLASS_ID());
                         classNameLength = stringLength(className);
 #else
                         className = "java/lang/String";
@@ -1232,7 +1255,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                     cN = getClassIndex(classNameId);
-                    className = getClassName(cN);
+                    className = getClassName(classNameId);
                     classNameLength = stringLength(className);
 #else
                     className = UTF8_GET_STRING(cN,classNameId);
@@ -1316,16 +1339,17 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 // now call method
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
-                    printf("Invoke native method:%s->%s[%s]\n",className,methodName,methodDescr);
-
+                    //TODO - printf("Invoke native method:%s->%s[%s]\n",className,methodName,methodDescr);
+                    //goto nativeVoidReturn;
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
                         else
                             goto nativeVoidReturn;
-                    }
-                    else
+                    }else if(nativeDispath(methodName,methodDescr)){
+                        goto nativeVoidReturn;
+                    }else
                     {
                         errorExit(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
                     }
@@ -1361,7 +1385,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(cN);
+                className = getClassName(classNameId);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
@@ -1552,7 +1576,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(cN);
+                className = getClassName(classNameId);
                 classNameLength = stringLength(className);
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
@@ -1788,7 +1812,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #ifdef ENABLE_KCLASS_FORMAT
                     if(typeTag == CONSTANT_KClass)
                     {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
-                        target = classNameId;
+                        target = getClassIndex(classNameId);
                     }else
 #endif  
                     {
@@ -1880,11 +1904,10 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #ifdef ENABLE_KCLASS_FORMAT
                     if(typeTag == CONSTANT_KClass)
                     {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
-                        target = classNameId;
+                        target = getClassIndex(classNameId);
                     }else
 #endif
                     {
-
                         char* classname = UTF8_GET_STRING(cN,classNameId);
                         u2 len = UTF8_GET_LENGTH(cN,classNameId);
 
@@ -2216,7 +2239,11 @@ void raiseExceptionFromIdentifier(const Exception exception)
     methodStackPush(mN);
 
     extern u2 getExceptionClassId(const Exception exception);
+#ifdef ENABLE_KCLASS_FORMAT
     cN = getClassIndex(getExceptionClassId(exception));
+#else
+    cN = getExceptionClassId(exception);
+#endif
 
     if (cN == INVALID_CLASS_ID)
     {

@@ -35,10 +35,10 @@ public class NativeMethodsTest {
 		mTest.nativeMethod(mTest.i);
 		mTest.nativeMethod(mTest.f);
 		mTest.nativeMethod(mTest.b,mTest.c,mTest.i,mTest.f);
-		
+		/*
 		mTest.nativeMethod(mTest.arrayB);
 		mTest.nativeMethod(mTest.arrayC);
 		mTest.nativeMethod(mTest.arrayI);
-		mTest.nativeMethod(mTest.arrayF);
+		mTest.nativeMethod(mTest.arrayF);*/
     }
 }

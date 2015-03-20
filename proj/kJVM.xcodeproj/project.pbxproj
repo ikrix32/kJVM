@@ -134,6 +134,7 @@
 		4E10364E1AABC61800BF56D5 /* tests_Switch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_Switch.h; sourceTree = "<group>"; };
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
+		4E86BA741AB789B700F69DE1 /* nativedispach.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nativedispach.h; sourceTree = "<group>"; };
 		4E9A38321A91400C00665CC3 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		4EB8F7481A8FD0E3001C885A /* kJVM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kJVM; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EB8F7B31A9128E6001C885A /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
@@ -338,6 +339,7 @@
 				4EB8F7F51A91290C001C885A /* stack.c */,
 				4EB8F7F61A91290C001C885A /* heap.c */,
 				4EB8F7F71A91290C001C885A /* heap.h */,
+				4E86BA741AB789B700F69DE1 /* nativedispach.h */,
 				4EB8F7F91A91290C001C885A /* nativedispatch.c */,
 				4EB8F7FA1A91290C001C885A /* scheduler.c */,
 				4EB8F7FB1A91290C001C885A /* scheduler.h */,
