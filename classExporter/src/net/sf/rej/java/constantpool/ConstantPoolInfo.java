@@ -44,9 +44,9 @@ public abstract class ConstantPoolInfo {
     public static final int NAME_AND_TYPE = 12;
     public static final int UTF8 = 1;
     
-    public static final int KCLASS = 16;
-    public static final int KFIELD_REF = 17;
-    public static final int KMEHOD_REF = 18;
+    public static final int KCLASS = 25;
+    public static final int KFIELD_REF = 26;
+    public static final int KMEHOD_REF = 27;
 
     private int tag;
 
@@ -119,7 +119,6 @@ public abstract class ConstantPoolInfo {
     
     public void forceType(int tag){
     	this.tag = tag;
-    	System.out.println("IMPLEMENT ConstantPoolInfo.forceType()!!!");
     }
 
     /**

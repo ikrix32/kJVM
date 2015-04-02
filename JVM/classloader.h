@@ -11,5 +11,5 @@ void classLoader_init(void);
 u1 classLoader_loadClass(const u1* bin,const u4 binSize);
 void classLoader_clinitClass(const u1 classId);
 //todo - unload all and unload to bootstrap
-void unloadLastClass();
+void unloadLastClass(void);
 #endif

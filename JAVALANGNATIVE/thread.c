@@ -53,7 +53,8 @@ char nativeSetPriority()                          //by ceh
     const u1 newPrio = opStackGetValue(local + 1).UInt;
     const slot soi = opStackGetValue(local);
     cN = soi.stackObj.classNumber;                // of object, which calls the method
-    if (!findFieldByRamName("priority", 8, "I", 1))
+    //if (!findFieldByRamName("priority", 8, "I", 1))
+    if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
     {
         errorExit(78,"field priority not found\n");
     }

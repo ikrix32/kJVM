@@ -1,12 +1,3 @@
-/*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-/*#if LINUX || AVR32LINUX
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "definitions.h"
@@ -17,6 +8,7 @@
 #include <avr/pgmspace.h>
 #endif
 extern void printStringFromFlash(u1*, u1);
+
 #include "classfile.h"
 
 extern const char* nativeClassNames[];
@@ -117,103 +109,115 @@ u2 findMaxLocals(const u1 classId,const u1 methodId)                            
 /* in cN fieldName fieldDescr*/
 /* out cN, fN of normal field in object (non static, non final primitive fields)*/
 /* return 1 -> found */
-u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLength,
-                   const char* fieldDescr, const u1 fieldDescrLength)
+//instanceClassId is current intance class,fieldClassId represents class where is defined the field, class fieldId = superClass.fieldsCount+field index
+u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
+                   const char* fieldDescr, const u1 fieldDescrLength,const u1 isStatic)
 {
-    fN = 0;
-    u1  class = cN;
-    u1	found = 0;
-
+    fN = INVALID_FIELD_ID;
+    u1  class = instanceClassId;
     u1 f = 0;
     do
     {
-        const u1 numFields = getU2(cN,cs[cN].fields_count);
+        const u1 numFields = getU2(class,cs[class].fields_count);
         for (u1 i = 0; i < numFields; ++i)
         {
-            const u2 crtFieldInfo = getU2(cN,cs[cN].field_info[i]);
-            const u2 crtFieldDescrId = getU2(cN,cs[cN].field_info[i] + 4);
+            const u2 crtFieldInfo = getU2(class,cs[class].field_info[i]);
+            const u2 crtFieldDescrId = getU2(class,cs[class].field_info[i] + 4);
 
             //const u2 fielddescr = cs[cN].constant_pool[fieldDescrId];
 
             if (crtFieldInfo & ACC_FINAL){
-                const char* crtFieldDescr = UTF8_GET_STRING(cN, crtFieldDescrId);
+                const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);
                 const u1 isNotObject= STRNCMPRAMFLASH ("L",crtFieldDescr, 1);
                 if(isNotObject)
                     continue; // ignore static and non static primitive finals
             }
 
-            if (crtFieldInfo & ACC_STATIC)
-                continue;// ignore static
+            if ((!isStatic && crtFieldInfo & ACC_STATIC) || (isStatic && !(crtFieldInfo & ACC_STATIC)))
+                continue;// ignore static/non static depends what kind of file are we searching
 
-            const u2 crtFieldNameId = getU2(cN,cs[cN].field_info[i] + 2);
-            //const u2 fieldname = cs[cN].constant_pool[crtFieldNameId];
-            const u2 crtFieldNameLen = UTF8_GET_LENGTH(cN, crtFieldNameId);// getU2(cN,fieldname + 1);
-            const u2 crtFielsDescLen = UTF8_GET_LENGTH(cN, crtFieldDescrId);//getU2(cN,fielddescr + 1);
+            const u2 crtFieldNameId = getU2(class,cs[class].field_info[i] + 2);
+            const u2 crtFieldNameLen = UTF8_GET_LENGTH(class, crtFieldNameId);// getU2(cN,fieldname + 1);
+            const u2 crtFielsDescLen = UTF8_GET_LENGTH(class, crtFieldDescrId);//getU2(cN,fielddescr + 1);
 
             if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
             {
-                const char* crtFieldName = UTF8_GET_STRING(cN, crtFieldNameId);
+                const char* crtFieldName = UTF8_GET_STRING(class, crtFieldNameId);
                 if(STRNCMPFLASHFLASH(fieldName,crtFieldName, fieldNameLength) == 0)
                 {
-                    const char* crtFieldDescr = UTF8_GET_STRING(cN, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
+                    const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
                     if( STRNCMPFLASHFLASH(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
                     {
                         fN = f;
-                        class = cN;
-                        found = 1;
-                        //break;
                     }
                 }
             }
             f++;
         }
-        if (found == 1 && cN == classId)
+        if (fN != INVALID_FIELD_ID && class == fieldClassId)
             break;
-    } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
-    if(found == 1){
+    } while ((class = findSuperClass(class)) != INVALID_CLASS_ID);
+    if(fN != INVALID_FIELD_ID){
         cN = class;
     }
-    return found;
+    return fN != INVALID_FIELD_ID;
 }
 
 
+/*
 u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength, // for normal fields
                       const char* fieldDescr,const u1 fieldDescrLength) // only use in scheduler
 {
     fN = 0;
+    u1 class = cN;
     do
     {
         u1 found = 0;
 
-        const u1 numFields = getU2(cN,cs[cN].fields_count);
+        const u1 numFields = getU2(class,cs[class].fields_count);
         for (u1 i = 0; i < numFields; ++i)
         {
-            const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-            const u1 isNotObject =  STRNCMPRAMFLASH ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+            const u2 crtFieldInfo = getU2(class,cs[class].field_info[i]);
+            const u2 crtFieldDescrId = getU2(class,cs[class].field_info[i] + 4);
 
-            if ((getU2(cN,cs[cN].field_info[i]) & ACC_FINAL)&& isNotObject)
-                continue; // ignore static and non static primitive finals
+            if (crtFieldInfo & ACC_FINAL){
+                const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);
+                const u1 isNotObject= STRNCMPRAMFLASH ("L",crtFieldDescr, 1);
+                if(isNotObject)
+                    continue; // ignore static and non static primitive finals
+            }
 
-            if ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC)
+            if ( crtFieldInfo & ACC_STATIC)
                 continue;// ignore static
 
-            const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
-            if(fieldNameLength == getU2(cN,fieldname + 1) &&
-               STRNCMPRAMFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3),getU2(cN,fieldname + 1)) == 0
-            && fieldDescrLength == getU2(cN,fielddescr + 1)
-            && STRNCMPRAMFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3),getU2(cN,fielddescr + 1)) == 0)
+
+            const u2 crtFieldNameId = getU2(class,cs[class].field_info[i] + 2);
+            const u2 crtFieldNameLen = UTF8_GET_LENGTH(class, crtFieldNameId);// getU2(cN,fieldname + 1);
+            const u2 crtFielsDescLen = UTF8_GET_LENGTH(class, crtFieldDescrId);//getU2(cN,fielddescr + 1);
+
+            if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
             {
-                found=1;
-                break;
+                const char* crtFieldName = UTF8_GET_STRING(class, crtFieldNameId);
+                if(STRNCMPFLASHFLASH(fieldName,crtFieldName, fieldNameLength) == 0)
+                {
+                    const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
+                    if( STRNCMPFLASHFLASH(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
+                    {
+                        found = 1;
+                        break;
+                    }
+                }
             }
             fN++;
         }
         if (found)
             return 1;
-    } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
+    } while ((class = findSuperClass(class)) != INVALID_CLASS_ID);
+    cN = class;
     return 0;
 }
-
+ */
+/*
 u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
                          const char* fieldDescr,const u1 fieldDescrLength)	{
     u1	found = 0;
@@ -221,7 +225,7 @@ u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
     const u1 numFields = getU2(cN,cs[cN].fields_count);
     for (u1 i = 0; i < numFields; ++i)
     {
-        const u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
+        const u2 fielddescr = CP(cN,getU2(cN,cs[cN].field_info[i] + 4));
         const u1 isNotObject =  STRNCMPRAMFLASH  ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
 
         if (! ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC))
@@ -230,7 +234,7 @@ u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
         if ( (getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) &&  isNotObject)
             continue; // non object finals
 
-        const u2 fieldname = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 2)];
+        const u2 fieldname = CP(cN,getU2(cN,cs[cN].field_info[i] + 2));
         if(fieldNameLength == getU2(cN,fieldname + 1) &&
             STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3),getU2(cN,fieldname + 1)) == 0
         &&  fieldDescrLength == getU2(cN,fielddescr + 1)
@@ -246,35 +250,14 @@ u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
     return 0;
 
 }
-
-#ifdef AVR8
-u1 findMethodByNameFlash(const u1 classId,const char* name, const u1 len, const char* methodDescr, const u1 methodDescrLength)
-{
-    /*  in: classNumber cN, out: methodNumber mN*/
-    /* non recursive */
-    for (mN=0; mN < getU2(classId,cs[classId].methods_count); mN++)
-        if (len==getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+2)]+1))
-            if(strncmpFlashFlash(name,(char*)getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+2)]+3),
-                                 getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+2)]+1))==0)
-            {
-                if (methodDescr!=NULL)
-                {
-                    if (methodDescrLength==getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+4)]+1))
-                        if(strncmpFlashFlash(methodDescr,(char*)getAddr(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+4)]+3),
-                                             getU2(classId,cs[classId].constant_pool[getU2(classId,METHODBASE(classId,mN)+4)]+1))==0) return 1;
-                }
-                else return 1;
-            }
-    return 0;
-}
-#endif
-
+*/
 //Returns methodId(mN)
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,const u1 methodDescrLength)
 {
     /* in: classNumber cN, out: methodNumber mN */
     /* non recursiv*/
-    for (u1 methodId = 0; methodId < getU2(classId,cs[classId].methods_count); methodId++)
+    const u2 methodsCount = getU2(classId,cs[classId].methods_count);
+    for (u1 methodId = 0; methodId < methodsCount; methodId++)
     {
         const u2 methodNameId = getU2(classId,METHODBASE(classId, methodId) + 2);
         const u2 methodNameLen = UTF8_GET_LENGTH(classId, methodNameId);
@@ -329,31 +312,7 @@ u1 findSuperClass(const u1 classId)
 #endif
 }
 
-
-#ifdef AVR8
-/* out: cN*/
-u1 findClassFlash(const char* className,const u1 classNameLength)
-{
-    for (int classId = 0; classId < numClasses; classId++)
-    {
-        if (classNameLength !=(u2)getU2(classId,cs[classId].constant_pool[
-                                                    getU2(classId,cs[classId].constant_pool[
-                                                    getU2(classId,cs[classId].this_class)]+1)]+1))
-        {
-            continue;
-        }
-        if (strncmpFlashFlash(className,(const char*)getAddr(classId,cs[classId].constant_pool[
-                                                            getU2(classId,cs[classId].constant_pool[
-                                                            getU2(classId,cs[classId].this_class)] + 1)] + 3),classNameLength) == 0)
-        {
-            return classId;
-        }
-    }
-    return INVALID_CLASS_ID;
-}
-#endif
-
-//Todo - #ifndef ENABLE_KCLASS_FORMAT
+#ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
@@ -373,7 +332,7 @@ u1 findClass(const char* className,const u1 classNameLength)
     }
     return INVALID_CLASS_ID;
 }
-#ifdef ENABLE_KCLASS_FORMAT//#else
+#else
 u2 getClassIndex(u2 classId){
     for (int i = 0; i < numClasses; i++) {
         const u2 classInfoId = getU2(i,cs[i].this_class);
@@ -516,15 +475,7 @@ void analyzeConstantPool(const u1 classId)
             case CONSTANT_Float:              /*    4 */
             {
 #ifdef DEBUG_CLASS_LOADING
-#ifdef AVR8                           // change all avr8 string to flash strings gives more data ram space for java!!
-                {
-                    u1 float_str[7];
-                    dtostrf( getFloat(pc), 7, 3, float_str );
-                    printf_P(PSTR("\tcp %d\t:Float:\t%s  \n"),n,float_str);
-                }
-#else
                 DEBUG_CL_PRINTF("\tcp %d\t:Float:\t%f  \n",n,getFloat(classId,pc));
-#endif
 #endif
                 pc += 4;
             }break;

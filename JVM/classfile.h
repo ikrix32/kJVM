@@ -22,20 +22,18 @@ u1 findClass(const char* name,const u1 len);
 u1 findSuperClass(const u1 classId);
 u1 findNumArgs(const u1 classId,const u2 method);
 u2 findMaxLocals(const u1 classId,const u1 methodId);
-u1 findFieldByName(const u2 classId,const char* fieldName,const u1 fieldNameLength,
-                   const char* fieldDescr,const u1 fieldDescrLength);
-u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength,
-                      const char* fieldDescr,const u1 fieldDescrLength);
-u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
-                         const char* fieldDescr,const u1 fieldDescrLength);
+u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
+                   const char* fieldDescr,const u1 fieldDescrLength,const u1 isStatic);
+//u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength,
+//                      const char* fieldDescr,const u1 fieldDescrLength);
+//u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
+//                         const char* fieldDescr,const u1 fieldDescrLength);
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,
                     const u1 methodDescrLength);
-u1 findMethodByNameFlash(const u1 classId,const char* name, const u1 len,
-                         const char* methodDescr, const u1 methodDescrLength);
 u1 findClassFlash(const char* className,const u1 classNameLength);
 u1* findMethodByMethodNumber(const u1 classId,const u1 methodId);               // mb jf
 
 u2 getStartPC(const u1 classId,const u1 methodId);
-u1 strncmpFlashFlash(const char*, const char*, u1);
-u1 strncmpRamFlash(const char*, const char*, u1);
+//u1 strncmpFlashFlash(const char*, const char*, u1);
+//u1 strncmpRamFlash(const char*, const char*, u1);
 #endif

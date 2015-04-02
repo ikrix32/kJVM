@@ -68,13 +68,13 @@
     #endif
 #endif
 
-#ifdef AVR8
-    #define STRNCMPRAMFLASH strncmpRamFlash
-    #define STRNCMPFLASHFLASH strncmpFlashFlash
-#else
+//#ifdef AVR8
+//    #define STRNCMPRAMFLASH strncmpRamFlash
+//    #define STRNCMPFLASHFLASH strncmpFlashFlash
+//#else
     #define STRNCMPRAMFLASH     stringsNotEquals
     #define STRNCMPFLASHFLASH   stringsNotEquals
-#endif
+//#endif
 
 
 
@@ -171,7 +171,7 @@
 #define   CONSTANT_NameAndType          12
 #define   CONSTANT_Utf8                     1
 
-#define   CONSTANT_KClass                    16
+#define   CONSTANT_KClass                    25
 
 #define     ACC_PUBLIC              0x0001        //Declared public; may be accessed from outside its package.
 #define     ACC_PRIVATE         0x0002            //Declared private; accessible only within the defining class.
@@ -247,12 +247,13 @@
 
 #define INVALID_CLASS_ID 0xff
 #define INVALID_METHOD_ID 0xff
+#define INVALID_FIELD_ID 0xff
 
-#ifdef AVR8
-#define STRNCMP strncmpRamFlash
-#else
+//#ifdef AVR8
+//#define STRNCMP strncmpRamFlash
+//#else
 #define STRNCMP stringsNotEquals
-#endif
+//#endif
 
 #include "debug.h"
 //end of file

@@ -243,7 +243,8 @@ void createThread (void)
     else
     {
         cN = opStackGetValue(local).stackObj.classNumber;
-        if (!findFieldByRamName("priority", 8, "I", 1))
+        //if (!findFieldByRamName("priority", 8, "I", 1))
+        if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
         {
             errorExit(77, "field priority not found");
         }

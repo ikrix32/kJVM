@@ -5,6 +5,7 @@ package tests;
 
 public class InheritanceB extends InheritanceA {
   public int varB = 34;
+  public int varC = 45;
 
   public InheritanceB() {
     System.out.println("InheritanceB created");
@@ -14,7 +15,7 @@ public class InheritanceB extends InheritanceA {
     System.out.println("InheritanceB/methodB() called");
     System.out.println("  super.varA:" + super.varA + 
 		       "  super.varB: " + super.varB);    
-    System.out.println("  varB:" + varB); 
+    System.out.println("  varB:" + varB+" varC:"+varC); 
   }
 }
 

@@ -1,6 +1,5 @@
-package com.iceq.gui;
+package com.iceq;
 
-import com.iceq.KJVMExporter.KClass;
 
 public class DbgClassInfo {
 	public KClass m_class;

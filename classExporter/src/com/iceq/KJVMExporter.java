@@ -7,29 +7,15 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.util.Vector;
 
-import com.iceq.gui.DbgClassPackageInfo;
-
 import net.sf.rej.java.ClassFile;
+import net.sf.rej.java.Descriptor;
 import net.sf.rej.java.Disassembler;
 import net.sf.rej.java.constantpool.ClassInfo;
 import net.sf.rej.java.constantpool.ConstantPool;
 import net.sf.rej.java.constantpool.ConstantPoolInfo;
+import net.sf.rej.java.constantpool.UTF8Info;
 
-public class KJVMExporter {
-	public class KClass {
-		public String m_name;
-		public ClassFile m_class;
-		public String m_filePath;
-		public boolean m_export;
-
-		public KClass(ClassFile classFile, String filePath) {
-			m_filePath = filePath;
-			m_class = classFile;
-			m_name = classFile.getFullClassName();
-			m_export = true;
-		}
-	}
-
+public class KJVMExporter extends KJVMPackageHandler {
 	String destFolder;
 	Vector<KClass> m_microKernelClasses = new Vector<KClass>();
 	Vector<KClass> m_applicationClasses = new Vector<KClass>();
@@ -45,11 +31,11 @@ public class KJVMExporter {
 		return m_applicationClasses;
 	}
 
-	public void load(File file, boolean microkernelFile) {
+	public void load(File file,KClass kclass, boolean microkernelFile) {
 		if (file.isDirectory()) {
 			File[] files = file.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				load(files[i], microkernelFile);
+				load(files[i], null,microkernelFile);
 			}
 		} else {
 			if (file.getName().endsWith(".class")) {
@@ -60,8 +46,10 @@ public class KJVMExporter {
 					data = new byte[fis.available()];
 					fis.read(data);
 					ClassFile classFile = Disassembler.readClass(data);
-					KClass kclass = new KClass(classFile,
-							file.getAbsolutePath());
+					if(kclass != null)
+						kclass.setClass(classFile);
+					else
+						kclass = new KClass(classFile,file.getAbsolutePath());
 					if (microkernelFile)
 						m_microKernelClasses.add(kclass);
 					else
@@ -243,14 +231,32 @@ public class KJVMExporter {
 			if (cpi != null) {
 				if (cpi.getType() == ConstantPoolInfo.CLASS) {
 					final ClassInfo ci = (ClassInfo) cpi;
-					final String className = ci.getValue();
-					if (!className.contains("["))// arrays descriptors are
-													// stored as ClassReference
-					{
+					final int nameIndex = ci.getNameIndex();
+					final UTF8Info utf8Name = (UTF8Info)cp.get(nameIndex);
+					final String className = utf8Name.getValue().replace("/", ".");
+					
+					// arrays descriptors are stored as ClassReference
+					if (!className.contains("["))
+					{	//UTF8 name can be removed
+						//cp.removeLast(nameIndex);
 						ci.forceType(ConstantPoolInfo.KCLASS);
 						ci.setNameIndex(pk.getClassId(className));
-					} else
+					} else{//array of objects
+						if(className.contains("L"))
+						{
+							int index1 = className.indexOf("L");
+							int index2 = className.indexOf(";");
+							if(index1 >= 0 && index2 >= 0)
+							{
+								final String objClassName = className.substring(index1 + 1, index2 - index1 + 1);
+								final int objClassId = pk.getClassId(objClassName);
+								final String nClassName = className.replace(objClassName, ""+objClassId); 
+								utf8Name.setString(nClassName);
+								System.out.println("New Array descriptor:"+utf8Name.getValue());
+							}
+						}
 						System.out.println("ClassName:" + className);
+					}
 				}
 				/*
 				 * if (cpi.getType() == ConstantPoolInfo.METHOD_REF) { final
@@ -282,85 +288,18 @@ public class KJVMExporter {
 			e.printStackTrace();
 		}
 	}
-
-	public void savePackage(File file,boolean microkernel) 
-	{
-		try {
-			String packageFile = file.getAbsolutePath();
-			if(microkernel){
-				if (!packageFile.endsWith(".kmicrok"))
-					packageFile = packageFile + ".kmicrok";
-			}else{
-				if (!packageFile.endsWith(".kproj"))
-					packageFile = packageFile + ".kproj";
-			}
-			System.out.println("Save "+(microkernel ? "MicroKernel " : "") + packageFile);
-			BufferedWriter fos = new BufferedWriter(new FileWriter(new File(packageFile)));
-			Vector<KClass> classes = microkernel ? m_microKernelClasses : m_applicationClasses;
-			for (int i = 0; i < classes.size(); i++) {
-				final KClass kclass = classes.get(i);
-				final String classPath = kclass.m_filePath;
-				fos.write(classPath + "\n");
-			}
-			fos.write("\n");
-			fos.flush();
-			fos.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+	
+	public void savePackage(File file,boolean microkernel){
+		String packageFile = file.getAbsolutePath();
+		if(microkernel){
+			if (!packageFile.endsWith(".kmicrok"))
+				packageFile = packageFile + ".kmicrok";
+		}else{
+			if (!packageFile.endsWith(".kproj"))
+				packageFile = packageFile + ".kproj";
 		}
-	}
-
-	public void loadPackage(File file,boolean microkernel) 
-	{
-		try {
-			String packageFile = file.getAbsolutePath();
-			
-			if (file.isDirectory() || (microkernel && !packageFile.endsWith(".kmicrok"))
-			|| (!microkernel && !packageFile.endsWith(".kproj")))
-					return;
-
-			System.out.println("Load "+(microkernel?"MicroKernel ":"") + packageFile);
-			DataInputStream fos = new DataInputStream(new FileInputStream(
-					new File(packageFile)));
-
-			String filePath = fos.readLine();
-			while (filePath != null && filePath.contains(".class")) {
-				load(new File(filePath), microkernel);
-				filePath = fos.readLine();
-			}
-			fos.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	private final static String[] hexSymbols = { "0", "1", "2", "3", "4", "5",
-			"6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
-
-	public final static int BITS_PER_HEX_DIGIT = 4;
-
-	public static String toHexFromByte(final byte b) {
-		byte leftSymbol = (byte) ((b >>> BITS_PER_HEX_DIGIT) & 0x0f);
-		byte rightSymbol = (byte) (b & 0x0f);
-
-		return (hexSymbols[leftSymbol] + hexSymbols[rightSymbol]);
-	}
-
-	public static String toHexFromBytes(final byte[] bytes) {
-		if (bytes == null || bytes.length == 0) {
-			return ("");
-		}
-
-		// there are 2 hex digits per byte
-		StringBuilder hexBuffer = new StringBuilder(bytes.length * 2);
-
-		// for each byte, convert it to hex and append it to the buffer
-		for (int i = 0; i < bytes.length; i++) {
-			if (i % 16 == 0)
-				hexBuffer.append('\n');
-			hexBuffer.append("0x" + toHexFromByte(bytes[i]) + ",");
-		}
-
-		return (hexBuffer.toString());
+		System.out.println("Save "+(microkernel ? "MicroKernel " : "") + packageFile);
+		
+		savePackage(new File(packageFile), microkernel ? m_microKernelClasses : m_applicationClasses);
 	}
 }

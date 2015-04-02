@@ -28,8 +28,9 @@ import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.AbstractTableModel;
 
+import com.iceq.KClass;
 import com.iceq.KJVMExporter;
-import com.iceq.KJVMExporter.KClass;
+
 
 public class KJVMExporterUI extends JPanel {
 	File m_save = new File("save.txt");
@@ -133,7 +134,7 @@ public class KJVMExporterUI extends JPanel {
 						setCurrentPath(selectedFile.getParentFile()
 								.getAbsolutePath());
 
-					m_exporter.load(selectedFile,true);
+					m_exporter.load(selectedFile,null,true);
 				}
 			}
 		});
@@ -257,7 +258,7 @@ public class KJVMExporterUI extends JPanel {
 						setCurrentPath(selectedFile.getParentFile()
 								.getAbsolutePath());
 
-					m_exporter.load(selectedFile,false);
+					m_exporter.load(selectedFile,null,false);
 				}
 			}
 		});

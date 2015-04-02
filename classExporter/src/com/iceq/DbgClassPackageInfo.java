@@ -1,13 +1,11 @@
-package com.iceq.gui;
+package com.iceq;
 
 import java.util.Vector;
-
-import com.iceq.KJVMExporter;
 
 public class DbgClassPackageInfo {
 	Vector<DbgClassInfo> m_classes = new Vector<DbgClassInfo>();
 	
-	public DbgClassPackageInfo(Vector<KJVMExporter.KClass> microkernelClasses,Vector<KJVMExporter.KClass> classes) {
+	public DbgClassPackageInfo(Vector<KClass> microkernelClasses,Vector<KClass> classes) {
 		for(int i = 0; i < microkernelClasses.size();i++)
 		{
 			if(microkernelClasses.get(i).m_export)

@@ -65,6 +65,8 @@ static u2   descrLength;
 // static u2 i, j, k;
 // static s2 count;
 
+extern char* getClassName(const u2 classId);
+	
 void interpreter_run() // in: classNumber,  methodNumber cN, mN
 {   //u1 code, byte1, byte2;
     //u2 heapPos;
@@ -868,7 +870,6 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
             CASE(IF_ICMPLT):
             {
                 DEBUGPRINTLN_OPC("if_icmplt");
-                /*???*/
                 if (opStackPop().Int > opStackPop().Int)
                     pc += (s2)((u2)((byte1 << 8) | (byte2))) - 1;
                 else
@@ -915,77 +916,57 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 pc = opStackGetValue(local + getU1(cN,0)).UInt;
             }BREAK;
             CASE(TABLESWITCH):
-            {
-                DEBUGPRINTLN_OPC("tableswitch");
-                {
-                    /*
-                     aa		tableswitch
-                     0  0  0 	padding
-                     0 0 0 2		DefaultByte
-                     0 0 0 1		LowByte
-                     0 0 0 3		HighByte
-                     0  0  0 1c	Offset für 1
-                     0  0  0 22	Offset für 2
-                     0  0  0 28	Offset für 3
-                     */
-
-                    u2 startPc = --pc;
-                    u2 relPc = pc - getStartPC(cN,mN); //pcMethodStart;	//calculate relative PC for ByteCode in Method
-                    u4 windex = opStackPop().Int;
-                    // next pc as multiple of 4 --> skip padding bytes
-                    relPc = (u2)((relPc + 4) & 0xfffc);
-                    pc = relPc + getStartPC(cN,mN);  //pcMethodStart;	// set pc to begin of default address
-                    u4 offset = getU4(cN,0);         //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));	// default offset
-                    u4 lowbyte = getU4(cN,0);        //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
-                    u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
-                    if (lowbyte <= windex && windex <= highbyte)
-                    {
-                        u4 tableoffset = windex - lowbyte;
-                        pc += tableoffset * 4;       // skip 4 byte of previous address(es)
-                        offset = getU4(cN,0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
-                    }
-                    pc = startPc + offset;
-                }
-            }BREAK;
             CASE(LOOKUPSWITCH):
             {
-                DEBUGPRINTLN_OPC("lookupswitch");
+                DEBUGPRINTLN_OPC(code == LOOKUPSWITCH ? "lookupswitch" : "tableswitch");
                 {
                     /*
-                     ab          lookupswitch
-                     0  0        padding
-                     0  0  0 25  defaultByte
-                     0  0  0  2  npairs
-                     0  0  0  1  match
-                     0  0  0 1b  offset
-                     0  0  0  2  match
-                     0  0  0 20  offset
+                     aa		tableswitch		ab          lookupswitch
+                     0  0  0 	padding			0  0        padding
+                     0 0 0 2		DefaultByte	0  0  0 25  defaultByte
+                     0 0 0 1		LowByte		0  0  0  2  npairs
+                     0 0 0 3		HighByte	0  0  0  1  match
+                     0  0  0 1c	Offset für 1		0  0  0 1b  offset
+                     0  0  0 22	Offset für 2		0  0  0  2  match
+                     0  0  0 28	Offset für 3		0  0  0 20  offset
                      */
                     u2 startPc = --pc;
                     u2 relPc = pc - getStartPC(cN,mN); // pcMethodStart;	//calculate relative PC for ByteCode in Method
                     u4 key = opStackPop().Int;
 
-                    // next pc as multiple of 4 from address of 0xab (lookupswitch)
+                    // next pc as multiple of 4 from address of 0xab (lookupswitch)/skip padding bytes(tableswitch)
                     relPc = (u2)((relPc + 4) & 0xfffc);
                     pc = relPc + getStartPC(cN,mN);     // pcMethodStart;	// set pc to begin of default address
                     u4 offset = getU4(cN,0);            // default offset
-                    u4 matches;
-                    for (matches = getU4(cN,0); matches > 0; --matches)
-                    {
-                        u4 match = getU4(cN,0);
-                        u4 tmpOffset = getU4(cN,0);
-                        if (key == match)
+
+                    u4 lowbyte = getU4(cN,0);
+                    if(code == TABLESWITCH){
+                        u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
+                        if (lowbyte <= key && key <= highbyte)
                         {
-                            offset = tmpOffset;
-                            break;
+                            u4 tableoffset = key - lowbyte;
+                            pc += tableoffset * 4;       // skip 4 byte of previous address(es)
+                            offset = getU4(cN,0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
+                        }
+                    }else{
+                        for (; lowbyte > 0; --lowbyte)
+                        {
+                            u4 match = getU4(cN,0);
+                            u4 tmpOffset = getU4(cN,0);
+                            if (key == match)
+                            {
+                                offset = tmpOffset;
+                                break;
+                            }
                         }
                     }
                     pc = startPc + offset;
                 }
             }BREAK;
+            CASE(PUTSTATIC):
             CASE(GETSTATIC):
             {
-                DEBUGPRINTLN_OPC("getstatic ");       //mb jf ... corrected funtion
+                DEBUGPRINTLN_OPC(code == GETSTATIC ? "getstatic " : "putstatic");       //mb jf ... corrected funtion
                 methodStackPush(cN);
 
                 const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
@@ -1018,60 +999,19 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 }
 #endif
 
-                if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
+                //if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
+                if (!findFieldByName(cN,cN,fieldName, fieldNameLength, fieldDescr,fieldDescrLength,1))
                 {
                     FIELDNOTFOUNDERR(fieldName,className);
                 }
-                // got position in constant pool --> results in position on heap
-                DEBUGPRINTLNSTRING(fieldName, fieldNameLength);
-                opStackPush(heapGetElement(cs[cN].classInfo.stackObj.pos + fN + 1));
-                pc += 2;
-                cN = methodStackPop();	// end GETSTATIC
-
-            }BREAK;
-            CASE(PUTSTATIC):
-            {
-                DEBUGPRINTLN_OPC("putstatic -> stack in static field");
-                methodStackPush(cN);
-
-                const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
-
-                const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
-
-                fieldName = UTF8_GET_STRING(cN,nameId);
-                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
-
-                const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
-
-                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
-
-                const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
-                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-#ifdef ENABLE_KCLASS_FORMAT
-                cN = getClassIndex(classNameId);
-                className = getClassName(classNameId);
-                classNameLength = stringLength(className);
-#else
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-
-                cN = FIND_CLASS(className,classNameLength);
-                if (cN == INVALID_CLASS_ID)
-                {
-                    CLASSNOTFOUNDERR(className,classNameLength);
+                if(code == GETSTATIC){
+                    opStackPush(heapGetElement(cs[cN].classInfo.stackObj.pos + fN + 1));
+                }else{
+                    heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
                 }
-#endif
-                if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
-                {
-                    FIELDNOTFOUNDERR(fieldName,className);
-                }
-
-                heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
                 pc += 2;
-
-                cN = methodStackPop();            // restore cN
-                // end PUTSTATIC
+                cN = methodStackPop();	// end GETSTATIC/PUTSTATIC
+                
             }BREAK;
             CASE(GETFIELD):
             {
@@ -1110,12 +1050,11 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
 #endif
-                if(cN == 29){
-                    //  printf("String class\n");
-                }
                 const u2 fieldClassId = cN;
-                cN = first.stackObj.classNumber;
-                if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                const u2 instanceClassId = first.stackObj.classNumber;
+                //printf("GET Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
+
+                if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
                 {
                    FIELDNOTFOUNDERR(fieldName,className);
                 }
@@ -1169,9 +1108,13 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     else
                     {
                         const u2 fieldClassId = cN;
-                        cN = second.stackObj.classNumber;
+                        const u2 instanceClassId = second.stackObj.classNumber;
+                        //#ifdef DEBUG_INHERITANCE//this won't work if cN != classNameId
+                        //printf("PUT Field %s defined in :%s, instance class:%s \n",fieldName,(char*)getClassName(fieldClassId),(char*)getClassName(instanceClassId));
+                        //#endif
+
                         //should be find field by name and class
-                        if (!findFieldByName(fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength))
+                        if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
                         {//class name can't be correct
                             FIELDNOTFOUNDERR(fieldName,className);
                         }
@@ -1608,7 +1551,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 
-                cN=methodStackPop();
+                cN = methodStackPop();
                 u2 heapPos=getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
                 first.stackObj.pos=heapPos;
                 first.stackObj.magic=OBJECTMAGIC;
@@ -1771,7 +1714,6 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                         {
                             if (myTCB->isMutexBlockedOrWaitingForObject.UInt==opStackGetValue(first.stackObj.pos).UInt)
                             {
-                                /*!!*/
                                 myTCB->state = THREADNOTBLOCKED;
                                 //myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;
                             }
@@ -1794,109 +1736,20 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
             }BREAK;
             CASE(CHECKCAST):
+            CASE(INSTANCEOF):
             {
-                DEBUGPRINTLN_OPC("checkcast");
+                DEBUGPRINTLN_OPC(code == INSTANCEOF ? "instanceof" : "checkcast");
                 // In general, we try to cast as much as possible.
                 // Only if we perfectly know that this cast is invalid, break it.
-                first = opStackPeek();
-                char performcheck = 1;
-                char invalidcast = 0;
-                // a nullobject can always be casted
+                first = code == INSTANCEOF ? opStackPop() : opStackPeek();
+
+                u1 performcheck = 1;
+                u1 invalidcast = 0;
+                u1 isInstanceOf = 0;
+
                 if (first.UInt != NULLOBJECT.UInt)
                 {   // the cast's target class
                     const u2 targetclass = getU2(cN,0);
-                    const u1 typeTag = GET_TAG(targetclass);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
-
-                    u2 target = INVALID_CLASS_ID;
-#ifdef ENABLE_KCLASS_FORMAT
-                    if(typeTag == CONSTANT_KClass)
-                    {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
-                        target = getClassIndex(classNameId);
-                    }else
-#endif  
-                    {
-                        char* classname = UTF8_GET_STRING(cN,classNameId);
-                        u2 len = UTF8_GET_LENGTH(cN,classNameId);
-
-                        // we have to make some dirty hacks here
-                        //since we are not storing typing informations for arrays
-                        if (*classname == '[')//getU1(classname)=='[')
-                        {
-                            while ('[' == *classname)//getU1(classname)=='['
-                            {
-                                // we hope to get useful information
-                                //from the objects stored in the array.
-                                //this only takes the first object in the array,
-                                //yet it could be extended to gathering
-                                //all stored object's typing informations
-                                if( first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
-                                ||  HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
-                                {
-                                    invalidcast = 1;
-                                    performcheck = 0;
-                                    break;
-                                }
-                                first = heapGetElement(first.stackObj.pos + 1);
-                                // remove the leading '['
-                                --len;
-                                ++classname;
-                            }
-                            if (first.UInt == NULLOBJECT.UInt)
-                            {
-                                performcheck = 0;
-                            }
-                            // A class identifier is Lclassname;
-                            if ('L' == *classname)
-                            {
-                                len -= 2;
-                                ++classname;
-                            }
-                            else
-                            {   // a primitive type
-                                performcheck = 0;
-                            }
-                        }
-                        target = FIND_CLASS(classname, len);
-                    }
-                    if (performcheck == 1)
-                    {
-                        methodStackPush(cN);
-                        methodStackPush(mN);
-#ifndef ENABLE_KCLASS_FORMAT
-                        if (target == INVALID_CLASS_ID)
-                        {
-                            const char* classname = UTF8_GET_STRING(cN,classNameId);
-                            CLASSNOTFOUNDERR(classname,len);
-                        }
-#endif
-                        cN = first.stackObj.classNumber;
-                        if (!checkInstance(cN,target))
-                        {
-                            invalidcast = 1;
-                        }
-                        mN=methodStackPop();
-                        cN=methodStackPop();
-                    }
-                }
-                else
-                {
-                    pc += 2;
-                }
-                if (invalidcast == 1)
-                {
-                    opStackPop();
-                    CLASSCASTEXCEPTION;
-                }
-            }BREAK;
-            CASE(INSTANCEOF):
-            {
-                DEBUGPRINTLN_OPC("instanceof");
-                first = opStackPop();
-                const u2 targetclass = getU2(cN,0);
-                char performcheck = 1;
-                if (first.UInt != NULLOBJECT.UInt)
-                {
                     const u1 typeTag = GET_TAG(targetclass);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
@@ -1918,15 +1771,16 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                             while ('[' == *classname)//getU1(classname)=='[')
                             {
                                 // we hope to get useful information
-                                // from the objects stored in the array.
-                                // this only takes the first object in the array,
-                                // yet it could be extended to gathering
-                                // all stored object's typing informations
-                                if (first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
-                                || HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
+                                //from the objects stored in the array.
+                                //this only takes the first object in the array,
+                                //yet it could be extended to gathering
+                                //all stored object's typing informations
+                                if( first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
+                                ||  HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
                                 {
                                     performcheck = 0;
-                                    opStackPush(toSlot((u4)0));
+                                    isInstanceOf = 0;
+                                    invalidcast = 1;
                                     break;
                                 }
                                 first = heapGetElement(first.stackObj.pos + 1);
@@ -1937,7 +1791,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                             if (first.UInt == NULLOBJECT.UInt)
                             {
                                 performcheck = 0;
-                                opStackPush(toSlot((u4)1));
+                                isInstanceOf = 1;
                             }
                             // A class identifier is Lclassname;
                             if ('L' == *classname)//getU1(classname)=='L')
@@ -1946,13 +1800,21 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                                 ++classname;
                             }
                             else
-                            {
-                                // a primitive type
+                            {	// a primitive type
                                 performcheck = 0;
-                                opStackPush(toSlot((u4)1));
+                                isInstanceOf = 1;
                             }
                         }
+#ifndef ENABLE_KCLASS_FORMAT
                         target = FIND_CLASS(classname, len);
+#else
+                        target = 0;
+                        while (*classname != ';') {
+                            target = target * 10 + (*classname - 48);
+                            ++classname;
+                        }
+                        target = getClassIndex(target);
+#endif
                     }
 
                     if (performcheck == 1)
@@ -1969,23 +1831,34 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                         cN = first.stackObj.classNumber;
                         if (checkInstance(cN,target))
                         {
-                            opStackPush(toSlot((u4)1));
+                            isInstanceOf = 1;
                         }
                         else
                         {
-                            opStackPush(toSlot((u4)0));
+                            isInstanceOf = 0;
+                            invalidcast = 1;
                         }
                         mN = methodStackPop();
                         cN = methodStackPop();
                     }
                     else
                     {
-                        opStackPush(toSlot((u4)0));
+                        isInstanceOf = 0;
                     }
                 }
                 else
                 {
-                    opStackPush(toSlot((u4)0));
+                    if(code == INSTANCEOF)
+                        isInstanceOf = 0;
+                    else
+                        pc += 2;
+                }
+                if(code == INSTANCEOF){
+                    opStackPush(toSlot((u4)isInstanceOf));
+                }else if (invalidcast == 1)
+                {
+                    opStackPop();
+                    CLASSCASTEXCEPTION;
                 }
             }BREAK;
             CASE(WIDE):
