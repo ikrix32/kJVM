@@ -47,6 +47,8 @@ public abstract class ConstantPoolInfo {
     public static final int KCLASS = 25;
     public static final int KFIELD_REF = 26;
     public static final int KMEHOD_REF = 27;
+    public static final int KNAME_AND_TYPE = 28;
+    
 
     private int tag;
 

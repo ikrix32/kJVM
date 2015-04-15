@@ -1212,7 +1212,10 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR(className, classNameLength);
                 }
 #endif
+                u2 cNS = cN;
                 do{
+                    if(cNS != cN)
+                        printf("Check super class,method name:%s!!!\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
@@ -1339,7 +1342,10 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR((const char*) className, classNameLength);
                 }
 #endif
+                u2 cNS = cN;
                 do{
+                    if(cNS != cN)
+                        printf("Check super class!!! method name:%s\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 

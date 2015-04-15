@@ -17,21 +17,24 @@ import net.sf.rej.java.constantpool.UTF8Info;
 
 public class KJVMExporter extends KJVMPackageHandler {
 	String destFolder;
-	Vector<KClass> m_microKernelClasses = new Vector<KClass>();
-	Vector<KClass> m_applicationClasses = new Vector<KClass>();
+	Vector<KClassFileInfo> m_microKernelClasses = new Vector<KClassFileInfo>();
+	Vector<KClassFileInfo> m_applicationClasses = new Vector<KClassFileInfo>();
+	
+	private KJVMClassPoolProcessor m_classPoolProcessor;
 
 	public KJVMExporter() {
+		m_classPoolProcessor = new KJVMClassPoolProcessor();
 	}
 
-	public Vector<KClass> getMicroKernelClassFiles() {
+	public Vector<KClassFileInfo> getMicroKernelClassFiles() {
 		return m_microKernelClasses;
 	}
 	
-	public Vector<KClass> getProjectClassFiles() {
+	public Vector<KClassFileInfo> getProjectClassFiles() {
 		return m_applicationClasses;
 	}
 
-	public void load(File file,KClass kclass, boolean microkernelFile) {
+	public void load(File file,KClassFileInfo kclass, boolean microkernelFile) {
 		if (file.isDirectory()) {
 			File[] files = file.listFiles();
 			for (int i = 0; i < files.length; i++) {
@@ -47,9 +50,9 @@ public class KJVMExporter extends KJVMPackageHandler {
 					fis.read(data);
 					ClassFile classFile = Disassembler.readClass(data);
 					if(kclass != null)
-						kclass.setClass(classFile);
+						kclass.setClassFile(classFile);
 					else
-						kclass = new KClass(classFile,file.getAbsolutePath());
+						kclass = new KClassFileInfo(classFile,file.getAbsolutePath());
 					if (microkernelFile)
 						m_microKernelClasses.add(kclass);
 					else
@@ -66,7 +69,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 	}
 
 	public void exportMicroKernel(File folder) {
-		DbgClassPackageInfo cPK = new DbgClassPackageInfo(m_microKernelClasses, null);
+		KJVMPackageInfo cPK = new KJVMPackageInfo(m_microKernelClasses, null);
 
 		try {
 			String microkernelFilePath = folder.getAbsolutePath() + "/microkernel.h";
@@ -85,10 +88,10 @@ public class KJVMExporter extends KJVMPackageHandler {
 			String classNames = "static const char* microkernelClassNames[] =\n{";
 			for (int i = 0; i < m_microKernelClasses.size(); i++) 
 			{
-				KClass kclass = m_microKernelClasses.get(i);
-				if(kclass.m_export)
+				KClassFileInfo kclass = m_microKernelClasses.get(i);
+				if(kclass.isExport())
 				{
-					String className = kclass.m_name.replace(".", "_");
+					String className = kclass.getFullClassName().replace(".", "_");
 					
 					binariesDef += "\t"+className+"Bin,\n";
 					binariesSizeDef += "\tsizeof("+className+"Bin),\n";
@@ -101,9 +104,9 @@ public class KJVMExporter extends KJVMPackageHandler {
 					fos.write("#include \""+className+".h\"\n");
 					fos.write("#endif\n\n");
 					
-					ClassFile classFile = kclass.m_class;
+					ClassFile classFile = kclass.getClassFile();
 					exportClassFile(microkernelBinaries.getAbsolutePath() + "/" + className +".h", classFile);
-					replaceClassNameIdWithClassId(cPK, classFile);
+					m_classPoolProcessor.processClassFile(cPK, classFile);
 					exportClassFile(microkernelBinaries.getAbsolutePath() + "/" + className + "_k.h", classFile);
 				}
 			}
@@ -173,7 +176,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 	}
 
 	public void exportClasses(File folder) {
-		DbgClassPackageInfo cPK = new DbgClassPackageInfo(m_microKernelClasses, m_applicationClasses);
+		KJVMPackageInfo cPK = new KJVMPackageInfo(m_microKernelClasses, m_applicationClasses);
 
 		try {
 			String packageFile = folder.getAbsolutePath() + "/KVMTestPackage.h";
@@ -186,10 +189,10 @@ public class KJVMExporter extends KJVMPackageHandler {
 			String classNames = "static const char* testNames[] =\n{";
 			for (int i = 0; i < m_applicationClasses.size(); i++) 
 			{
-				KClass kclass = m_applicationClasses.get(i);
-				if(kclass.m_export)
+				KClassFileInfo kclass = m_applicationClasses.get(i);
+				if(kclass.isExport())
 				{
-					String className = kclass.m_name.replace(".", "_");
+					String className = kclass.getFullClassName().replace(".", "_");
 					
 					binariesDef += "\t"+className+"Bin,\n";
 					binariesSizeDef += "\tsizeof("+className+"Bin),\n";
@@ -202,9 +205,9 @@ public class KJVMExporter extends KJVMPackageHandler {
 					fos.write("#include \""+className+".h\"\n");
 					fos.write("#endif\n\n");
 					
-					ClassFile classFile = kclass.m_class;
+					ClassFile classFile = kclass.getClassFile();
 					exportClassFile(folder + "/" + className +".h", classFile);
-					replaceClassNameIdWithClassId(cPK, classFile);
+					m_classPoolProcessor.processClassFile(cPK, classFile);
 					exportClassFile(folder + "/" + className + "_k.h", classFile);
 				}
 			}
@@ -222,55 +225,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 		}
 	}
 
-	private void replaceClassNameIdWithClassId(DbgClassPackageInfo pk,
-			ClassFile cf) throws ClassNotFoundException {
-		final ConstantPool cp = cf.getPool();
-
-		for (int i = 0; i < cp.size(); i++) {
-			final ConstantPoolInfo cpi = cp.get(i);
-			if (cpi != null) {
-				if (cpi.getType() == ConstantPoolInfo.CLASS) {
-					final ClassInfo ci = (ClassInfo) cpi;
-					final int nameIndex = ci.getNameIndex();
-					final UTF8Info utf8Name = (UTF8Info)cp.get(nameIndex);
-					final String className = utf8Name.getValue().replace("/", ".");
-					
-					// arrays descriptors are stored as ClassReference
-					if (!className.contains("["))
-					{	//UTF8 name can be removed
-						//cp.removeLast(nameIndex);
-						ci.forceType(ConstantPoolInfo.KCLASS);
-						ci.setNameIndex(pk.getClassId(className));
-					} else{//array of objects
-						if(className.contains("L"))
-						{
-							int index1 = className.indexOf("L");
-							int index2 = className.indexOf(";");
-							if(index1 >= 0 && index2 >= 0)
-							{
-								final String objClassName = className.substring(index1 + 1, index2 - index1 + 1);
-								final int objClassId = pk.getClassId(objClassName);
-								final String nClassName = className.replace(objClassName, ""+objClassId); 
-								utf8Name.setString(nClassName);
-								System.out.println("New Array descriptor:"+utf8Name.getValue());
-							}
-						}
-						System.out.println("ClassName:" + className);
-					}
-				}
-				/*
-				 * if (cpi.getType() == ConstantPoolInfo.METHOD_REF) { final
-				 * ClassInfo ci = (ClassInfo) cpi; final String className =
-				 * ci.getValue(); if(!className.contains("["))//arrays
-				 * descriptors are stored as ClassReference {
-				 * ci.forceType(ConstantPoolInfo.KCLASS);
-				 * ci.setNameIndex(pk.getClassId(className)); }else
-				 * System.out.println("ClassName:"+className); }
-				 */
-			}
-		}
-	}
-
+	
 	public void exportClassFile(String filePath, ClassFile classFile) {
 		try {
 			System.out.println("Export file:" + filePath);

@@ -28,11 +28,12 @@ import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.AbstractTableModel;
 
-import com.iceq.KClass;
+import com.iceq.KClassFileInfo;
 import com.iceq.KJVMExporter;
 
 
-public class KJVMExporterUI extends JPanel {
+public class KJVMExporterUI extends JPanel 
+{
 	File m_save = new File("save.txt");
 	KJVMExporterUI m_instance = null;
 	KJVMExporter m_exporter;
@@ -64,10 +65,11 @@ public class KJVMExporterUI extends JPanel {
 		JPanel panel = new JPanel();
 
 		JButton loadMicro = new JButton("Load");
-		loadMicro.addActionListener(new ActionListener() {
+		loadMicro.addActionListener(new ActionListener()
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+			public void actionPerformed(ActionEvent e) 
+			{
 				fd.setDialogType(JFileChooser.OPEN_DIALOG);
 				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fd.setDialogTitle("Add microkernel class or file set.");
@@ -89,9 +91,11 @@ public class KJVMExporterUI extends JPanel {
 		panel.add(loadMicro);
 
 		JButton saveMicro = new JButton("Save");
-		saveMicro.addActionListener(new ActionListener() {
+		saveMicro.addActionListener(new ActionListener() 
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e) 
+			{
 				fd.setDialogType(JFileChooser.SAVE_DIALOG);
 				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fd.setDialogTitle("Save microkernel.");
@@ -188,10 +192,11 @@ public class KJVMExporterUI extends JPanel {
 		JFileChooser fd = new JFileChooser();
 		JPanel panel = new JPanel();
 		JButton loadPackage = new JButton("Load");
-		loadPackage.addActionListener(new ActionListener() {
+		loadPackage.addActionListener(new ActionListener() 
+		{
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+			public void actionPerformed(ActionEvent e)
+			{
 				fd.setDialogType(JFileChooser.OPEN_DIALOG);
 				fd.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fd.setDialogTitle("Add microkernel class or file set.");
@@ -309,7 +314,7 @@ public class KJVMExporterUI extends JPanel {
 			m_kernel = isKernel;
 		}
 		
-		private Vector<KClass> getClasses(){
+		private Vector<KClassFileInfo> getClasses(){
 			if(m_kernel)
 				return m_exporter.getMicroKernelClassFiles();
 			else
@@ -336,10 +341,10 @@ public class KJVMExporterUI extends JPanel {
 			if (col == 0)
 				return row;
 			if (col == 1)
-				return getClasses().get(row).m_export;
+				return getClasses().get(row).isExport();
 
 			if (col == 2)
-				return getClasses().get(row).m_name;
+				return getClasses().get(row).getFullClassName();
 			return "UNKNOWN COLUMN";
 		}
 
@@ -374,7 +379,7 @@ public class KJVMExporterUI extends JPanel {
 		@Override
 		public void setValueAt(Object value, int row, int col) {
 			if (col == 1)
-				getClasses().get(row).m_export = (Boolean) value;
+				getClasses().get(row).setExport((Boolean) value);
 
 			fireTableCellUpdated(row, col);
 		}
@@ -412,8 +417,7 @@ public class KJVMExporterUI extends JPanel {
 
 	private String getCurrentPath() {
 		try {
-			DataInputStream dis = new DataInputStream(new FileInputStream(
-					m_save));
+			DataInputStream dis = new DataInputStream(new FileInputStream(m_save));
 			return dis.readUTF();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -423,8 +427,7 @@ public class KJVMExporterUI extends JPanel {
 
 	private void setCurrentPath(String str) {
 		try {
-			DataOutputStream dis = new DataOutputStream(new FileOutputStream(
-					m_save));
+			DataOutputStream dis = new DataOutputStream(new FileOutputStream( m_save));
 			dis.writeUTF(str);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -442,7 +445,7 @@ public class KJVMExporterUI extends JPanel {
 		TableTransferHandler(boolean iskernel){
 			m_kernel = iskernel;
 		}
-		private Vector<KClass> getClasses(){
+		private Vector<KClassFileInfo> getClasses(){
 			if(m_kernel)
 				return m_exporter.getMicroKernelClassFiles();
 			else
@@ -494,7 +497,7 @@ public class KJVMExporterUI extends JPanel {
 				return false;
 			}
 			int sourceRow = Integer.parseInt(data);
-			KClass elem = getClasses().get(sourceRow);
+			KClassFileInfo elem = getClasses().get(sourceRow);
 
 			getClasses().remove(sourceRow);
 			getClasses().insertElementAt(elem, row);
