@@ -14,7 +14,7 @@
 #undef DEBUG
 
 #define DEBUG_VM
-//#define DEBUG_CLASS_LOADING
+#define DEBUG_CLASS_LOADING
 
 #define USE_MICROKERNEL
 

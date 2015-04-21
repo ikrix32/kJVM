@@ -5,6 +5,8 @@ import java.util.List;
 import net.sf.rej.java.ClassFile;
 import net.sf.rej.java.Field;
 import net.sf.rej.java.Method;
+import net.sf.rej.java.constantpool.ClassInfo;
+import net.sf.rej.java.constantpool.ConstantPoolInfo;
 
 public class KJVMClassInfo
 {
@@ -47,15 +49,16 @@ public class KJVMClassInfo
 		int classId = m_package.getClassId(m_classFileInfo.getFullClassName());
 		int fieldId = getFieldId(fieldName, type);
 
-		while (fieldId < 0 && crtClassFile.getSuperClassName() != null)
+		while (fieldId < 0 && crtClassFile.getSuperClass() != 0)
 		{
-			final String superClassName = crtClassFile.getSuperClassName();
-			final KJVMClassInfo superClass = m_package.getClassInfo(superClassName);
+			
+			final ClassInfo superClassInfo = (ClassInfo)crtClassFile.getPool().get(crtClassFile.getSuperClass());
+			final KJVMClassInfo superClass = m_package.getKClassInfo(superClassInfo);
 
 			fieldId = superClass.getFieldId(fieldName, type);
 
 			if (fieldId >= 0)
-				classId = m_package.getClassId(superClassName);
+				classId = m_package.getClassId(superClass.m_classFileInfo.getFullClassName());
 
 			crtClassFile = superClass.m_classFileInfo.getClassFile();
 		}
@@ -74,13 +77,13 @@ public class KJVMClassInfo
 
 		while (methodId < 0 && crtClassFile.getSuperClassName() != null)
 		{
-			final String superClassName = crtClassFile.getSuperClassName();
-			final KJVMClassInfo superClass = m_package.getClassInfo(superClassName);
+			final ClassInfo superClassInfo = (ClassInfo)crtClassFile.getPool().get(crtClassFile.getSuperClass());
+			final KJVMClassInfo superClass = m_package.getKClassInfo(superClassInfo);
 
 			methodId = superClass.getMethodId(methodName, type);
 
 			if (methodId >= 0)
-				classId = m_package.getClassId(superClassName);
+				classId = m_package.getClassId(superClass.m_classFileInfo.getFullClassName());
 
 			crtClassFile = superClass.m_classFileInfo.getClassFile();
 		}

@@ -34,6 +34,7 @@ void setPin(int pin,bool on){
 #include "KVMTestPackage.h"
 #endif
 
+#ifdef ENABLE_KCLASS_FORMAT
 extern const char* getClassName(const u2 classId){
 #ifdef USE_MICROKERNEL
     extern const int getNoMicroKernelClasses();
@@ -51,6 +52,7 @@ extern const char* getClassName(const u2 classId){
     extern const char* testNames[];
     return testNames[classId - noMicroClasses];
 }
+#endif
 
 #ifdef TINYBAJOS
 void main() __attribute__ ((noreturn));

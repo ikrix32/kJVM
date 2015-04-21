@@ -66,14 +66,19 @@ void* getAddr(const u1 classId,const u2 pos)
 }
 
 
-u1 findNumArgs(const u1 classId,const u2 methodRef)                      /*  count BCDFIJLSZ in runden Klammern!!*/
+u1 findNumArgs(const u1 classId,const u2 methodRef)
 {
     u2 n = 0;
     u1 object = 0;
-    const u2 meth = CP(classId, getU2(classId,CP(classId, getU2(classId,CP(classId, methodRef) + 3)) + 3));
-    for (u2 i = 0; i < getU2(classId,meth + 1); i++)
+    const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,methodRef);
+    const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
+
+    const char* methodDescr = UTF8_GET_STRING(cN,methodDescrId);
+    const u2    methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
+
+    for (u2 i = 0; i < methodDescrLength; i++)
     {
-        const u1 c = getU1(classId,meth + 3 + i);               //BH*(u1*)(getAddr(meth+3)+i);
+        const u1 c = methodDescr[i];
         if (c == '(')
             continue;
 
@@ -90,7 +95,7 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)                      /*  cou
                 object = 1;
                 n++;
             } else  if((c == 'B') || (c == 'C') || (c == 'F') || (c == 'I')
-                    || (c == 'S') || (c == 'Z'))
+                       || (c == 'S') || (c == 'Z'))
             {
                 n++;
             }

@@ -25,27 +25,33 @@ public class ClassInfo extends ConstantPoolInfo {
 	 * Pointer to a UTF8Info entry in the constant pool. The package elements of the class name are separated with '/' instead of '.'
 	 */
     private int nameIndex;
+    private int oldNameIndex;
 
     public ClassInfo(int nameIndex, ConstantPool pool) {
         super(CLASS, pool);
         this.nameIndex = nameIndex;
+        oldNameIndex = nameIndex;
     }
 
     @Override
 	public String toString() {
-        return "(class) nameindex " + this.nameIndex + "("
-                + this.pool.get(this.nameIndex) + ")";
+        return "(class) nameindex " + this.oldNameIndex + "("
+                + this.pool.get(this.oldNameIndex) + ")";
     }
 
     public String getName() {
-        String name = this.pool.get(this.nameIndex).getValue()
-                .replace('/', '.');
-        if (name.startsWith("[")) {
-            Descriptor desc = new Descriptor(name);
-            return desc.getReturn().toString();
-        } else {
-            return name;
-        }
+    	if(getType() == ConstantPoolInfo.KCLASS){
+    		return "KCLASS";
+    	}else{
+	        String name = this.pool.get(this.oldNameIndex).getValue()
+	                .replace('/', '.');
+	        if (name.startsWith("[")) {
+	            Descriptor desc = new Descriptor(name);
+	            return desc.getReturn().toString();
+	        } else {
+	            return name;
+	        }
+    	}
     }
     
     public int getNameIndex() {

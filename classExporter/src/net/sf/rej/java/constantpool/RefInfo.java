@@ -14,7 +14,7 @@ public class RefInfo extends ConstantPoolInfo
 	 * Pointer to a <code>ClassInfo</code> entry in the constant pool.
 	 */
 	private int classIndex;
-
+	private int oldClassIndex;
 	/**
 	 * Pointer to a <code>NameAndTypeInfo</code> entry in the constant pool.
 	 */
@@ -26,6 +26,7 @@ public class RefInfo extends ConstantPoolInfo
 		super(tag, pool);
 		this.tag = tag;
 		this.classIndex = classIndex;
+		this.oldClassIndex = classIndex;
 		this.nameAndTypeIndex = nameAndTypeIndex;
 	}
 
@@ -46,7 +47,7 @@ public class RefInfo extends ConstantPoolInfo
 	
 	public ClassInfo getClassInfo()
 	{
-		final ClassInfo ci = (ClassInfo) this.pool.get(this.classIndex);
+		final ClassInfo ci = (ClassInfo) this.pool.get(this.oldClassIndex);
 		return ci;
 	}
 	
@@ -95,6 +96,14 @@ public class RefInfo extends ConstantPoolInfo
 		NameAndTypeInfo info = (NameAndTypeInfo) this.pool
 				.get(this.nameAndTypeIndex);
 		return info;
+	}
+	
+	public int getNameAndTypeIndex(){
+		return this.nameAndTypeIndex;
+	}
+	
+	public void setNameAndTypeIndex(int index){
+		this.nameAndTypeIndex = index;
 	}
 
 	@Override

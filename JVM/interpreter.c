@@ -64,9 +64,10 @@ static u2   descrLength;
 // static u1	numFields; <-- not used?
 // static u2 i, j, k;
 // static s2 count;
-
+#ifdef ENABLE_KCLASS_FORMAT
 extern char* getClassName(const u2 classId);
-	
+#endif
+
 void interpreter_run() // in: classNumber,  methodNumber cN, mN
 {   //u1 code, byte1, byte2;
     //u2 heapPos;
@@ -1214,8 +1215,8 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #endif
                 u2 cNS = cN;
                 do{
-                    if(cNS != cN)
-                        printf("Check super class,method name:%s!!!\n",methodName);
+                    //if(cNS != cN)
+                    //   printf("Check super class,method name:%s!!!\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
@@ -1344,8 +1345,8 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #endif
                 u2 cNS = cN;
                 do{
-                    if(cNS != cN)
-                        printf("Check super class!!! method name:%s\n",methodName);
+                    //if(cNS != cN)
+                    //    printf("Check super class!!! method name:%s\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 

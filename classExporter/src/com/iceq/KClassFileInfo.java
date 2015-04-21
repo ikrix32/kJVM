@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.sf.rej.java.ClassFile;
+import net.sf.rej.java.constantpool.ConstantPool;
 
 public class KClassFileInfo 
 {
@@ -68,5 +69,16 @@ public class KClassFileInfo
 	
 	public void setExport(boolean export) {
 		this.m_export = export;
+	}
+	
+	public void printClassPool(){
+		ConstantPool cp = m_classFile.getPool();
+		
+		for(int i = 0;i < cp.size();i++){
+			if(cp.get(i) != null)
+				System.out.println(cp.get(i).toString());
+			else
+				System.out.println("cp["+i+"] is null");
+		}
 	}
 }

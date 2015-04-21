@@ -2,6 +2,9 @@ package com.iceq;
 
 import java.util.Vector;
 
+import net.sf.rej.java.constantpool.ClassInfo;
+import net.sf.rej.java.constantpool.ConstantPoolInfo;
+
 public class KJVMPackageInfo
 {
 	Vector<KJVMClassInfo> m_classes = new Vector<KJVMClassInfo>();
@@ -33,14 +36,21 @@ public class KJVMPackageInfo
 		throw new ClassNotFoundException("Class " + classFullName + " not found.");
 	}
 	
-	public KJVMClassInfo getClassInfo(final int classId)
+	public KJVMClassInfo getKClassInfo(final int classId)
 	{
 		return m_classes.get(classId);
 	}
 	
-	public KJVMClassInfo getClassInfo(final String classFullName) throws ClassNotFoundException
+	public KJVMClassInfo getKClassInfo(final String classFullName) throws ClassNotFoundException
 	{
-		return getClassInfo(getClassId(classFullName));
+		return getKClassInfo(getClassId(classFullName));
 	}
 	
+	public KJVMClassInfo getKClassInfo(final ClassInfo classInfo) throws ClassNotFoundException
+	{
+		if(classInfo.getType() == ConstantPoolInfo.KCLASS)
+			return getKClassInfo(classInfo.getNameIndex());
+		else
+			return getKClassInfo(classInfo.getName());
+	}
 }

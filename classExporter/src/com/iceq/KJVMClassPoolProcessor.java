@@ -26,18 +26,18 @@ public class KJVMClassPoolProcessor
 				{
 					case ConstantPoolInfo.CLASS:
 					{
-						// convertClassInfoToKClassInfo(cp,(ClassInfo) cpi,pk);
+						convertClassInfoToKClassInfo(cp,(ClassInfo) cpi,pk);
 					}
 					break;
 					case ConstantPoolInfo.INTERFACE_METHOD_REF:	
 					case ConstantPoolInfo.METHOD_REF:
 					{
-						convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
+						//convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
 					}
 					break;
 					case ConstantPoolInfo.FIELD_REF:
 					{
-						convertFieldRefToKFieldRef(cp, (RefInfo) cpi, pk);
+						//convertFieldRefToKFieldRef(cp, (RefInfo) cpi, pk);
 					}
 					break;
 					default:
@@ -85,21 +85,31 @@ public class KJVMClassPoolProcessor
 			throws ClassNotFoundException
 	{
 		final ClassInfo classInfo = methodRefInfo.getClassInfo();
-		KJVMClassInfo kClassInfo = pk.getClassInfo(classInfo.getName());
+		KJVMClassInfo kClassInfo = pk.getKClassInfo(classInfo);
 
 		NameAndTypeInfo nameAndType = methodRefInfo.getNameAndTypeInfo();
 		KRef methodRef = kClassInfo.getMethodRef(nameAndType.getName(), nameAndType.getDescriptorString());
 
-		if(true){
-			kClassInfo = pk.getClassInfo(methodRef.getClassId());
+		if(false){
+			kClassInfo = pk.getKClassInfo(methodRef.getClassId());
 			Method meth = kClassInfo.getMethod(methodRef.getItemId());
 			System.out.println("Orig. Method: " + classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString());
 			System.out.println("New Method: " + kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
 					+ meth.getDescriptor().getRawDesc());
 		}
+		
 		//proccess
 		methodRefInfo.forceType(ConstantPoolInfo.KMEHOD_REF);
 		methodRefInfo.setClassIndex(methodRef.getClassId());
+		if(nameAndType.getType() == ConstantPoolInfo.KNAME_AND_TYPE
+		&& methodRef.getItemId() != methodRefInfo.getNameAndTypeIndex())
+		{
+			nameAndType = new NameAndTypeInfo(nameAndType.getOriginalNameIndex(), nameAndType.getDescriptorIndex(),cp);
+			System.out.println("Add name for method ref:"+nameAndType.toString());
+			int index = cp.forceAdd(nameAndType);
+			methodRefInfo.setNameAndTypeIndex(index);
+			
+		}
 		nameAndType.forceType(ConstantPoolInfo.KNAME_AND_TYPE);
 		nameAndType.setNameIndex(methodRef.getItemId());
 	}
@@ -108,16 +118,32 @@ public class KJVMClassPoolProcessor
 			throws ClassNotFoundException
 	{
 		final ClassInfo classInfo = fieldRefInfo.getClassInfo();
-		KJVMClassInfo kClassInfo = pk.getClassInfo(classInfo.getName());
+		KJVMClassInfo kClassInfo = pk.getKClassInfo(classInfo);
 
 		NameAndTypeInfo nameAndType = fieldRefInfo.getNameAndTypeInfo();
 		KRef fieldRef = kClassInfo.getFieldRef(nameAndType.getName(), nameAndType.getDescriptorString());
 
-		kClassInfo = pk.getClassInfo(fieldRef.getClassId());
-		Field meth = kClassInfo.getField(fieldRef.getItemId());
-		
-		System.out.println("Orig Field: " + classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString());
-		System.out.println("New Field: " + kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
-				+ meth.getDescriptor().getRawDesc());
+		if(false)
+		{
+			kClassInfo = pk.getKClassInfo(fieldRef.getClassId());
+			Field meth = kClassInfo.getField(fieldRef.getItemId());
+			
+			System.out.println("Orig Field: " + classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString());
+			System.out.println("New Field: " + kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
+					+ meth.getDescriptor().getRawDesc());
+		}
+		//proccess
+		fieldRefInfo.forceType(ConstantPoolInfo.KFIELD_REF);
+		fieldRefInfo.setClassIndex(fieldRef.getClassId());
+		if(nameAndType.getType() == ConstantPoolInfo.KNAME_AND_TYPE
+		&& fieldRef.getItemId() != fieldRefInfo.getNameAndTypeIndex())
+		{
+			nameAndType = new NameAndTypeInfo(nameAndType.getOriginalNameIndex(), nameAndType.getDescriptorIndex(),cp);
+			System.out.println("Add name for field ref:"+nameAndType.toString());
+			int index = cp.forceAdd(nameAndType);
+			fieldRefInfo.setNameAndTypeIndex(index);	
+		}
+		nameAndType.forceType(ConstantPoolInfo.KNAME_AND_TYPE);
+		nameAndType.setNameIndex(fieldRef.getItemId());
 	}
 }

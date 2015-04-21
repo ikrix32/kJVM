@@ -171,7 +171,10 @@
 #define   CONSTANT_NameAndType          12
 #define   CONSTANT_Utf8                     1
 
-#define   CONSTANT_KClass                    25
+#define   CONSTANT_KClass           25
+#define   CONSTANT_KFIELD_REF       26
+#define   CONSTANT_KMEHOD_REF       27
+#define   CONSTANT_KNAME_AND_TYPE   28
 
 #define     ACC_PUBLIC              0x0001        //Declared public; may be accessed from outside its package.
 #define     ACC_PRIVATE         0x0002            //Declared private; accessible only within the defining class.
