@@ -14,11 +14,12 @@
 #undef DEBUG
 
 #define DEBUG_VM
-#define DEBUG_CLASS_LOADING
+//#define DEBUG_CLASS_LOADING
 
 #define USE_MICROKERNEL
 
 #define ENABLE_KCLASS_FORMAT
+#define ENABLE_KMETHOD
 #define DEBUG_KCLASS//native methods don't work without this
 
 #define ENABLE_TESTS

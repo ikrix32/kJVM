@@ -134,6 +134,28 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_DivByZeroBin),
 };
 
+static const u2 testCLInitMethods[] =
+{	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+};
+
+extern const u2 getClassCLInitMethod(const u2 classId){
+	return testCLInitMethods[classId];
+}
 static const char* testNames[] =
 {	"tests/HelloWorld",
 	"tests/Arithmetic",

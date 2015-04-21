@@ -348,6 +348,14 @@ u2 getClassIndex(u2 classId){
     CLASSNOTFOUNDERR("aa",2);
     return INVALID_CLASS_ID;
 }
+u2 getClassID(u2 classIndex){
+    if(classIndex < numClasses) {
+        const u2 classInfoId = getU2(classIndex,cs[classIndex].this_class);
+        const u2 classNameId = CLASSINFO_GET_NAMEID(classIndex,classInfoId);
+        return classNameId;
+    }
+    return INVALID_CLASS_ID;
+}
 #endif
 
 void analyzeClass(const u1 classId)
@@ -533,7 +541,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
 #ifdef ENABLE_KCLASS_FORMAT
             //todo - implement new native method dispach
             extern char* getClassName(const u2 classId);
-            const char* className = getClassName(getClassIndex(classNameId));
+            const char* className = getClassName(classNameId);
             const u2 classNameLength=stringLength(className);
 #else
             const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);

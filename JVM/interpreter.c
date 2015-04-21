@@ -1490,7 +1490,12 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #endif
                 if (methodStackEmpty())
                 {   //mb jf if not <clinit> you're done :-D
+#ifdef ENABLE_KMETHOD
+                    extern const u2 getCLInitMethodId(const u2 classId);
+                    if(mN == getCLInitMethodId(getClassID(cN)))
+#else
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
+#endif
                     {
                         DEBUGPRINTLN_OPC(" from <clinit>");
 
@@ -1509,7 +1514,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 }
                 first=opStackPop();// ret val
                 opStackSetSpPos(methodStackPop());
-                pc = methodStackPop()+2;
+                pc = methodStackPop() + 2;
                 mN = methodStackPop();
                 cN = methodStackPop();
                 local = methodStackPop();

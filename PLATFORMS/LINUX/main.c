@@ -35,7 +35,8 @@ void setPin(int pin,bool on){
 #endif
 
 #ifdef ENABLE_KCLASS_FORMAT
-extern const char* getClassName(const u2 classId){
+extern const char* getClassName(const u2 classId)
+{
 #ifdef USE_MICROKERNEL
     extern const int getNoMicroKernelClasses();
     const int  noMicroClasses = getNoMicroKernelClasses();
@@ -52,6 +53,21 @@ extern const char* getClassName(const u2 classId){
     extern const char* testNames[];
     return testNames[classId - noMicroClasses];
 }
+
+extern const u2 getCLInitMethodId(const u2 classId){
+#ifdef USE_MICROKERNEL
+    extern const int getNoMicroKernelClasses();
+    const int  noMicroClasses = getNoMicroKernelClasses();
+    if(classId < noMicroClasses)
+    {
+        extern const u2 getMicroKernelClassCLInitMethod(const u2 classId);
+        return getMicroKernelClassCLInitMethod(classId);
+    }
+#endif
+    extern const u2 getClassCLInitMethod(const u2 classId);
+    return getClassCLInitMethod(classId - noMicroClasses);
+}
+
 #endif
 
 #ifdef TINYBAJOS
@@ -87,11 +103,11 @@ void main()
         for (int i = 0; i < noTests; i++)
         {
             printf("\n========== Start %s (id: %d) =========\n",testNames[i],i);
-            const u1 classId = classLoader_loadClass(testBinaries[i], testBinariesSize[i]);
+            const u1 classIndex = classLoader_loadClass(testBinaries[i], testBinariesSize[i]);
 
-            classLoader_clinitClass(classId);
+            classLoader_clinitClass(classIndex);
 
-            if(vm_run(classId) == 0)//run main on last loaded class
+            if(vm_run(classIndex) == 0)//run main on last loaded class
                 unloadLastClass();
             printf("\n========== End %s =========\n",testNames[i]);
             printf("Heap free space %d\n",getHeapFreeSpace());

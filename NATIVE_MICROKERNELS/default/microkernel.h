@@ -238,6 +238,18 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_lang_SystemBin),
 };
 
+extern const int getNoMicroKernelClasses(){
+	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
+}
+
+extern const u1* getMicroKernelBinary(const int i){
+	return microkernelBinaries[i];
+}
+
+extern const u4 getMicroKernelBinarySize(const int i){
+	return microKernelBinariesSize[i];
+}
+
 #ifdef ENABLE_KCLASS_FORMAT
 #ifdef DEBUG_KCLASS
 static const char* microkernelClassNames[] =
@@ -347,6 +359,41 @@ extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 metho
 }
 #endif
 
+static const u2 microkernelCLInitMethods[] =
+{	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+};
+
+extern const u2 getMicroKernelClassCLInitMethod(const u2 classId){
+	return microkernelCLInitMethods[classId];
+}
 extern const u2 JAVA_LANG_OBJECT_CLASS_ID(){ return 0; }
 extern const u2 JAVA_LANG_STRING_CLASS_ID(){ return 9; }
 
@@ -363,17 +410,5 @@ extern u2 getMicroKernelExceptionClassId(const int exception){
 	return microkernelExceptions[exception];
 }
 #endif
-
-extern const int getNoMicroKernelClasses(){
-	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
-}
-
-extern const u1* getMicroKernelBinary(const int i){
-	return microkernelBinaries[i];
-}
-
-extern const u4 getMicroKernelBinarySize(const int i){
-	return microKernelBinariesSize[i];
-}
 
 #endif
