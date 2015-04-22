@@ -24,17 +24,17 @@ u1 classLoader_loadClass(const u1* bin,const u4 binSize)
     if (crtByteCodeSize + binSize > MAXBYTECODE){
        ERROREXIT(-1, "MAXBYTECODE reached!\n");
     }
-    const u1 classId = numClasses;
+    const u1 classIndex = numClasses;
     numClasses++;
-    cs[classId].classFileStartAddress = classFileBase + crtByteCodeSize;
-    cs[classId].classFileLength = readClassBin(bin,binSize,cs[classId].classFileStartAddress);
-    analyzeClass(classId);
-    crtByteCodeSize += cs[classId].classFileLength;
+    cs[classIndex].classFileStartAddress = classFileBase + crtByteCodeSize;
+    cs[classIndex].classFileLength = readClassBin(bin,binSize,cs[classIndex].classFileStartAddress);
+    analyzeClass(classIndex);
+    crtByteCodeSize += cs[classIndex].classFileLength;
 
-    PRINTF("Loaded class id:%d bytecode size %d,current loaded bytecode size: %d\n\n",classId,binSize,crtByteCodeSize);
+    PRINTF("Loaded class id:%d bytecode size %d,current loaded bytecode size: %d\n\n",classIndex,binSize,crtByteCodeSize);
 
     DEBUGPRINTHEAP;
-    return classId;
+    return classIndex;
 }
 
 void unloadLastClass(){
@@ -44,7 +44,12 @@ void unloadLastClass(){
 
 void classLoader_clinitClass(const u1 classId){
     //initialize class
+#ifdef ENABLE_KMETHOD
+    extern const u2 getCLInitMethodId(const u2 classId);
+    mN = getCLInitMethodId(getClassID(classId));
+#else
     mN = FIND_METHOD_BYNAME(classId,"<clinit>", 8, "()V", 3);
+#endif
     if (mN != INVALID_METHOD_ID)
     {
         opStackPush(cs[classId].classInfo);

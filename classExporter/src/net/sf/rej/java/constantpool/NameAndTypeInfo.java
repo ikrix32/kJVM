@@ -15,12 +15,14 @@ import net.sf.rej.util.ByteSerializer;
 public class NameAndTypeInfo extends ConstantPoolInfo implements DescriptorEnabled {
 
 	private int nameIndex;
+	private int oldNameIndex;
 
 	private int descriptorIndex;
 
 	public NameAndTypeInfo(int nameIndex, int descriptorIndex, ConstantPool pool) {
 		super(NAME_AND_TYPE, pool);
 		this.nameIndex = nameIndex;
+		this.oldNameIndex = nameIndex;
 		this.descriptorIndex = descriptorIndex;
 	}
 
@@ -32,11 +34,11 @@ public class NameAndTypeInfo extends ConstantPoolInfo implements DescriptorEnabl
 	}
 
 	public String getName() {
-		return this.pool.get(this.nameIndex).getValue();
+		return this.pool.get(this.oldNameIndex).getValue();
 	}
 	
 	public UTF8Info getNameInfo() {
-		return (UTF8Info)this.pool.get(this.nameIndex);		
+		return (UTF8Info)this.pool.get(this.oldNameIndex);		
 	}
 
 	public String getDescriptorString() {
@@ -97,6 +99,10 @@ public class NameAndTypeInfo extends ConstantPoolInfo implements DescriptorEnabl
 	
 	public int getNameIndex() {
 		return this.nameIndex;
+	}
+	
+	public int getOriginalNameIndex() {
+		return this.oldNameIndex;
 	}
 	
 	public int getDescriptorIndex() {

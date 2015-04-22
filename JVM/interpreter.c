@@ -64,9 +64,10 @@ static u2   descrLength;
 // static u1	numFields; <-- not used?
 // static u2 i, j, k;
 // static s2 count;
-
+#ifdef ENABLE_KCLASS_FORMAT
 extern char* getClassName(const u2 classId);
-	
+#endif
+
 void interpreter_run() // in: classNumber,  methodNumber cN, mN
 {   //u1 code, byte1, byte2;
     //u2 heapPos;
@@ -1212,7 +1213,10 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR(className, classNameLength);
                 }
 #endif
+                u2 cNS = cN;
                 do{
+                    //if(cNS != cN)
+                    //   printf("Check super class,method name:%s!!!\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
@@ -1339,7 +1343,10 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     CLASSNOTFOUNDERR((const char*) className, classNameLength);
                 }
 #endif
+                u2 cNS = cN;
                 do{
+                    //if(cNS != cN)
+                    //    printf("Check super class!!! method name:%s\n",methodName);
                     mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
@@ -1483,7 +1490,12 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 #endif
                 if (methodStackEmpty())
                 {   //mb jf if not <clinit> you're done :-D
+#ifdef ENABLE_KMETHOD
+                    extern const u2 getCLInitMethodId(const u2 classId);
+                    if(mN == getCLInitMethodId(getClassID(cN)))
+#else
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
+#endif
                     {
                         DEBUGPRINTLN_OPC(" from <clinit>");
 
@@ -1502,7 +1514,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 }
                 first=opStackPop();// ret val
                 opStackSetSpPos(methodStackPop());
-                pc = methodStackPop()+2;
+                pc = methodStackPop() + 2;
                 mN = methodStackPop();
                 cN = methodStackPop();
                 local = methodStackPop();

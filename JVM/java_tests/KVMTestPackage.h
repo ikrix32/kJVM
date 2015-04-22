@@ -1,111 +1,95 @@
 #ifdef ENABLE_TESTS
 
-static const u1 tests_HelloWorldBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_HelloWorld_k.h"
 #else
 #include "tests_HelloWorld.h"
 #endif
 
-static const u1 tests_ArithmeticBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_Arithmetic_k.h"
 #else
 #include "tests_Arithmetic.h"
 #endif
 
-static const u1 tests_ICMPBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_ICMP_k.h"
 #else
 #include "tests_ICMP.h"
 #endif
 
-static const u1 tests_FibonacciBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_Fibonacci_k.h"
 #else
 #include "tests_Fibonacci.h"
 #endif
 
-static const u1 tests_SelfInstanceBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_SelfInstance_k.h"
 #else
 #include "tests_SelfInstance.h"
 #endif
 
-static const u1 tests_StaticTestBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_StaticTest_k.h"
 #else
 #include "tests_StaticTest.h"
 #endif
 
-static const u1 tests_StringAndHeapTestBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_StringAndHeapTest_k.h"
 #else
 #include "tests_StringAndHeapTest.h"
 #endif
 
-static const u1 tests_SwitchBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_Switch_k.h"
 #else
 #include "tests_Switch.h"
 #endif
 
-static const u1 tests_ArraySizeBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_ArraySize_k.h"
 #else
 #include "tests_ArraySize.h"
 #endif
 
-static const u1 tests_InheritanceABin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_InheritanceA_k.h"
 #else
 #include "tests_InheritanceA.h"
 #endif
 
-static const u1 tests_InheritanceBBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_InheritanceB_k.h"
 #else
 #include "tests_InheritanceB.h"
 #endif
 
-static const u1 tests_InheritanceBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_Inheritance_k.h"
 #else
 #include "tests_Inheritance.h"
 #endif
 
-static const u1 tests_FloatTestBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_FloatTest_k.h"
 #else
 #include "tests_FloatTest.h"
 #endif
 
-static const u1 tests_QuickSortBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_QuickSort_k.h"
 #else
 #include "tests_QuickSort.h"
 #endif
 
-static const u1 tests_ErathostenesBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_Erathostenes_k.h"
 #else
 #include "tests_Erathostenes.h"
 #endif
 
-static const u1 tests_DivByZeroBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "tests_DivByZero_k.h"
 #else
@@ -150,6 +134,28 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_DivByZeroBin),
 };
 
+static const u2 testCLInitMethods[] =
+{	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+};
+
+extern const u2 getClassCLInitMethod(const u2 classId){
+	return testCLInitMethods[classId];
+}
 static const char* testNames[] =
 {	"tests/HelloWorld",
 	"tests/Arithmetic",
@@ -169,4 +175,49 @@ static const char* testNames[] =
 	"tests/DivByZero",
 };
 
+static const char** testFieldNames[] =
+{	tests_HelloWorldFieldNames,
+	tests_ArithmeticFieldNames,
+	tests_ICMPFieldNames,
+	tests_FibonacciFieldNames,
+	tests_SelfInstanceFieldNames,
+	tests_StaticTestFieldNames,
+	tests_StringAndHeapTestFieldNames,
+	tests_SwitchFieldNames,
+	tests_ArraySizeFieldNames,
+	tests_InheritanceAFieldNames,
+	tests_InheritanceBFieldNames,
+	tests_InheritanceFieldNames,
+	tests_FloatTestFieldNames,
+	tests_QuickSortFieldNames,
+	tests_ErathostenesFieldNames,
+	tests_DivByZeroFieldNames,
+};
+
+extern const char* getClassFieldName(const u2 classId,const u2 fieldId){
+	return testFieldNames[classId][fieldId];
+}
+
+static const char** testMethodNames[] =
+{	tests_HelloWorldMethodNames,
+	tests_ArithmeticMethodNames,
+	tests_ICMPMethodNames,
+	tests_FibonacciMethodNames,
+	tests_SelfInstanceMethodNames,
+	tests_StaticTestMethodNames,
+	tests_StringAndHeapTestMethodNames,
+	tests_SwitchMethodNames,
+	tests_ArraySizeMethodNames,
+	tests_InheritanceAMethodNames,
+	tests_InheritanceBMethodNames,
+	tests_InheritanceMethodNames,
+	tests_FloatTestMethodNames,
+	tests_QuickSortMethodNames,
+	tests_ErathostenesMethodNames,
+	tests_DivByZeroMethodNames,
+};
+
+extern const char* getClassMethodName(const u2 classId,const u2 methodId){
+	return testMethodNames[classId][methodId];
+}
 #endif

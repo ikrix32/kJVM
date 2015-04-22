@@ -72,22 +72,22 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
     u1 object = 0;
     const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,methodRef);
     const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
-    
+
     const char* methodDescr = UTF8_GET_STRING(cN,methodDescrId);
     const u2    methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
-    
+
     for (u2 i = 0; i < methodDescrLength; i++)
     {
         const u1 c = methodDescr[i];
         if (c == '(')
             continue;
-        
+
         if (c == ')')
             break;
-        
+
         if (c == ';')
             object = 0;
-        
+
         if (!object)
         {
             if (c == 'L')
@@ -103,6 +103,7 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
     }
     return n;
 }
+
 
 u2 findMaxLocals(const u1 classId,const u1 methodId)                                /*cN,mN*/
 {
@@ -288,6 +289,7 @@ u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char*
     return INVALID_METHOD_ID;
 }
 
+
 u1* findMethodByMethodNumber(const u1 classId,const u1 methodId)/*mb jf  in: methodNumber, out: methodName*/
 {
     const u2 methAddr = METHODBASE(classId, methodId);       /* get start address in class file of method #methodNumber*/
@@ -344,6 +346,14 @@ u2 getClassIndex(u2 classId){
             return i;
     }
     CLASSNOTFOUNDERR("aa",2);
+    return INVALID_CLASS_ID;
+}
+u2 getClassID(u2 classIndex){
+    if(classIndex < numClasses) {
+        const u2 classInfoId = getU2(classIndex,cs[classIndex].this_class);
+        const u2 classNameId = CLASSINFO_GET_NAMEID(classIndex,classInfoId);
+        return classNameId;
+    }
     return INVALID_CLASS_ID;
 }
 #endif
@@ -531,7 +541,7 @@ void analyzeMethods(const u1 classId)            /* jan 08 not good tested*/
 #ifdef ENABLE_KCLASS_FORMAT
             //todo - implement new native method dispach
             extern char* getClassName(const u2 classId);
-            const char* className = getClassName(getClassIndex(classNameId));
+            const char* className = getClassName(classNameId);
             const u2 classNameLength=stringLength(className);
 #else
             const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);

@@ -1,202 +1,173 @@
 #ifdef USE_MICROKERNEL
 
-static const u1 java_lang_ObjectBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Object_k.h"
 #else
 #include "java_lang_Object.h"
 #endif
 
-static const u1 platform_PlatFormBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "platform_PlatForm_k.h"
 #else
 #include "platform_PlatForm.h"
 #endif
 
-static const u1 java_lang_BooleanBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Boolean_k.h"
 #else
 #include "java_lang_Boolean.h"
 #endif
 
-static const u1 java_lang_ByteBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Byte_k.h"
 #else
 #include "java_lang_Byte.h"
 #endif
 
-static const u1 java_lang_CharacterBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Character_k.h"
 #else
 #include "java_lang_Character.h"
 #endif
 
-static const u1 java_lang_ShortBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Short_k.h"
 #else
 #include "java_lang_Short.h"
 #endif
 
-static const u1 java_lang_IntegerBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Integer_k.h"
 #else
 #include "java_lang_Integer.h"
 #endif
 
-static const u1 java_lang_FloatBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Float_k.h"
 #else
 #include "java_lang_Float.h"
 #endif
 
-static const u1 java_lang_CharSequenceBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_CharSequence_k.h"
 #else
 #include "java_lang_CharSequence.h"
 #endif
 
-static const u1 java_lang_StringBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_String_k.h"
 #else
 #include "java_lang_String.h"
 #endif
 
-static const u1 java_lang_StringBufferBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_StringBuffer_k.h"
 #else
 #include "java_lang_StringBuffer.h"
 #endif
 
-static const u1 java_lang_StringBuilderBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_StringBuilder_k.h"
 #else
 #include "java_lang_StringBuilder.h"
 #endif
 
-static const u1 java_lang_ErrorBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Error_k.h"
 #else
 #include "java_lang_Error.h"
 #endif
 
-static const u1 java_lang_ThrowableBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Throwable_k.h"
 #else
 #include "java_lang_Throwable.h"
 #endif
 
-static const u1 java_lang_ExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Exception_k.h"
 #else
 #include "java_lang_Exception.h"
 #endif
 
-static const u1 java_lang_NullPointerExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_NullPointerException_k.h"
 #else
 #include "java_lang_NullPointerException.h"
 #endif
 
-static const u1 java_lang_ArithmeticExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_ArithmeticException_k.h"
 #else
 #include "java_lang_ArithmeticException.h"
 #endif
 
-static const u1 java_lang_ArrayIndexOutOfBoundsExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_ArrayIndexOutOfBoundsException_k.h"
 #else
 #include "java_lang_ArrayIndexOutOfBoundsException.h"
 #endif
 
-static const u1 java_lang_RuntimeExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_RuntimeException_k.h"
 #else
 #include "java_lang_RuntimeException.h"
 #endif
 
-static const u1 java_lang_IllegalArgumentExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_IllegalArgumentException_k.h"
 #else
 #include "java_lang_IllegalArgumentException.h"
 #endif
 
-static const u1 java_lang_ClassCastExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_ClassCastException_k.h"
 #else
 #include "java_lang_ClassCastException.h"
 #endif
 
-static const u1 java_lang_InterruptedExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_InterruptedException_k.h"
 #else
 #include "java_lang_InterruptedException.h"
 #endif
 
-static const u1 java_lang_IllegalMonitorStateExceptionBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_IllegalMonitorStateException_k.h"
 #else
 #include "java_lang_IllegalMonitorStateException.h"
 #endif
 
-static const u1 java_lang_ThreadBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Thread_k.h"
 #else
 #include "java_lang_Thread.h"
 #endif
 
-static const u1 java_lang_RuntimeBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Runtime_k.h"
 #else
 #include "java_lang_Runtime.h"
 #endif
 
-static const u1 java_lang_MathBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_Math_k.h"
 #else
 #include "java_lang_Math.h"
 #endif
 
-static const u1 java_io_InputStreamBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_io_InputStream_k.h"
 #else
 #include "java_io_InputStream.h"
 #endif
 
-static const u1 java_io_PrintStreamBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_io_PrintStream_k.h"
 #else
 #include "java_io_PrintStream.h"
 #endif
 
-static const u1 java_lang_SystemBin[] =
 #ifdef ENABLE_KCLASS_FORMAT
 #include "java_lang_System_k.h"
 #else
@@ -267,6 +238,19 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_lang_SystemBin),
 };
 
+extern const int getNoMicroKernelClasses(){
+	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
+}
+
+extern const u1* getMicroKernelBinary(const int i){
+	return microkernelBinaries[i];
+}
+
+extern const u4 getMicroKernelBinarySize(const int i){
+	return microKernelBinariesSize[i];
+}
+
+#ifdef ENABLE_KCLASS_FORMAT
 #ifdef DEBUG_KCLASS
 static const char* microkernelClassNames[] =
 {	"java/lang/Object",
@@ -303,26 +287,116 @@ static const char* microkernelClassNames[] =
 extern const char* getMicroKernelClassName(const u2 classId){
 	return microkernelClassNames[classId];
 }
+static const char** microkernelFieldNames[] =
+{	java_lang_ObjectFieldNames,
+	platform_PlatFormFieldNames,
+	java_lang_BooleanFieldNames,
+	java_lang_ByteFieldNames,
+	java_lang_CharacterFieldNames,
+	java_lang_ShortFieldNames,
+	java_lang_IntegerFieldNames,
+	java_lang_FloatFieldNames,
+	java_lang_CharSequenceFieldNames,
+	java_lang_StringFieldNames,
+	java_lang_StringBufferFieldNames,
+	java_lang_StringBuilderFieldNames,
+	java_lang_ErrorFieldNames,
+	java_lang_ThrowableFieldNames,
+	java_lang_ExceptionFieldNames,
+	java_lang_NullPointerExceptionFieldNames,
+	java_lang_ArithmeticExceptionFieldNames,
+	java_lang_ArrayIndexOutOfBoundsExceptionFieldNames,
+	java_lang_RuntimeExceptionFieldNames,
+	java_lang_IllegalArgumentExceptionFieldNames,
+	java_lang_ClassCastExceptionFieldNames,
+	java_lang_InterruptedExceptionFieldNames,
+	java_lang_IllegalMonitorStateExceptionFieldNames,
+	java_lang_ThreadFieldNames,
+	java_lang_RuntimeFieldNames,
+	java_lang_MathFieldNames,
+	java_io_InputStreamFieldNames,
+	java_io_PrintStreamFieldNames,
+	java_lang_SystemFieldNames,
+};
+
+extern const char* getMicroKernelClassFieldName(const u2 classId,const u2 fieldId){
+	return microkernelFieldNames[classId][fieldId];
+}
+static const char** microkernelMethodNames[] =
+{	java_lang_ObjectMethodNames,
+	platform_PlatFormMethodNames,
+	java_lang_BooleanMethodNames,
+	java_lang_ByteMethodNames,
+	java_lang_CharacterMethodNames,
+	java_lang_ShortMethodNames,
+	java_lang_IntegerMethodNames,
+	java_lang_FloatMethodNames,
+	java_lang_CharSequenceMethodNames,
+	java_lang_StringMethodNames,
+	java_lang_StringBufferMethodNames,
+	java_lang_StringBuilderMethodNames,
+	java_lang_ErrorMethodNames,
+	java_lang_ThrowableMethodNames,
+	java_lang_ExceptionMethodNames,
+	java_lang_NullPointerExceptionMethodNames,
+	java_lang_ArithmeticExceptionMethodNames,
+	java_lang_ArrayIndexOutOfBoundsExceptionMethodNames,
+	java_lang_RuntimeExceptionMethodNames,
+	java_lang_IllegalArgumentExceptionMethodNames,
+	java_lang_ClassCastExceptionMethodNames,
+	java_lang_InterruptedExceptionMethodNames,
+	java_lang_IllegalMonitorStateExceptionMethodNames,
+	java_lang_ThreadMethodNames,
+	java_lang_RuntimeMethodNames,
+	java_lang_MathMethodNames,
+	java_io_InputStreamMethodNames,
+	java_io_PrintStreamMethodNames,
+	java_lang_SystemMethodNames,
+};
+
+extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId){
+	return microkernelMethodNames[classId][methodId];
+}
 #endif
 
-#ifdef ENABLE_KCLASS_FORMAT
+static const u2 microkernelCLInitMethods[] =
+{	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	INVALID_METHOD_ID,
+	0x0,
+};
+
+extern const u2 getMicroKernelClassCLInitMethod(const u2 classId){
+	return microkernelCLInitMethods[classId];
+}
 extern const u2 JAVA_LANG_OBJECT_CLASS_ID(){ return 0; }
 extern const u2 JAVA_LANG_STRING_CLASS_ID(){ return 9; }
-#endif
 
-extern const int getNoMicroKernelClasses(){
-	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
-}
-
-extern const u1* getMicroKernelBinary(const int i){
-	return microkernelBinaries[i];
-}
-
-extern const u4 getMicroKernelBinarySize(const int i){
-	return microKernelBinariesSize[i];
-}
-
-#ifdef ENABLE_KCLASS_FORMAT
 static const u2 microkernelExceptions[] =
 {	17,//java.lang.ArrayIndexOutOfBoundsException
 	INVALID_CLASS_ID,//java.lang.NegativeArraySizeException

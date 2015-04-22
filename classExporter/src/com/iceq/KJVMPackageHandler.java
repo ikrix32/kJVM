@@ -12,15 +12,15 @@ import java.util.Vector;
 public abstract class KJVMPackageHandler
 {
 	final static int VERSION = 1;
-	public abstract void load(File file, KClass kclass,boolean microkernelFile);
+	public abstract void load(File file, KClassFileInfo kclass,boolean microkernelFile);
 	
-	public void savePackage(final File file,final Vector<KClass> classes) 
+	public void savePackage(final File file,final Vector<KClassFileInfo> classes) 
 	{
 		try {
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
 			dos.writeInt(VERSION);
 			for (int i = 0; i < classes.size(); i++) {
-				final KClass kclass = classes.get(i);
+				final KClassFileInfo kclass = classes.get(i);
 				kclass.serialize(dos);
 			}
 			dos.flush();
@@ -44,11 +44,11 @@ public abstract class KJVMPackageHandler
 
 			int dataVersion = fos.readInt();
 			System.out.println("Data version:"+dataVersion);
-			KClass kclass = new KClass();
+			KClassFileInfo kclass = new KClassFileInfo();
 			while (fos.available() > 0 && kclass.deserialize(fos,dataVersion)) {
-				File crtfile = new File(kclass.m_filePath);
+				File crtfile = new File(kclass.getFilePath());
 				load(crtfile,kclass, microkernel);
-				kclass = new KClass();
+				kclass = new KClassFileInfo();
 			}
 			fos.close();
 		} catch (Exception ex) {
