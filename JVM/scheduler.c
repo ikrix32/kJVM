@@ -261,7 +261,7 @@ void createThread (void)
     {
         for (;;)
         {
-            mN = FIND_METHOD_BYNAME(cN,"run", 3, "()V", 3);
+            mN = findMethodByName(cN,"run", 3, "()V", 3);
             if (mN != INVALID_METHOD_ID)
                 break;
 

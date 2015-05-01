@@ -30,9 +30,11 @@ u1 classLoader_loadClass(const u1* bin,const u4 binSize)
     cs[classIndex].classFileLength = readClassBin(bin,binSize,cs[classIndex].classFileStartAddress);
     analyzeClass(classIndex);
     crtByteCodeSize += cs[classIndex].classFileLength;
-
+#ifdef ENABLE_KCLASS_FORMAT
+    PRINTF("Loaded class name:%s id:%d bytecode size %d,current loaded bytecode size: %d\n\n",getClassName(getClassID(classIndex)),classIndex,binSize,crtByteCodeSize);
+#else
     PRINTF("Loaded class id:%d bytecode size %d,current loaded bytecode size: %d\n\n",classIndex,binSize,crtByteCodeSize);
-
+#endif
     DEBUGPRINTHEAP;
     return classIndex;
 }
@@ -45,16 +47,13 @@ void unloadLastClass(){
 void classLoader_clinitClass(const u1 classId){
     //initialize class
 #ifdef ENABLE_KMETHOD
-    extern const u2 getCLInitMethodId(const u2 classId);
-    mN = getCLInitMethodId(getClassID(classId));
+    const u1 clinitMethodIndex = cs[classId].clinitMethodId;
 #else
-    mN = FIND_METHOD_BYNAME(classId,"<clinit>", 8, "()V", 3);
+    const u1 clinitMethodIndex = findMethodByName(classId,"<clinit>", 8, "()V", 3);
 #endif
-    if (mN != INVALID_METHOD_ID)
+    if (clinitMethodIndex != INVALID_METHOD_ID)
     {
         opStackPush(cs[classId].classInfo);
-        opStackSetSpPos(findMaxLocals(classId,mN));
-        cN = classId;//todo fixme!
-        interpreter_run();
+        interpreter_run(classId,clinitMethodIndex);
     }
 }

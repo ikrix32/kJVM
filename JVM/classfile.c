@@ -313,11 +313,11 @@ u1 findSuperClass(const u1 classId)
     const u2 classNameLength = UTF8_GET_LENGTH(classId, classNameId);
     const char* className = UTF8_GET_STRING(classId, classNameId);
 
-    return FIND_CLASS(className,classNameLength);
+    return findClass(className,classNameLength);
 #endif
 }
 
-#ifndef ENABLE_KCLASS_FORMAT
+//#ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
@@ -337,11 +337,16 @@ u1 findClass(const char* className,const u1 classNameLength)
     }
     return INVALID_CLASS_ID;
 }
-#else
-u2 getClassIndex(u2 classId){
+//#else
+u2 getClassIndex(u2 classId)
+{
     for (int i = 0; i < numClasses; i++) {
         const u2 classInfoId = getU2(i,cs[i].this_class);
         const u2 classNameId = CLASSINFO_GET_NAMEID(i,classInfoId);
+        if(classId == 0 )
+        {
+            // printf("classNameId:%d classInfoId:%d i:%d this:%d\n",classNameId,classInfoId,i,cs[i].this_class);
+        }
         if(classNameId == classId)
             return i;
     }
@@ -356,7 +361,7 @@ u2 getClassID(u2 classIndex){
     }
     return INVALID_CLASS_ID;
 }
-#endif
+//#endif
 
 void analyzeClass(const u1 classId)
 {
@@ -426,8 +431,16 @@ void analyzeClass(const u1 classId)
             ERROREXIT(4,"malloc error");
         analyzeMethods(classId);
     }
+
+#ifdef ENABLE_KMETHOD
+    //todo - should be last
+    cs[classId].clinitMethodId = getU2(classId, pc);
+    pc += 2;
+    cs[classId].mainMethodId = getU2(classId, pc);
+#endif
     const u2 ln = getU2(classId,0);                                // class file attribute count
     DEBUG_CL_PRINTF("cf-attributes: count: %d ",ln);
+
     // SourceFile (6), Deprecated (4),InnerClasses,EnclosingMethod,Synthetic,Signature
 }
 
@@ -439,7 +452,8 @@ void analyzeConstantPool(const u1 classId)
     for (int n = 1; n < anz; n++)
     {
         cs[classId].constant_pool[n] = pc;
-        switch (getU1(classId,0))
+        const u1 type = getU1(classId,0);
+        switch (type)
         {
             case CONSTANT_KClass:/*    16 */
             {
@@ -456,18 +470,21 @@ void analyzeConstantPool(const u1 classId)
                 DEBUG_CL_PRINTF("\tcp %d\t:String\t\t-> string:\t%d\n",n,getU2(classId,pc));
                 pc += 2;
             }break;
+            case CONSTANT_KFIELD_REF:           /*    9 */
             case CONSTANT_Fieldref:           /*    9 */
             {
                 DEBUG_CL_PRINTF("\tcp %d\t:Fieldref\t-> class: %d ", n,getU2(classId,pc));
                 DEBUG_CL_PRINTF("name_and_type:\t%d\n", getU2(classId,pc+2));
                 pc += 4;
             }break;
+            case  CONSTANT_KINTERFACE_MEHOD_REF:
             case CONSTANT_InterfaceMethodref: /*   11 */
             {
                 DEBUG_CL_PRINTF("\tcp %d\t:InterfaceMethodref->class: %d ",n,getU2(classId,pc));
                 DEBUG_CL_PRINTF("name_and_type_index\t%d\n",getU2(classId,pc+2));
                 pc += 4;
             }break;
+            case CONSTANT_KMEHOD_REF:
             case CONSTANT_Methodref:          /*    10  nur Methoden, die aufgerufen werden!!!*/
             {
                 DEBUG_CL_PRINTF("\tcp %d\t:Methodref\t-> class: %d ",n,getU2(classId,pc));
@@ -479,6 +496,7 @@ void analyzeConstantPool(const u1 classId)
                 DEBUG_CL_PRINTF("cp %d\t: Integer -> name:\t%d\n",n,getU4(classId,pc));
                 pc += 4;
             }break;
+            case CONSTANT_KNAME_AND_TYPE:
             case CONSTANT_NameAndType:        /*    12*/
             {
                 DEBUG_CL_PRINTF("\tcp %d\t:nameAndType\t-> name:\t%d ",n,getU2(classId,pc));

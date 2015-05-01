@@ -47,7 +47,7 @@ const static char* exceptionClassNames[]=
 };
 extern u2 getExceptionClassId(const Exception exception){
     const char* className = exceptionClassNames[exception];
-    return FIND_CLASS(className,stringLength(className));
+    return findClass(className,stringLength(className));
 }
 #endif
 

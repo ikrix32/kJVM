@@ -227,7 +227,7 @@
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
 #endif
 
-void interpreter_run(void);
+void interpreter_run(const u1 classId,const u1 methodId);
 u1  checkInstance(const u2 classId,const u2 target);
 void raiseExceptionFromIdentifier(const Exception exception);
 void handleException(void);

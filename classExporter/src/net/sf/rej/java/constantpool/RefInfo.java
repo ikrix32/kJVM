@@ -55,6 +55,10 @@ public class RefInfo extends ConstantPoolInfo
 		this.classIndex = classIndex;
 	}
 	
+	public int getClassIndex(){
+		return this.classIndex;
+	}
+	
 	/**
 	 * Returns the method or field name this Ref
 	 * 

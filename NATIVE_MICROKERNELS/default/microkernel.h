@@ -176,7 +176,7 @@
 
 static const u1* microkernelBinaries[] =
 {	java_lang_ObjectBin,
-	platform_PlatFormBin,
+	/*platform_PlatFormBin,
 	java_lang_BooleanBin,
 	java_lang_ByteBin,
 	java_lang_CharacterBin,
@@ -203,12 +203,12 @@ static const u1* microkernelBinaries[] =
 	java_lang_MathBin,
 	java_io_InputStreamBin,
 	java_io_PrintStreamBin,
-	java_lang_SystemBin,
+	java_lang_SystemBin,*/
 };
 
 static const u4 microKernelBinariesSize[] =
 {	sizeof(java_lang_ObjectBin),
-	sizeof(platform_PlatFormBin),
+	/*sizeof(platform_PlatFormBin),
 	sizeof(java_lang_BooleanBin),
 	sizeof(java_lang_ByteBin),
 	sizeof(java_lang_CharacterBin),
@@ -235,7 +235,7 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_lang_MathBin),
 	sizeof(java_io_InputStreamBin),
 	sizeof(java_io_PrintStreamBin),
-	sizeof(java_lang_SystemBin),
+	sizeof(java_lang_SystemBin),*/
 };
 
 extern const int getNoMicroKernelClasses(){
@@ -254,7 +254,7 @@ extern const u4 getMicroKernelBinarySize(const int i){
 #ifdef DEBUG_KCLASS
 static const char* microkernelClassNames[] =
 {	"java/lang/Object",
-	"platform/PlatForm",
+	/*"platform/PlatForm",
 	"java/lang/Boolean",
 	"java/lang/Byte",
 	"java/lang/Character",
@@ -281,50 +281,15 @@ static const char* microkernelClassNames[] =
 	"java/lang/Math",
 	"java/io/InputStream",
 	"java/io/PrintStream",
-	"java/lang/System",
+	"java/lang/System",*/
 };
 
 extern const char* getMicroKernelClassName(const u2 classId){
 	return microkernelClassNames[classId];
 }
-static const char** microkernelFieldNames[] =
-{	java_lang_ObjectFieldNames,
-	platform_PlatFormFieldNames,
-	java_lang_BooleanFieldNames,
-	java_lang_ByteFieldNames,
-	java_lang_CharacterFieldNames,
-	java_lang_ShortFieldNames,
-	java_lang_IntegerFieldNames,
-	java_lang_FloatFieldNames,
-	java_lang_CharSequenceFieldNames,
-	java_lang_StringFieldNames,
-	java_lang_StringBufferFieldNames,
-	java_lang_StringBuilderFieldNames,
-	java_lang_ErrorFieldNames,
-	java_lang_ThrowableFieldNames,
-	java_lang_ExceptionFieldNames,
-	java_lang_NullPointerExceptionFieldNames,
-	java_lang_ArithmeticExceptionFieldNames,
-	java_lang_ArrayIndexOutOfBoundsExceptionFieldNames,
-	java_lang_RuntimeExceptionFieldNames,
-	java_lang_IllegalArgumentExceptionFieldNames,
-	java_lang_ClassCastExceptionFieldNames,
-	java_lang_InterruptedExceptionFieldNames,
-	java_lang_IllegalMonitorStateExceptionFieldNames,
-	java_lang_ThreadFieldNames,
-	java_lang_RuntimeFieldNames,
-	java_lang_MathFieldNames,
-	java_io_InputStreamFieldNames,
-	java_io_PrintStreamFieldNames,
-	java_lang_SystemFieldNames,
-};
-
-extern const char* getMicroKernelClassFieldName(const u2 classId,const u2 fieldId){
-	return microkernelFieldNames[classId][fieldId];
-}
 static const char** microkernelMethodNames[] =
 {	java_lang_ObjectMethodNames,
-	platform_PlatFormMethodNames,
+	/*platform_PlatFormMethodNames,
 	java_lang_BooleanMethodNames,
 	java_lang_ByteMethodNames,
 	java_lang_CharacterMethodNames,
@@ -351,7 +316,7 @@ static const char** microkernelMethodNames[] =
 	java_lang_MathMethodNames,
 	java_io_InputStreamMethodNames,
 	java_io_PrintStreamMethodNames,
-	java_lang_SystemMethodNames,
+	java_lang_SystemMethodNames,*/
 };
 
 extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId){
@@ -359,41 +324,6 @@ extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 metho
 }
 #endif
 
-static const u2 microkernelCLInitMethods[] =
-{	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	0x0,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	INVALID_METHOD_ID,
-	0x0,
-};
-
-extern const u2 getMicroKernelClassCLInitMethod(const u2 classId){
-	return microkernelCLInitMethods[classId];
-}
 extern const u2 JAVA_LANG_OBJECT_CLASS_ID(){ return 0; }
 extern const u2 JAVA_LANG_STRING_CLASS_ID(){ return 9; }
 

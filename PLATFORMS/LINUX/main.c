@@ -34,7 +34,7 @@ void setPin(int pin,bool on){
 #include "KVMTestPackage.h"
 #endif
 
-#ifdef ENABLE_KCLASS_FORMAT
+//#ifdef ENABLE_KCLASS_FORMAT
 extern const char* getClassName(const u2 classId)
 {
 #ifdef USE_MICROKERNEL
@@ -54,21 +54,26 @@ extern const char* getClassName(const u2 classId)
     return testNames[classId - noMicroClasses];
 }
 
-extern const u2 getCLInitMethodId(const u2 classId){
+extern const char* getDebugMethodName(const u2 classId,const u2 methodId)
+{
 #ifdef USE_MICROKERNEL
     extern const int getNoMicroKernelClasses();
     const int  noMicroClasses = getNoMicroKernelClasses();
     if(classId < noMicroClasses)
     {
-        extern const u2 getMicroKernelClassCLInitMethod(const u2 classId);
-        return getMicroKernelClassCLInitMethod(classId);
+#ifdef DEBUG_KCLASS
+        extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId);
+        return getMicroKernelClassMethodName(classId,methodId);
+#else
+        return "kernelMethod";
+#endif
     }
 #endif
-    extern const u2 getClassCLInitMethod(const u2 classId);
-    return getClassCLInitMethod(classId - noMicroClasses);
+    extern const char* getClassMethodName(const u2 classId,const u2 methodId);
+    return getClassMethodName(classId - noMicroClasses,methodId);
 }
 
-#endif
+//#endif
 
 #ifdef TINYBAJOS
 void main() __attribute__ ((noreturn));

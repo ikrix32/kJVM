@@ -43,12 +43,12 @@ getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) 
 #define fieldName       name
 #define fieldNameLength     nameLength
 //#define lengthArray     nameLength
-#define methodName      name
-#define methodNameLength    nameLength
+//#define methodName      name
+//#define methodNameLength    nameLength
 #define fieldDescr      descr
 #define fieldDescrLength    descrLength
-#define methodDescr     descr
-#define methodDescrLength   descrLength
+//#define methodDescr     descr
+//#define methodDescrLength   descrLength
 
 
 static slot first;
@@ -68,9 +68,13 @@ static u2   descrLength;
 extern char* getClassName(const u2 classId);
 #endif
 
-void interpreter_run() // in: classNumber,  methodNumber cN, mN
+void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  methodNumber cN, mN
 {   //u1 code, byte1, byte2;
     //u2 heapPos;
+    cN = classId;
+    mN = methodId;
+    opStackSetSpPos(findMaxLocals(cN,mN));
+
     pc = getStartPC(cN,mN);
 
     while(1)
@@ -921,16 +925,14 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
             {
                 DEBUGPRINTLN_OPC(code == LOOKUPSWITCH ? "lookupswitch" : "tableswitch");
                 {
-                    /*
-                     aa		tableswitch		ab          lookupswitch
-                     0  0  0 	padding			0  0        padding
-                     0 0 0 2		DefaultByte	0  0  0 25  defaultByte
-                     0 0 0 1		LowByte		0  0  0  2  npairs
-                     0 0 0 3		HighByte	0  0  0  1  match
-                     0  0  0 1c	Offset für 1		0  0  0 1b  offset
-                     0  0  0 22	Offset für 2		0  0  0  2  match
-                     0  0  0 28	Offset für 3		0  0  0 20  offset
-                     */
+                    // aa		tableswitch		ab          lookupswitch
+                    // 0  0  0 	padding			0  0        padding
+                    // 0 0 0 2		DefaultByte	0  0  0 25  defaultByte
+                    // 0 0 0 1		LowByte		0  0  0  2  npairs
+                    // 0 0 0 3		HighByte	0  0  0  1  match
+                    // 0  0  0 1c	Offset für 1		0  0  0 1b  offset
+                    // 0  0  0 22	Offset für 2		0  0  0  2  match
+                    // 0  0  0 28	Offset für 3		0  0  0 20  offset
                     u2 startPc = --pc;
                     u2 relPc = pc - getStartPC(cN,mN); // pcMethodStart;	//calculate relative PC for ByteCode in Method
                     u4 key = opStackPop().Int;
@@ -942,12 +944,12 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
                     u4 lowbyte = getU4(cN,0);
                     if(code == TABLESWITCH){
-                        u4 highbyte = getU4(cN,0);       //(u4)((u4)getU1(pc++)<<24 | (u4)getU1(pc++)<<16 | (u4)getU1(pc++)<<8 | getU1(pc++));
+                        u4 highbyte = getU4(cN,0);
                         if (lowbyte <= key && key <= highbyte)
                         {
                             u4 tableoffset = key - lowbyte;
                             pc += tableoffset * 4;       // skip 4 byte of previous address(es)
-                            offset = getU4(cN,0);        //(u4)((u4)getU1(0)<<24 | (u4)getU1(0)<<16 | (u4)getU1(0)<<8 | (u4)getU1(0));
+                            offset = getU4(cN,0);
                         }
                     }else{
                         for (; lowbyte > 0; --lowbyte)
@@ -987,13 +989,15 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
+#ifdef DEBUG_KCLASS
                 className = getClassName(classNameId);
                 classNameLength = stringLength(className);
+#endif
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-                cN = FIND_CLASS(className,classNameLength);
+                cN = findClass(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR(className,classNameLength);
@@ -1039,13 +1043,15 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
+#ifdef DEBUG_KCLASS
                 className = getClassName(classNameId);
                 classNameLength = stringLength(className);
+#endif
 #else
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-                cN = FIND_CLASS(className,classNameLength);
+                cN = findClass(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR(className,classNameLength);
@@ -1088,13 +1094,15 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
                     cN = getClassIndex(classNameId);
+#ifdef DEBUG_KCLASS
                     className = getClassName(classNameId);
                     classNameLength = stringLength(className);
+#endif
 #else
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-                    cN = FIND_CLASS(className,classNameLength);
+                    cN = findClass(className,classNameLength);
                     if (cN == INVALID_CLASS_ID)
                     {
                         CLASSNOTFOUNDERR(className,classNameLength);
@@ -1113,6 +1121,8 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                         //#ifdef DEBUG_INHERITANCE//this won't work if cN != classNameId
                         //printf("PUT Field %s defined in :%s, instance class:%s \n",fieldName,(char*)getClassName(fieldClassId),(char*)getClassName(instanceClassId));
                         //#endif
+
+                        //printf("PUT Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
 
                         //should be find field by name and class
                         if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
@@ -1137,11 +1147,11 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
             CASE(INVOKEVIRTUAL):
             CASE(INVOKEINTERFACE):
             {
-#ifdef DEBUG
-                if (code == INVOKEVIRTUAL) DEBUGPRINT_OPC("invokevirtual: ");
-                if (code == INVOKEINTERFACE) DEBUGPRINT_OPC("invokeinterface: ");
-                if (code == INVOKESPECIAL) DEBUGPRINT_OPC("invoke special: ");
-#endif
+                //#ifdef DEBUG
+                if (code == INVOKEVIRTUAL) printf("invokevirtual: ");//DEBUGPRINT_OPC("invokevirtual: ");
+                if (code == INVOKEINTERFACE) printf("invokeinterface: ");//DEBUGPRINT_OPC("invokeinterface: ");
+                if (code == INVOKESPECIAL) printf("invoke special: ");//DEBUGPRINT_OPC("invoke special: ");
+                //#endif
                 methodStackPush(local);
                 methodStackPush(cN);
                 methodStackPush(mN);
@@ -1160,15 +1170,15 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
 
-                methodName = UTF8_GET_STRING(cN,methodNameId);
-                methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
-                DEBUGPRINTLNSTRING(methodName, methodNameLength);
-
+#ifndef ENABLE_KMETHOD
+                const char* methodName = UTF8_GET_STRING(cN,methodNameId);
+                const u2 methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
+#endif
                 const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
 
-                methodDescr = UTF8_GET_STRING(cN,methodDescrId);
-                methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
-                DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
+                const char* methodDescr = UTF8_GET_STRING(cN,methodDescrId);
+                const u2 methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
+//TODO - #endif
 
                 if(opStackGetValue(local).UInt == NULLOBJECT.UInt)
                 {//todo - fix throw of null pointer exception
@@ -1183,53 +1193,81 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                     {
 #ifdef ENABLE_KCLASS_FORMAT
                         cN = getClassIndex(JAVA_LANG_STRING_CLASS_ID());
-                        className = getClassName(JAVA_LANG_STRING_CLASS_ID());
-                        classNameLength = stringLength(className);
 #else
                         className = "java/lang/String";
                         classNameLength = 16;
-                        cN = FIND_CLASS(className, classNameLength);
+                        cN = findClass(className, classNameLength);
 #endif
-                    } else
+                    } else{
                         cN = opStackGetValue(local).stackObj.classNumber;
+
+#ifdef ENABLE_KMETHOD
+                        const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
+                        const u2 classId = classInfo;
+                        //cN = classId;
+                        printf("cN:%d classId:%d ",cN,classId);
+#endif
+                        //printf("cN:%d nameAndType:%d",cN,methodNameAndTypeId);
+                    }
                 }// INVOKESPECIAL
                 else
                 {
                     const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-                    cN = getClassIndex(classNameId);
-                    className = getClassName(classNameId);
-                    classNameLength = stringLength(className);
+#ifdef ENABLE_KMETHOD
+                    const u2 classId = classInfo;
 #else
+                    const u2 classId = CLASSINFO_GET_NAMEID(cN,classInfo);
+#endif
+                    cN = getClassIndex(classId);
+#else
+                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
                     className = UTF8_GET_STRING(cN,classNameId);
                     classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-                    cN = FIND_CLASS(className, classNameLength);
+                    cN = findClass(className, classNameLength);
 #endif
                 }
-#ifndef ENABLE_KCLASS_FORMAT
+#ifdef ENABLE_KCLASS_FORMAT
+#ifdef DEBUG_KCLASS
+                className = getClassName(getClassID(cN));
+                classNameLength = stringLength(className);
+#endif
+#else
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR(className, classNameLength);
                 }
 #endif
-                u2 cNS = cN;
+                
+#ifdef ENABLE_KMETHOD
+                extern const char* getDebugMethodName(const u2 classId,const u2 methodId);
+                const char* methodName = getDebugMethodName(getClassID(cN), methodNameId);
+                printf("%s->%s:%s \n",className,methodName,methodDescr);
+                mN = methodNameId;
+#else
+                //u2 cNS = cN;
                 do{
                     //if(cNS != cN)
                     //   printf("Check super class,method name:%s!!!\n",methodName);
-                    mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
+                    mN = findMethodByName(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while ( mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
+                className = UTF8_GET_STRING(cN,getClassID(cN));
+                printf("%s->%s:%s \n",className,methodName,methodDescr);
                 //bh DEBUGPRINTLNSTRING(className,classNameLength);
                 if (mN == INVALID_METHOD_ID)
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }
-
+#endif
+                if(STRNCMPRAMFLASH(className,"java/lang/StringBuilder",22) == 0
+                && STRNCMPRAMFLASH(methodName,"append",6) == 0
+                && STRNCMPRAMFLASH(methodDescr,"([CII)Ljava/lang/StringBuilder;",30) == 0)
+                    printf("");
                 opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
 
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
+                if (getU2(cN,METHODBASE(cN,  mN)) & ACC_SYNCHRONIZED)
                 {
                     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex == MUTEXNOTBLOCKED)
                     {
@@ -1286,7 +1324,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 // now call method
                 if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
                 {
-                    //TODO - printf("Invoke native method:%s->%s[%s]\n",className,methodName,methodDescr);
+                    //printf("Invoke native method:%s->%s\n",className,methodName);
                     //goto nativeVoidReturn;
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
@@ -1294,8 +1332,8 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                             goto nativeValueReturn;
                         else
                             goto nativeVoidReturn;
-                    }else if(nativeDispath(methodName,methodDescr)){
-                        goto nativeVoidReturn;
+                    //}else if(nativeDispath(methodName,methodDescr)){
+                    //  goto nativeVoidReturn;
                     }else
                     {
                         errorExit(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
@@ -1305,7 +1343,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
             }BREAK;
             CASE(INVOKESTATIC):
             {
-                DEBUGPRINT_OPC("invoke static: ");// a static method
+                printf("invoke static: ");//DEBUGPRINT_OPC("invoke static: ");// a static method
                 methodStackPush(local);
                 methodStackPush(cN);
                 methodStackPush(mN);
@@ -1317,45 +1355,58 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 local = (u2) opStackGetSpPos() - k;
 
                 const u2 classInfo = METHODREF_GET_CLASSINFOID(cN,BYTECODEREF);
-                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
                 const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 methodNameId = NAMEANDTYPE_GET_NAMEID(cN,methodNameAndTypeId);
-
-                methodName = UTF8_GET_STRING(cN,methodNameId);
-                methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
-
+#ifndef ENABLE_KMETHOD
+                const char* methodName = UTF8_GET_STRING(cN,methodNameId);
+                const u2 methodNameLength = UTF8_GET_LENGTH(cN,methodNameId);
+#endif
                 const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
-                methodDescr = UTF8_GET_STRING(cN,methodDescrId);;
-                methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
-                DEBUGPRINTLNSTRING(methodDescr, methodDescrLength);
+                const char* methodDescr = UTF8_GET_STRING(cN,methodDescrId);;
+                const u2 methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
+                //todo - #endif
 
 #ifdef ENABLE_KCLASS_FORMAT
-                cN = getClassIndex(classNameId);
-                className = getClassName(classNameId);
-                classNameLength = stringLength(className);
+#ifdef ENABLE_KMETHOD
+                const u2 classId = classInfo;
 #else
+                const u2 classId = CLASSINFO_GET_NAMEID(cN,classInfo);
+#endif
+                cN = getClassIndex(classId);
+#ifdef DEBUG_KCLASS
+                className = getClassName(classId);
+                classNameLength = stringLength(className);
+#endif
+#else
+                const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-                cN = FIND_CLASS(className, classNameLength);
+                cN = findClass(className, classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
                     CLASSNOTFOUNDERR((const char*) className, classNameLength);
                 }
 #endif
-                u2 cNS = cN;
+
+#ifdef ENABLE_KMETHOD
+                extern const char* getDebugMethodName(const u2 classId,const u2 methodId);
+                printf("%s->%s:%s \n",className,getDebugMethodName(getClassID(cN), methodNameId),methodDescr);
+                mN = methodNameId;
+#else
+                //u2 cNS = cN;
                 do{
                     //if(cNS != cN)
                     //    printf("Check super class!!! method name:%s\n",methodName);
-                    mN = FIND_METHOD_BYNAME(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
+                    mN = findMethodByName(cN,methodName, methodNameLength, methodDescr, methodDescrLength);
                 }while (mN == INVALID_METHOD_ID && (cN = findSuperClass(cN)) != INVALID_CLASS_ID);
 
                 if (mN == INVALID_METHOD_ID)
                 {
                     METHODNOTFOUNDERR(methodName, className);
                 }
-                DEBUGPRINTLNSTRING(methodName, methodNameLength);
-                DEBUGPRINTLNSTRING(className, classNameLength);
+                printf("%s->%s:%s \n",UTF8_GET_STRING(cN,getClassID(cN)),methodName,methodDescr);
+#endif
                 opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
 
 #ifndef TINYBAJOS_MULTITASKING
@@ -1491,8 +1542,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 if (methodStackEmpty())
                 {   //mb jf if not <clinit> you're done :-D
 #ifdef ENABLE_KMETHOD
-                    extern const u2 getCLInitMethodId(const u2 classId);
-                    if(mN == getCLInitMethodId(getClassID(cN)))
+                    if(mN == cs[cN].clinitMethodId)//todo check what should happen for invalid clinitmethod
 #else
                     if (STRNCMP("<clinit>",(char*)findMethodByMethodNumber(cN,mN),8) == 0)
 #endif
@@ -1537,7 +1587,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 className = UTF8_GET_STRING(cN,classNameId);
                 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
                 
-                cN = FIND_CLASS(className,classNameLength);
+                cN = findClass(className,classNameLength);
 
                 if (cN == INVALID_CLASS_ID)//When using KClass format can't have invalid classes
                 {
@@ -1762,7 +1812,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                 if (first.UInt != NULLOBJECT.UInt)
                 {   // the cast's target class
                     const u2 targetclass = getU2(cN,0);
-                    const u1 typeTag = GET_TAG(targetclass);
+                    const u1 typeTag = GET_TAG(cN,targetclass);
                     const u2 classNameId = CLASSINFO_GET_NAMEID(cN,targetclass);
 
                     u2 target = INVALID_CLASS_ID;
@@ -1818,7 +1868,7 @@ void interpreter_run() // in: classNumber,  methodNumber cN, mN
                             }
                         }
 #ifndef ENABLE_KCLASS_FORMAT
-                        target = FIND_CLASS(classname, len);
+                        target = findClass(classname, len);
 #else
                         target = 0;
                         while (*classname != ';') {
@@ -2031,7 +2081,7 @@ u2 subCheck(const u2 classId,const u2 target,const u2 superClass)
 #else
     className = UTF8_GET_STRING(classId,classNameId);
     classNameLength = UTF8_GET_LENGTH(classId,classNameId);
-    const u2 superClassId = FIND_CLASS(className, classNameLength);
+    const u2 superClassId = findClass(className, classNameLength);
 #endif
     if (checkInstance(superClassId,target))
     {
@@ -2213,7 +2263,7 @@ void handleException()
         className = UTF8_GET_STRING(cN,classNameId);
         classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
-        cN = FIND_CLASS(className,classNameLength);
+        cN = findClass(className,classNameLength);
 
         if (cN == INVALID_CLASS_ID)
         {

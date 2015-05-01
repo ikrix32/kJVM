@@ -119,6 +119,8 @@ typedef struct
     u2* method_info;                              //method_info methods[methods_count];
     u2 attributes_count;
     u2* attribute_info;                           //attribute_info attributes[attributes_count];
+    u2 clinitMethodId;
+    u2 mainMethodId;
     functionForNativeMethodType* nativeFunction;
     slot classInfo;
 } classStructure;

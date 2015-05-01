@@ -92,6 +92,12 @@ public class ClassFile {
      */
     private Attributes attributes;
 
+    /** Static initialize method index */
+    private short clinitMethodIndex;
+    
+    /** static void main(String argsp[]) method index */
+    private short mainMethodIndex;
+    
     /**
      * Initializes this <code>ClassFile</code> object. Note that
      * this object is not yet valid for deserialization until several
@@ -300,6 +306,18 @@ public class ClassFile {
     public void setMethods(List<Method> methods) {
         this.methods.clear();
         this.methods.addAll(methods);
+        clinitMethodIndex = (short) 0xFF;//TODO - should be 0xFFFF
+        mainMethodIndex = (short) 0xFF;	 //TODO - should be 0xFFFF
+        for (int i = 0; i < methods.size(); i++)
+		{
+			final Method method = methods.get(i);
+			if("<clinit>".equals(method.getName()) && "()V".equals(method.getDescriptor().getRawDesc())){
+				clinitMethodIndex = (short)i;
+			}
+			if("main".equals(method.getName()) && "([Ljava/lang/String;)V".equals(method.getDescriptor().getRawDesc())){
+				mainMethodIndex = (short)i;
+			}
+		}
     }
 
     /**
@@ -412,7 +430,10 @@ public class ClassFile {
         for (Method method : this.methods) {
             ser.addBytes(method.getData());
         }
-
+        //TODO - these should be last
+        ser.addShort(clinitMethodIndex);
+        ser.addShort(mainMethodIndex);
+        
         // 20+pooldata+interfaces*2+fielddata+methoddata
         ser.addBytes(this.attributes.getData());
         return ser.getBytes();
@@ -594,8 +615,8 @@ public class ClassFile {
      * The value is determined from the major/minor version of the class file
      * using the following specification:
      * <blockquote>
-	 * The Java virtual machine implementation of Sun’s JDK release 1.0.2 supports
-	 * class file format versions 45.0 through 45.3 inclusive. Sun’s JDK releases
+	 * The Java virtual machine implementation of Sunï¿½s JDK release 1.0.2 supports
+	 * class file format versions 45.0 through 45.3 inclusive. Sunï¿½s JDK releases
 	 * 1.1.X can support class file formats of versions in the range 45.0 through
 	 * 45.65535 inclusive. For implementations of version 1.k of the Java 2 platform
 	 * can support class file formats of versions in the range 45.0 through 44+k.0

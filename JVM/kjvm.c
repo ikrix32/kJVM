@@ -71,20 +71,22 @@ void vm_init() /* read, analyze classfiles and fill structures*/
 // classId containing the clinit or main method
 s1 vm_run(const u1 classId){
     //PRINTF("start clinit from classsId %d\n",classId);
-    cN = classId;
-    mN = FIND_METHOD_BYNAME(cN,"main", 4, "([Ljava/lang/String;)V", 22);
-    if (mN != INVALID_METHOD_ID)
+#ifdef ENABLE_KMETHOD
+    const u1 mainMethodIndex = cs[classId].mainMethodId;
+#else
+    const u1 mainMethodIndex = findMethodByName(classId,"main", 4, "([Ljava/lang/String;)V", 22);
+#endif
+    if (mainMethodIndex != INVALID_METHOD_ID)
     {
         //PRINTF("  -> run <main> :\n");
         opStackPush(toSlot((u4) 0));           /* args parameter to main (should be a string array)*/
-        opStackSetSpPos(findMaxLocals(cN,mN));
-        interpreter_run(); /*  run main*/
+        interpreter_run(classId,mainMethodIndex); /*  run main*/
 #ifndef TINYBAJOS
         return 0;
 #endif
     }
 
-    PRINTF("no clinit/main method found");
+    PRINTF("no main method found");
     return -1;
 }
 

@@ -40,18 +40,15 @@ public class ClassInfo extends ConstantPoolInfo {
     }
 
     public String getName() {
-    	if(getType() == ConstantPoolInfo.KCLASS){
-    		return "KCLASS";
-    	}else{
-	        String name = this.pool.get(this.oldNameIndex).getValue()
-	                .replace('/', '.');
-	        if (name.startsWith("[")) {
-	            Descriptor desc = new Descriptor(name);
-	            return desc.getReturn().toString();
-	        } else {
-	            return name;
-	        }
-    	}
+		String name = this.pool.get(this.oldNameIndex).getValue().replace('/', '.');
+		if (name.startsWith("["))
+		{
+			Descriptor desc = new Descriptor(name);
+			return desc.getReturn().toString();
+		} else
+		{
+			return name;
+		}
     }
     
     public int getNameIndex() {

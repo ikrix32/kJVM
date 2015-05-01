@@ -174,7 +174,8 @@
 #define   CONSTANT_KClass           25
 #define   CONSTANT_KFIELD_REF       26
 #define   CONSTANT_KMEHOD_REF       27
-#define   CONSTANT_KNAME_AND_TYPE   28
+#define   CONSTANT_KINTERFACE_MEHOD_REF 28
+#define   CONSTANT_KNAME_AND_TYPE   29
 
 #define     ACC_PUBLIC              0x0001        //Declared public; may be accessed from outside its package.
 #define     ACC_PRIVATE         0x0002            //Declared private; accessible only within the defining class.
@@ -196,7 +197,7 @@
 #define     T_LONG              0xb               // aaray type boolean
 
 
-#define GET_TAG(x) getU1(cN,CP(cN, x))
+#define GET_TAG(classId,x) getU1(classId,CP(classId, x))
 
 #define METHODREF_GET_CLASSINFOID(classId,x) getU2(classId,CP(classId, x) + 1)//1 = sizeof(tag)
 #define METHODREF_GET_NAME_AND_TYPEID(classId,x) getU2(classId,CP(classId, x) + 3)//3 = sizeof(tag) + sizeof(classInfoId)
@@ -238,14 +239,6 @@
 #define NUMBEROFINTERRUPTS  57                    //SIZE of interruptvectorarray
 #else
 #define NUMBEROFINTERRUPTS  1
-#endif
-
-#ifdef AVR8
-#define FIND_CLASS findClassFlash
-#define FIND_METHOD_BYNAME findMethodByNameFlash
-#else
-#define FIND_CLASS findClass
-#define FIND_METHOD_BYNAME findMethodByName
 #endif
 
 #define INVALID_CLASS_ID 0xff

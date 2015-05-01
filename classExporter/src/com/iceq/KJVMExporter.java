@@ -91,7 +91,6 @@ public class KJVMExporter extends KJVMPackageHandler {
 			String classNames = "static const char* microkernelClassNames[] =\n{";
 			String classFieldNames = "static const char** microkernelFieldNames[] =\n{";
 			String classMethodNames = "static const char** microkernelMethodNames[] =\n{";
-			String classClinitMethods = "static const u2 microkernelCLInitMethods[] =\n{";
 			
 			for (int i = 0; i < m_microKernelClasses.size(); i++) 
 			{
@@ -113,12 +112,11 @@ public class KJVMExporter extends KJVMPackageHandler {
 					fos.write("#endif\n\n");
 					
 					ClassFile classFile = kclass.getClassFile();
-					kclass.printClassPool();
+					//kclass.printClassPool();
 					exportClassFile(microkernelBinaries.getAbsolutePath() + "/" + className +".h", classFile,className);
 					m_classPoolProcessor.processClassFile(cPK, classFile);
-					kclass.printClassPool();
-					String clinitMethod = exportClassFile(microkernelBinaries.getAbsolutePath() + "/" + className + "_k.h", classFile,className);
-					classClinitMethods +="\t"+ clinitMethod + ",\n";
+					//kclass.printClassPool();
+					exportClassFile(microkernelBinaries.getAbsolutePath() + "/" + className + "_k.h", classFile,className);
 				}
 			}
 			binariesDef += "};\n\n";
@@ -126,7 +124,6 @@ public class KJVMExporter extends KJVMPackageHandler {
 			classNames += "};\n\n";
 			classFieldNames += "};\n\n";
 			classMethodNames += "};\n\n";
-			classClinitMethods += "};\n\n";
 			
 			fos.write(binariesDef);
 			fos.write(binariesSizeDef);
@@ -144,19 +141,15 @@ public class KJVMExporter extends KJVMPackageHandler {
 			fos.write(	"extern const char* getMicroKernelClassName(const u2 classId){\n"+
 						"\treturn microkernelClassNames[classId];\n}\n");
 			
-			fos.write(classFieldNames);
-			fos.write(	"extern const char* getMicroKernelClassFieldName(const u2 classId,const u2 fieldId){\n"+
-					"\treturn microkernelFieldNames[classId][fieldId];\n}\n");
+			//fos.write(classFieldNames);
+			//fos.write(	"extern const char* getMicroKernelClassFieldName(const u2 classId,const u2 fieldId){\n"+
+			//		"\treturn microkernelFieldNames[classId][fieldId];\n}\n");
 			
 			fos.write(classMethodNames);
 			fos.write(	"extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId){\n"+
 					"\treturn microkernelMethodNames[classId][methodId];\n}\n");
 			
 			fos.write("#endif\n\n");
-			
-			fos.write(classClinitMethods);
-			fos.write(	"extern const u2 getMicroKernelClassCLInitMethod(const u2 classId){\n"+
-					"\treturn microkernelCLInitMethods[classId];\n}\n");
 			
 			int classId = -1;
 			try{
@@ -220,7 +213,6 @@ public class KJVMExporter extends KJVMPackageHandler {
 			String classNames = "static const char* testNames[] =\n{";
 			String classFieldNames = "static const char** testFieldNames[] =\n{";
 			String classMethodNames = "static const char** testMethodNames[] =\n{";
-			String classClinitMethods = "static const u2 testCLInitMethods[] =\n{";
 			
 			for (int i = 0; i < m_applicationClasses.size(); i++) 
 			{
@@ -246,8 +238,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 					exportClassFile(folder + "/" + className +".h", classFile,className);
 					m_classPoolProcessor.processClassFile(cPK, classFile);
 					kclass.printClassPool();
-					String clinitMethod = exportClassFile(folder + "/" + className + "_k.h", classFile,className);
-					classClinitMethods +="\t"+ clinitMethod + ",\n";
+					exportClassFile(folder + "/" + className + "_k.h", classFile,className);
 				}
 			}
 			binariesDef += "};\n\n";
@@ -255,19 +246,14 @@ public class KJVMExporter extends KJVMPackageHandler {
 			classNames += "};\n\n";
 			classFieldNames += "};\n\n";
 			classMethodNames += "};\n\n";
-			classClinitMethods += "};\n\n";
 			
 			fos.write(binariesDef);
 			fos.write(binariesSizeDef);
 			
-			fos.write(classClinitMethods);
-			fos.write(	"extern const u2 getClassCLInitMethod(const u2 classId){\n"+
-					"\treturn testCLInitMethods[classId];\n}\n");
-			
 			fos.write(classNames);
-			fos.write(classFieldNames);
-			fos.write(	"extern const char* getClassFieldName(const u2 classId,const u2 fieldId){\n"+
-					"\treturn testFieldNames[classId][fieldId];\n}\n\n");
+			//fos.write(classFieldNames);
+			//fos.write(	"extern const char* getClassFieldName(const u2 classId,const u2 fieldId){\n"+
+			//		"\treturn testFieldNames[classId][fieldId];\n}\n\n");
 			
 			fos.write(classMethodNames);
 			fos.write(	"extern const char* getClassMethodName(const u2 classId,const u2 methodId){\n"+
@@ -282,10 +268,8 @@ public class KJVMExporter extends KJVMPackageHandler {
 	}
 
 	
-	public String exportClassFile(String filePath, ClassFile classFile,String className) 
+	public void exportClassFile(String filePath, ClassFile classFile,String className) 
 	{
-		String clinitMethod = "INVALID_METHOD_ID";
-		
 		try {
 			System.out.println("Export file:" + filePath);
 
@@ -298,7 +282,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 			fos.write(toHexFromBytes(data));
 			fos.write("\n};\n");
 			
-			fos.write("static const char* "+className+"FieldNames[] =\n{");
+			/*fos.write("static const char* "+className+"FieldNames[] =\n{");
 			
 			final List<Field> fields = classFile.getFields();
 
@@ -308,7 +292,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 				final String txt = "\n\t\""+field.getName()+(i < fields.size() - 1 ? "\"," : "\"");
 				fos.write(txt);
 			}
-			fos.write("\n};\n");
+			fos.write("\n};\n");*/
 			
 			fos.write("static const char* "+className+"MethodNames[] =\n{");
 			final List<Method> methods = classFile.getMethods();
@@ -317,8 +301,6 @@ public class KJVMExporter extends KJVMPackageHandler {
 			{
 				final Method method = methods.get(i);
 				final String txt = "\n\t\""+method.getName()+(i < methods.size() - 1 ? "\"," : "\"");
-				if(method.getName().equals("<clinit>"))
-					clinitMethod = "0x" + Integer.toHexString(i);
 				fos.write(txt);
 			}
 			fos.write("\n};\n");
@@ -328,7 +310,6 @@ public class KJVMExporter extends KJVMPackageHandler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return clinitMethod;
 	}
 	
 	public void savePackage(File file,boolean microkernel){

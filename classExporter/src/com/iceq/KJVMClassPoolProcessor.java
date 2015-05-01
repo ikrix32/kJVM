@@ -32,7 +32,7 @@ public class KJVMClassPoolProcessor
 					case ConstantPoolInfo.INTERFACE_METHOD_REF:	
 					case ConstantPoolInfo.METHOD_REF:
 					{
-						//convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
+						convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
 					}
 					break;
 					case ConstantPoolInfo.FIELD_REF:
@@ -88,18 +88,29 @@ public class KJVMClassPoolProcessor
 		KJVMClassInfo kClassInfo = pk.getKClassInfo(classInfo);
 
 		NameAndTypeInfo nameAndType = methodRefInfo.getNameAndTypeInfo();
+		if(kClassInfo.m_classFileInfo.getFullClassName().equals("java.lang.StringBuilder"))
+		{
+			System.out.println("");
+		}
 		KRef methodRef = kClassInfo.getMethodRef(nameAndType.getName(), nameAndType.getDescriptorString());
 
-		if(false){
+		if(true){
+			KJVMClassInfo origClass = kClassInfo;
 			kClassInfo = pk.getKClassInfo(methodRef.getClassId());
 			Method meth = kClassInfo.getMethod(methodRef.getItemId());
-			System.out.println("Orig. Method: " + classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString());
-			System.out.println("New Method: " + kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
+			String s1 = classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString();
+			String s2 = kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
+					+ meth.getDescriptor().getRawDesc();
+			if(!s1.equals(s2)){
+				System.out.println("Orig class:"+origClass.m_classFileInfo.getFullClassName());
+				System.out.println("Orig. Method: " + classInfo.getName() + "." + nameAndType.getName() + " desc:" + nameAndType.getDescriptorString());
+				System.out.println("New Method: " + kClassInfo.m_classFileInfo.getFullClassName() + "." + meth.getName() + " desc:"
 					+ meth.getDescriptor().getRawDesc());
+			}
 		}
-		
+	
 		//proccess
-		methodRefInfo.forceType(ConstantPoolInfo.KMEHOD_REF);
+		methodRefInfo.forceType(methodRefInfo.getType() == ConstantPoolInfo.METHOD_REF ? ConstantPoolInfo.KMEHOD_REF : ConstantPoolInfo.KINTERFACE_METHOD_REF);
 		methodRefInfo.setClassIndex(methodRef.getClassId());
 		if(nameAndType.getType() == ConstantPoolInfo.KNAME_AND_TYPE
 		&& methodRef.getItemId() != methodRefInfo.getNameAndTypeIndex())
