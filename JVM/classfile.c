@@ -1,13 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
+
+#include "stdlib.h" //malloc
 #include "definitions.h"
 #include "kjvm.h"
 #include "heap.h"
 #include "nstring.h"
-#ifdef AVR8
-#include <avr/pgmspace.h>
-#endif
-extern void printStringFromFlash(u1*, u1);
 
 #include "classfile.h"
 
@@ -154,94 +150,6 @@ u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fi
     return fN != INVALID_FIELD_ID;
 }
 
-
-/*
-u1 findFieldByRamName(const char* fieldName,const u1 fieldNameLength, // for normal fields
-                      const char* fieldDescr,const u1 fieldDescrLength) // only use in scheduler
-{
-    fN = 0;
-    u1 class = cN;
-    do
-    {
-        u1 found = 0;
-
-        const u1 numFields = getU2(class,cs[class].fields_count);
-        for (u1 i = 0; i < numFields; ++i)
-        {
-            const u2 crtFieldInfo = getU2(class,cs[class].field_info[i]);
-            const u2 crtFieldDescrId = getU2(class,cs[class].field_info[i] + 4);
-
-            if (crtFieldInfo & ACC_FINAL){
-                const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);
-                const u1 isNotObject= STRNCMPRAMFLASH ("L",crtFieldDescr, 1);
-                if(isNotObject)
-                    continue; // ignore static and non static primitive finals
-            }
-
-            if ( crtFieldInfo & ACC_STATIC)
-                continue;// ignore static
-
-
-            const u2 crtFieldNameId = getU2(class,cs[class].field_info[i] + 2);
-            const u2 crtFieldNameLen = UTF8_GET_LENGTH(class, crtFieldNameId);// getU2(cN,fieldname + 1);
-            const u2 crtFielsDescLen = UTF8_GET_LENGTH(class, crtFieldDescrId);//getU2(cN,fielddescr + 1);
-
-            if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
-            {
-                const char* crtFieldName = UTF8_GET_STRING(class, crtFieldNameId);
-                if(STRNCMPFLASHFLASH(fieldName,crtFieldName, fieldNameLength) == 0)
-                {
-                    const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
-                    if( STRNCMPFLASHFLASH(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
-                    {
-                        found = 1;
-                        break;
-                    }
-                }
-            }
-            fN++;
-        }
-        if (found)
-            return 1;
-    } while ((class = findSuperClass(class)) != INVALID_CLASS_ID);
-    cN = class;
-    return 0;
-}
- */
-/*
-u1 findStaticFieldByName(const char* fieldName,const u1 fieldNameLength,
-                         const char* fieldDescr,const u1 fieldDescrLength)	{
-    u1	found = 0;
-    fN = 0;
-    const u1 numFields = getU2(cN,cs[cN].fields_count);
-    for (u1 i = 0; i < numFields; ++i)
-    {
-        const u2 fielddescr = CP(cN,getU2(cN,cs[cN].field_info[i] + 4));
-        const u1 isNotObject =  STRNCMPRAMFLASH  ("L",(const char*) getAddr(cN,fielddescr + 3), 1);
-
-        if (! ( getU2(cN,cs[cN].field_info[i]) & ACC_STATIC))
-            continue; // ignore non static
-
-        if ( (getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) &&  isNotObject)
-            continue; // non object finals
-
-        const u2 fieldname = CP(cN,getU2(cN,cs[cN].field_info[i] + 2));
-        if(fieldNameLength == getU2(cN,fieldname + 1) &&
-            STRNCMPFLASHFLASH(fieldName, (const char*) getAddr(cN,fieldname + 3),getU2(cN,fieldname + 1)) == 0
-        &&  fieldDescrLength == getU2(cN,fielddescr + 1)
-        &&  STRNCMPFLASHFLASH(fieldDescr, (const char*) getAddr(cN,fielddescr + 3),getU2(cN,fielddescr + 1)) == 0)
-        {
-            found = 1;
-            break;
-        }
-        fN++;
-    }
-    if (found )
-        return 1;
-    return 0;
-
-}
-*/
 //Returns methodId(mN)
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,const u1 methodDescrLength)
 {

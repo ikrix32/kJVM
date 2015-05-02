@@ -10,7 +10,7 @@
 /* ..., objectref, [arg0, [arg1 ...]] -> ...*/
 /* invokestatic: Operand Stack*/
 /* ..., [arg0, [arg1 ...]] -> ...*/
-
+#include "config.h"
 #ifndef TINYBAJOS_MULTITASKING
 #include <stdio.h>
 //#include <stdlib.h>

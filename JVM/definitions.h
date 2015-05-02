@@ -1,28 +1,10 @@
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
 
-#ifdef AVR8
-#include <avr/pgmspace.h>
-#endif
-
 #include "typedefinitions.h"
 // RAMPZ ever 1 -> therefore 0x8000+0x3000=0xb000 (words) java class base
 // 0x10000 + 0x06000 in bytes
 // bamo128 -> 0xF000 to 0xFFFF in words
-#define AVR8_FLASH_JAVA_BASE    0x0000            // +rampz;16k boot classes in flash	-> 0x8000 in words
-#define AVR8_FLASH_APP_BASE     0xcc00            // +rampz;6k application classes	-> 0xe600
-// UC3A is evk1100
-#define UC3A_FLASH_BASE         0x80000000        // internal 512 KB flash
-//#define UC3A_FLASH_JAVA_BASE	0x80040000        // boot classes in flash
-#define UC3A_FLASH_JAVA_BASE    0x80038000        // boot classes in flash
-#define UC3A_SDRAM_BASE     0xD0000000
-#define UC3A_SDRAM_JAVA_BASE    0xD0200000        // application classes, heap, opstack methodstack
-#define STK1000_FLASH_BASE  0                     // external 8 MB flash
-#define STK1000_FLASH_JAVA_BASE 0x00040000        // boot classes in flash
-#define STK1000_SDRAM_BASE  0x10000000            // external SDRAM 8MB
-#define STK1000_SDRAM_JAVA_BASE (STK1000_SDRAM_BASE+0x00600000)
-
-#define STK1000_SDRAM_LCD_BASE  STK1000_SDRAM_BASE
 
 #define NGW_FLASH_BASE      0                     // external 8 MB flash
 #define NGW_FLASH_JAVA_BASE 0x00040000            // boot classes in flash
@@ -44,45 +26,16 @@
 #define THREADWAITAWAKENED      3
 #define GARBAGEFUSIONTRIALS     20
 
-#ifdef AVR8                                       // change all avr8 string to flash strings gives more data ram space for java!!
-    #ifdef TINYBAJOS
-	#ifndef TINYBAJOS_PRINTF
-	    #define	PRINTF(format, ...)
-	#else
-	    #define PRINTF(format, ...) printf_P(PSTR(format),  ## __VA_ARGS__)
-	#endif
-    #else
-	#define PRINTF(format, ...) printf_P(PSTR(format),  ## __VA_ARGS__)
-    #endif
-#else
-    #define PRINTF(format, ...) printf(format,  ## __VA_ARGS__)
-#endif
+#define PRINTF(format, ...) printf(format,  ## __VA_ARGS__)
 
 #ifdef TINYBAJOS_ERROREXIT
     #define ERROREXIT(nr, format, ...) exit((nr))
 #else
-    #ifdef AVR8                                       // change all avr8 string to flash strings gives more data ram space for java!!
-	#define ERROREXIT(nr, format, ...) errorExitFunction ((nr), PSTR((format)),  ## __VA_ARGS__)
-    #else
 	#define ERROREXIT(nr, format, ...) errorExitFunction ((nr), (format),  ## __VA_ARGS__)
-    #endif
 #endif
 
-//#ifdef AVR8
-//    #define STRNCMPRAMFLASH strncmpRamFlash
-//    #define STRNCMPFLASHFLASH strncmpFlashFlash
-//#else
-    #define STRNCMPRAMFLASH     stringsNotEquals
-    #define STRNCMPFLASHFLASH   stringsNotEquals
-//#endif
-
-
-
-#ifdef AVR8                                       // change all avr8 string to flash strings gives more data ram space for java!!
-    #define avr8Printf( format, ...) printf_P (PSTR((format)),  ## __VA_ARGS__)
-#else
-    #define avr8Printf( format, ...) printf ((format),  ## __VA_ARGS__)
-#endif
+#define STRNCMPRAMFLASH     stringsNotEquals
+#define STRNCMPFLASHFLASH   stringsNotEquals
 
 #ifndef TINYBAJOS_ERROREXIT
 #ifdef AVR8                                       // change all avr8 string to flash strings gives more data ram space for java!!
@@ -95,7 +48,7 @@
 #endif
 
 #ifndef TINYBAJOS_PRINTF
-#define verbosePrintf( format, ...) avr8Printf ((format),  ## __VA_ARGS__)
+#define verbosePrintf( format, ...) PRINTF ((format),  ## __VA_ARGS__)
 #else
 #define verbosePrintf( format, ...)
 #endif
@@ -218,7 +171,7 @@
 #define PRINTLN(format, ...)
 
 #define PRINTEXITTHREAD(a,b) {\
-    avr8Printf(a,b);\
+    PRINTF(a,b);\
     if (numThreads == 1) \
     { \
         return; \
@@ -245,12 +198,8 @@
 #define INVALID_METHOD_ID 0xff
 #define INVALID_FIELD_ID 0xff
 
-//#ifdef AVR8
-//#define STRNCMP strncmpRamFlash
-//#else
 #define STRNCMP stringsNotEquals
-//#endif
 
 #include "debug.h"
-//end of file
+
 #endif

@@ -18,17 +18,18 @@
 
 #define USE_MICROKERNEL
 
-//#define ENABLE_KCLASS_FORMAT
+#define ENABLE_KCLASS_FORMAT
 //#define ENABLE_KMETHOD
 #define DEBUG_KCLASS//native methods don't work without this
 
 #define ENABLE_TESTS
 
-//#define USE_STACK_MACROS
 //#define LOAD_STRING_CONSTANT_ON_HEAP//not working
 
 #ifdef NRF51
 //#define BLE_CONSOLE
+
+//#define TINYBAJOS_MULTITASKING
 
 #define exit(...)
 #ifdef BLE_CONSOLE

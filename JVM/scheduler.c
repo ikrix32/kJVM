@@ -1,36 +1,11 @@
-/*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
- */
-#ifndef TINYBAJOS_MULTITASKING
+#include "config.h"
 
-#include <stdio.h>
+#ifndef TINYBAJOS_MULTITASKING
 #include <stdlib.h>
-#include "definitions.h"
-#include "typedefinitions.h"
 #include "kjvm.h"
 #include "classfile.h"
 #include "stack.h"
 #include "scheduler.h"
-#include "heap.h"
-/*
- //EXAMPLE FOR ITERATING OVER ALL THREADS:
- void 	iterateOverThreads2(){
- u1 k,i,max;
- ThreadControlBlock* t;
- printf("start\n");
- for(i=0;i<(MAXPRIORITY);i++){
- max=(threadPriorities[i].count);
- t=threadPriorities[i].cb;
- for(k=0;k<max;k++){
- //do something with t
- printf("NR: %d\n", t->tid);
- //do something with t
- t=t->succ;
- }
- }
- }
- */
 
 void interruptThread(ThreadControlBlock* thread)
 {
@@ -49,9 +24,7 @@ void interruptThread(ThreadControlBlock* thread)
 }
 
 
-/*
- * finds corresponding ThreadCB to java object by ceh
- */
+// finds corresponding ThreadCB to java object by ceh
 ThreadControlBlock* findThreadCB(const slot obj)
 {
     for (int i = 0; i < (MAXPRIORITY); i++)
@@ -71,10 +44,7 @@ ThreadControlBlock* findThreadCB(const slot obj)
     return NULL;
 }
 
-
-/*
- * notifys a waiting blocked thread for given object by ceh
- */
+// notifys a waiting blocked thread for given object by ceh
 void notifyThread(const slot obj)
 {
     ThreadControlBlock* cb;
@@ -97,9 +67,7 @@ void notifyThread(const slot obj)
 }
 
 
-/*
- * notifys a waiting blocked threadfor given object by ceh
- */
+// notifys a waiting blocked threadfor given object by ceh
 void awakeThreadFromMutex(const slot obj)
 {
     ThreadControlBlock* cb;
@@ -166,22 +134,21 @@ void releaseMutexOnObject(ThreadControlBlock* t,const slot obj,
     }
 }
 
-
 /*
  * set Mutex on given object and given thread by ceh
  * in difference to it implementation in interpreter.c is it not possible to lock a locked object again
- * this behavior is necessa ry for interrupthandling
+ * this behavior is necessa ry for interrupthandling 
  */
 void setMutexOnObject(ThreadControlBlock* t,const slot obj)
 {
     if (HEAPOBJECTMARKER(obj.stackObj.pos).mutex == MUTEXNOTBLOCKED)
     {
-        /* mutex is free, I (the thread) have not the mutex and I can get the mutex for the object*/
+        // mutex is free, I (the thread) have not the mutex and I can get the mutex for the object
         t->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-        /* get the lock*/
+        // get the lock
         HEAPOBJECTMARKER(obj.stackObj.pos).mutex = MUTEXBLOCKED;
         int i = 0;
-        /* I had not the mutex for this object (but perhaps for others), now I have the look*/
+        // I had not the mutex for this object (but perhaps for others), now I have the look
         for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
             if (t->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
                 continue;
@@ -193,13 +160,13 @@ void setMutexOnObject(ThreadControlBlock* t,const slot obj)
             errorExit(-1, "too many locks\n");
 
         }
-        /* entry for this object in the array of mutexed objects for the thread*/
-        t->lockCount[i] = 1;                      /* count (before 0)*/
+        // entry for this object in the array of mutexed objects for the thread
+        t->lockCount[i] = 1;
         t->hasMutexLockForObject[i] = obj;
-    }                                             // mutex is blocked
+    } // mutex is blocked
     else
     {
-        t->state = THREADMUTEXBLOCKED;            /*mutex blocked*/
+        t->state = THREADMUTEXBLOCKED;
         t->isMutexBlockedOrWaitingForObject = obj;
         //force scheduling
         t->numTicks = 0;
@@ -207,9 +174,7 @@ void setMutexOnObject(ThreadControlBlock* t,const slot obj)
 }
 
 
-/*
- * generates a new thread by ceh
- */
+// generates a new thread by ceh
 void createThread (void)
 {
     if(numThreads == MAXTHREADS)
@@ -225,7 +190,7 @@ void createThread (void)
     t->state = THREADNOTBLOCKED;
 
     //set thread in matching priority list
-    if (currentThreadCB == NULL)                  //==the first thread (main thread) is created
+    if (currentThreadCB == NULL)//==the first thread (main thread) is created
     {
         //init priority array because first thread is created
         int i;
@@ -274,7 +239,7 @@ void createThread (void)
         *(t->methodStackBase + 2) = mN;
         *(t->methodStackBase + 3) = getStartPC(cN,mN);
         *(t->methodStackBase + 4) = findMaxLocals(cN,mN);
-        /* reference to caller object (from start())*/
+        // reference to caller object (from start())
         *(t->opStackBase) = opStackGetValue(local);
         //verbosePrintf("cN x%x mN x%x startPC x%x\n", cN, mN, *(t->methodStackBase + 3));
     }
@@ -323,9 +288,7 @@ void insertThreadIntoPriorityList(ThreadControlBlock* t)
     }
 }
 
-
-/*
- * Function does only remove the given Thread from his current list
+/* Function does only remove the given Thread from his current list
  * but does not deleteth>e thread
  * list will be recognised by *(thread->pPriority)!! Do not edit before!
  * by Christopher-Eyk Hrabia
@@ -354,9 +317,7 @@ void removeThreadFromPriorityList(ThreadControlBlock* t)
 }
 
 
-/*
- * Delete one thread, which is not actualThread by Christopher-Eyk Hrabia
- */
+// Delete one thread, which is not actualThread by Christopher-Eyk Hrabia
 void deleteNotCurrentThread(ThreadControlBlock** t)
 {
     removeThreadFromPriorityList(*t);
@@ -368,9 +329,7 @@ void deleteNotCurrentThread(ThreadControlBlock** t)
 }
 
 
-/*
- * Delete actualThread by Christopher-Eyk Hrabia
- */
+// Delete actualThread by Christopher-Eyk Hrabia
 void deleteThread(void)
 {
     *((currentThreadCB->pPriority) + 1) = (u4) 0; // isALive == false
@@ -398,8 +357,7 @@ void deleteThread(void)
 }
 
 
-/*
- * the scheduling process function, this function is called after every bytecode
+/* the scheduling process function, this function is called after every bytecode
  * one thread can run until is numTicks are 0. The numTicks a thread gets after he
  * was scheduled is his priority. The scheduler schedules(get active) if the numTicks of
  * current thread are 0. //CEH
@@ -471,7 +429,7 @@ void scheduler(void)
     }
 
 
-    /* scheduling -> next thread*/
+    // scheduling -> next thread
     methodStackPush(local);
     methodStackPush(cN);
     methodStackPush(mN);

@@ -5,15 +5,8 @@
 //  Copyright (c) 2015 Florin Cristian. All rights reserved.
 //
 
-#include <stdio.h>
-//#include <stdlib.h>
-
-#ifdef AVR8
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#endif
-
-#include "definitions.h"
+#include <stdlib.h>
+#include <stdarg.h>
 
 #define __DEF_GLOBALS__
 #include "kjvm.h"
@@ -21,9 +14,7 @@
 #include "stack.h"
 #include "classfile.h"
 #include "classloader.h"
-#include "scheduler.h"
 #include "interpreter.h"
-#include "platform.h"
 
 #if !(AVR32LINUX || LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104)
 #error You need a valid target device: AVR32LINUX||LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104

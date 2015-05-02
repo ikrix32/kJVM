@@ -238,7 +238,7 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_lang_SystemBin),
 };
 
-extern const int getNoMicroKernelClasses(){
+extern int getNoMicroKernelClasses(){
 	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
 }
 
@@ -246,7 +246,7 @@ extern const u1* getMicroKernelBinary(const int i){
 	return microkernelBinaries[i];
 }
 
-extern const u4 getMicroKernelBinarySize(const int i){
+extern u4 getMicroKernelBinarySize(const int i){
 	return microKernelBinariesSize[i];
 }
 
@@ -324,8 +324,8 @@ extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 metho
 }
 #endif
 
-extern const u2 JAVA_LANG_OBJECT_CLASS_ID(){ return 0; }
-extern const u2 JAVA_LANG_STRING_CLASS_ID(){ return 9; }
+extern u2 JAVA_LANG_OBJECT_CLASS_ID(){ return 0; }
+extern u2 JAVA_LANG_STRING_CLASS_ID(){ return 9; }
 
 static const u2 microkernelExceptions[] =
 {	17,//java.lang.ArrayIndexOutOfBoundsException

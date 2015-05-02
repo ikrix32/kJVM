@@ -12,15 +12,11 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 #include <stdio.h>
-//#include <stdlib.h>
-#include "definitions.h"
-#include "typedefinitions.h"
+#include <stdlib.h>
 #include "kjvm.h"
-#include "classfile.h"
 #include "stack.h"
-#include "scheduler.h"
-#include "heap.h"
 #include "object.h"
+
 #ifndef TINYBAJOS_MULTITASKING
 /* "java/lang/Object","notify","notifyAll","wait","waitTime","getDataAddress"*/
 char notify()

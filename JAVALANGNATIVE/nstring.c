@@ -12,13 +12,8 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 #include <stdio.h>
-//#include <stdlib.h>
-#include "definitions.h"
-#include "typedefinitions.h"
 #include "kjvm.h"
 #include "classfile.h"
-#include "stack.h"
-#include "heap.h"
 #include "stack.h"
 #include "nstring.h"
 

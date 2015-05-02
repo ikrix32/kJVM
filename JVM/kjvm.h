@@ -7,11 +7,6 @@
 
 #ifndef __KJVM__
 #define __KJVM__
-//#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include "typedefinitions.h"
-#include "limits.h"
 #include "definitions.h"
 #include "scheduler.h"
 

@@ -1,12 +1,15 @@
 #include "definitions.h"
-#include <stdlib.h>
+#include <stdlib.h> //malloc
 #include "kjvm.h"
 #include "classfile.h"
-#include "heap.h"
 #include "stack.h"
 #include "interpreter.h"
 #include "platform.h"
 
+
+#ifdef ENABLE_KCLASS_FORMAT
+extern char* getClassName(const u2 classId);
+#endif
 
 void classLoader_init(void){
 #if (AVR32LINUX || LINUX)

@@ -3,67 +3,32 @@
 // April 2007-> threads scheduling, funtion süberladung, native-dispatch
 // Mai 2007 -> garbage collection, exception handling
 // synchronized, wait notify
-#include <stdio.h>
-#include <stdlib.h>
-//#include <math.h>
+#include <stdlib.h> //malloc & free
 #include "nstring.h"
 
-#include "typedefinitions.h"
 #include "classfile.h"
-#include "definitions.h"
 #include "kjvm.h"
 #include "stack.h"
 #include "heap.h"
 #include "interpreter.h"
-#include "scheduler.h"
 #include "nativedispach.h"
-
-#ifdef AVR8
-
-#include <avr/pgmspace.h>
-
-#define GETSTARTPC(offset)  ((strncmpRamFlash(  "Code",\
-getAddr(cN,cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3), 4) == 0)\
-? (u2)METHODBASE(cN,mN) + 8 + 14 + offset\
-: GETSTARTPC(offset + getU4(METHODBASE(cN,mN) + 8) + 6))
-
-#else
 
 #define GETSTARTPC(offset)  ((strncmp(  "Code",\
 getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) == 0)\
 ? (u2)METHODBASE(cN,mN) + 8 + 14 + offset \
 : GETSTARTPC(offset + getU4(METHODBASE(cN,mN) + 8) + 6))
 
-#endif
 
 #ifdef USE_MICROKERNEL
 #include "microkernel.h"
 #endif
 
-#define fieldName       name
-#define fieldNameLength     nameLength
-//#define lengthArray     nameLength
-//#define methodName      name
-//#define methodNameLength    nameLength
-#define fieldDescr      descr
-#define fieldDescrLength    descrLength
-//#define methodDescr     descr
-//#define methodDescrLength   descrLength
-
-
 static slot first;
 static slot second;
 static slot third;
 static slot fourth;
-static char*className;
-static u2   classNameLength;
-static char*name;                                // field or method
-static u2   nameLength;
-static char*descr;                               // field or method
-static u2   descrLength;
-// static u1	numFields; <-- not used?
-// static u2 i, j, k;
-// static s2 count;
+
+
 #ifdef ENABLE_KCLASS_FORMAT
 extern char* getClassName(const u2 classId);
 #endif
@@ -977,13 +942,13 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
                 const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                fieldName = UTF8_GET_STRING(cN,nameId);
-                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
+                const char* fieldName = UTF8_GET_STRING(cN,nameId);
+                const u2 fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
                 const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
+                const char* fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                const u2 fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
 
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
@@ -991,12 +956,12 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
 #ifdef DEBUG_KCLASS
-                className = getClassName(classNameId);
-                classNameLength = stringLength(className);
+                const char* className = getClassName(classNameId);
+                const u2 classNameLength = stringLength(className);
 #endif
 #else
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+                const char* className = UTF8_GET_STRING(cN,classNameId);
+                const u2 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 cN = findClass(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
@@ -1005,7 +970,6 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 }
 #endif
 
-                //if (!findStaticFieldByName(fieldName, fieldNameLength, fieldDescr,fieldDescrLength))
                 if (!findFieldByName(cN,cN,fieldName, fieldNameLength, fieldDescr,fieldDescrLength,1))
                 {
                     FIELDNOTFOUNDERR(fieldName,className);
@@ -1020,37 +984,39 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 
             }BREAK;
             CASE(GETFIELD):
+            CASE(PUTFIELD):
             {
-                DEBUGPRINTLN_OPC("getfield ->   heap to stack:");
+                DEBUGPRINTLN_OPC("put/get field");
                 methodStackPush(cN);
                 first = opStackPop();
+               	if(code == PUTFIELD){
+                    second = opStackPop();
+                }
 
                 const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
                 const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
 
-                fieldName = UTF8_GET_STRING(cN,nameId);
-                fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
+                const char* fieldName = UTF8_GET_STRING(cN,nameId);
+                const u2 fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
 
                 const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
 
-                fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
-                fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
+                const char* fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
+                const u2 fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
 
-                // FindClass provides only the class in which the field is used
-                // Not the class is defined in the field (can be a super class)
-                // Now it's even better in the stack object to determine the class number
+
                 const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
 #ifdef DEBUG_KCLASS
-                className = getClassName(classNameId);
-                classNameLength = stringLength(className);
+                const char* className = getClassName(classNameId);
+                const u2 classNameLength = stringLength(className);
 #endif
 #else
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+                const char* className = UTF8_GET_STRING(cN,classNameId);
+                const u2 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
                 cN = findClass(className,classNameLength);
                 if (cN == INVALID_CLASS_ID)
@@ -1058,91 +1024,37 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
 #endif
-                const u2 fieldClassId = cN;
-                const u2 instanceClassId = first.stackObj.classNumber;
-                //printf("GET Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
-
-                if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
+                if (code == PUTFIELD && second.UInt == NULLOBJECT.UInt)
                 {
-                   FIELDNOTFOUNDERR(fieldName,className);
+                    pc += 2;
+                    cN = methodStackPop();
+                    NULLPOINTEREXCEPTION;
                 }
-                opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN +  1).Int));
-                pc += 2;
-                cN = methodStackPop();
-                // end GETFIELD
-            }BREAK;
-            CASE(PUTFIELD):
-            {
-                DEBUGPRINTLN_OPC("putfield -> stack to heap");
-                methodStackPush(cN);
+                else
                 {
-                    first = opStackPop();         //mb jf doesn't work without variable ?!?!
-                    second = opStackPop();
+                    const u2 fieldClassId = cN;
+                    const u2 instanceClassId = ( code == PUTFIELD ? second.stackObj.classNumber : first.stackObj.classNumber);
 
-                    const u2 nameAndTypeId = FIELDINFO_GET_NAME_AND_TYPEID(cN,BYTECODEREF);
-                    const u2 nameId = NAMEANDTYPE_GET_NAMEID(cN,nameAndTypeId);
+                    //printf("PUT/GET Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
 
-                    fieldName = UTF8_GET_STRING(cN,nameId);
-                    fieldNameLength = UTF8_GET_LENGTH(cN,nameId);
-
-                    const u2 fieldDescriptionId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,nameAndTypeId);
-
-                    fieldDescr = UTF8_GET_STRING(cN,fieldDescriptionId);
-                    fieldDescrLength = UTF8_GET_LENGTH(cN,fieldDescriptionId);
-
-
-                    const u2 classInfo = FIELDINFO_GET_CLASSINFOID(cN,BYTECODEREF);
-                    const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-#ifdef ENABLE_KCLASS_FORMAT
-                    cN = getClassIndex(classNameId);
-#ifdef DEBUG_KCLASS
-                    className = getClassName(classNameId);
-                    classNameLength = stringLength(className);
-#endif
-#else
-                    className = UTF8_GET_STRING(cN,classNameId);
-                    classNameLength = UTF8_GET_LENGTH(cN,classNameId);
-
-                    cN = findClass(className,classNameLength);
-                    if (cN == INVALID_CLASS_ID)
+                    if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
                     {
-                        CLASSNOTFOUNDERR(className,classNameLength);
+                        FIELDNOTFOUNDERR(fieldName,className);
                     }
-#endif
-                    if (second.UInt == NULLOBJECT.UInt)
+
+                    if (code == PUTFIELD)
                     {
-                        pc += 2;
-                        cN = methodStackPop();
-                        NULLPOINTEREXCEPTION;
-                    }
-                    else
-                    {
-                        const u2 fieldClassId = cN;
-                        const u2 instanceClassId = second.stackObj.classNumber;
-                        //#ifdef DEBUG_INHERITANCE//this won't work if cN != classNameId
-                        //printf("PUT Field %s defined in :%s, instance class:%s \n",fieldName,(char*)getClassName(fieldClassId),(char*)getClassName(instanceClassId));
-                        //#endif
-
-                        //printf("PUT Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
-
-                        //should be find field by name and class
-                        if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
-                        {//class name can't be correct
-                            FIELDNOTFOUNDERR(fieldName,className);
-                        }
-
-                        if (STRNCMPRAMFLASH( "B",fieldDescr, 1) == 0)
-                        {
-                            //Truncate Integer input for Byte output
+                        if(STRNCMPRAMFLASH( "B",fieldDescr, 1) == 0)
+                        {//Truncate Integer input for Byte output
                             first.Int = first.Int & 0x000000ff;
                         }
                         heapSetElement(first, second.stackObj.pos + fN + 1);
-                    }
-                    pc += 2;
-
-                    cN = methodStackPop();
+                    }else
+                        opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN +  1).Int));
                 }
-                // end PUTFIELD
+                pc += 2;
+                cN = methodStackPop();
+                // end PUT/GETFIELD
             }BREAK;
             CASE(INVOKESPECIAL):
             CASE(INVOKEVIRTUAL):
@@ -1186,6 +1098,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     NULLPOINTEREXCEPTION;
                     BREAK;
                 }
+                char* className = NULL;
+                u2  classNameLength = 0;
 
                 if ((code == INVOKEVIRTUAL) || (code == INVOKEINTERFACE))
                 {
@@ -1325,13 +1239,14 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #endif
                 cN = getClassIndex(classId);
 #ifdef DEBUG_KCLASS
-                className = getClassName(classId);
-                classNameLength = stringLength(className);
+                const char* className = getClassName(classId);
+                const u2 classNameLength = stringLength(className);
 #endif
 #else
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+                const char* className = UTF8_GET_STRING(cN,classNameId);
+                const u2 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+
                 cN = findClass(className, classNameLength);
                 if (cN == INVALID_CLASS_ID)
                 {
@@ -1481,11 +1396,13 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
 #ifdef ENABLE_KCLASS_FORMAT
                 cN = getClassIndex(classNameId);
-                className = getClassName(classNameId);
-                classNameLength = stringLength(className);
+#ifdef DEBUG_KCLASS
+                const char* className = getClassName(classNameId);
+                const u2 classNameLength = stringLength(className);
+#endif
 #else
-                className = UTF8_GET_STRING(cN,classNameId);
-                classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+                const char* className = UTF8_GET_STRING(cN,classNameId);
+                const u2 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
                 
                 cN = findClass(className,classNameLength);
 
@@ -2039,8 +1956,8 @@ u2 subCheck(const u2 classId,const u2 target,const u2 superClass)
 #ifdef ENABLE_KCLASS_FORMAT
     const u2 superClassId = getClassIndex(classNameId);
 #else
-    className = UTF8_GET_STRING(classId,classNameId);
-    classNameLength = UTF8_GET_LENGTH(classId,classNameId);
+    const char* className = UTF8_GET_STRING(classId,classNameId);
+    const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);
     const u2 superClassId = findClass(className, classNameLength);
 #endif
     if (checkInstance(superClassId,target))
@@ -2220,8 +2137,8 @@ void handleException()
 #ifdef ENABLE_KCLASS_FORMAT
         cN = getClassIndex(classNameId);
 #else
-        className = UTF8_GET_STRING(cN,classNameId);
-        classNameLength = UTF8_GET_LENGTH(cN,classNameId);
+        const char* className = UTF8_GET_STRING(cN,classNameId);
+        const u2 classNameLength = UTF8_GET_LENGTH(cN,classNameId);
 
         cN = findClass(className,classNameLength);
 
@@ -2257,9 +2174,9 @@ void handleException()
         const u2 classInfo = getU2(cN,cs[cN].this_class);
         const u2 classNameId =  CLASSINFO_GET_NAMEID(cN,classInfo);
 #ifdef ENABLE_KCLASS_FORMAT
-        className = getClassName(classNameId);
+        const char* className = getClassName(classNameId);
 #else
-        className = UTF8_GET_STRING(cN,classNameId);
+        const char* className = UTF8_GET_STRING(cN,classNameId);
 #endif
         UNHANDLEDEXCEPTIONERR(className);
     }
