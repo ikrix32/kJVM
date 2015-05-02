@@ -176,7 +176,7 @@
 
 static const u1* microkernelBinaries[] =
 {	java_lang_ObjectBin,
-	/*platform_PlatFormBin,
+	platform_PlatFormBin,
 	java_lang_BooleanBin,
 	java_lang_ByteBin,
 	java_lang_CharacterBin,
@@ -203,12 +203,12 @@ static const u1* microkernelBinaries[] =
 	java_lang_MathBin,
 	java_io_InputStreamBin,
 	java_io_PrintStreamBin,
-	java_lang_SystemBin,*/
+	java_lang_SystemBin,
 };
 
 static const u4 microKernelBinariesSize[] =
 {	sizeof(java_lang_ObjectBin),
-	/*sizeof(platform_PlatFormBin),
+	sizeof(platform_PlatFormBin),
 	sizeof(java_lang_BooleanBin),
 	sizeof(java_lang_ByteBin),
 	sizeof(java_lang_CharacterBin),
@@ -235,7 +235,7 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_lang_MathBin),
 	sizeof(java_io_InputStreamBin),
 	sizeof(java_io_PrintStreamBin),
-	sizeof(java_lang_SystemBin),*/
+	sizeof(java_lang_SystemBin),
 };
 
 extern const int getNoMicroKernelClasses(){
@@ -254,7 +254,7 @@ extern const u4 getMicroKernelBinarySize(const int i){
 #ifdef DEBUG_KCLASS
 static const char* microkernelClassNames[] =
 {	"java/lang/Object",
-	/*"platform/PlatForm",
+	"platform/PlatForm",
 	"java/lang/Boolean",
 	"java/lang/Byte",
 	"java/lang/Character",
@@ -281,7 +281,7 @@ static const char* microkernelClassNames[] =
 	"java/lang/Math",
 	"java/io/InputStream",
 	"java/io/PrintStream",
-	"java/lang/System",*/
+	"java/lang/System",
 };
 
 extern const char* getMicroKernelClassName(const u2 classId){
@@ -289,7 +289,7 @@ extern const char* getMicroKernelClassName(const u2 classId){
 }
 static const char** microkernelMethodNames[] =
 {	java_lang_ObjectMethodNames,
-	/*platform_PlatFormMethodNames,
+	platform_PlatFormMethodNames,
 	java_lang_BooleanMethodNames,
 	java_lang_ByteMethodNames,
 	java_lang_CharacterMethodNames,
@@ -316,7 +316,7 @@ static const char** microkernelMethodNames[] =
 	java_lang_MathMethodNames,
 	java_io_InputStreamMethodNames,
 	java_io_PrintStreamMethodNames,
-	java_lang_SystemMethodNames,*/
+	java_lang_SystemMethodNames,
 };
 
 extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId){

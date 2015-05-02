@@ -16,19 +16,6 @@ extern u2 numNativeClassNames;
 extern const functionForNativeMethodType* funcArray[];
 extern functionForNativeMethodType functionForNativePlatFormMethod[];
 
-#ifdef AVR8
-/* ARDUINOMEGA holds the classfiles in instruction flash!*/
-/* RAMPZ = 1 (ever) -> classfiles are in te upper half of atmega128 flash */
-/* address of classfile byte in flash 0x0000 to 0xffff */
-/* eg. address 0x2345 means byte in flash at address (binary):1001000110100101 */
-extern u1 getU1Flash(u1* pos);
-u1 getU1(const u1 classId,const u2 pos)
-{
-    return getU1Flash((u1*)((cs[classId].classFileStartAddress) + ((pos==0) ? (pc++) : pos)));
-}
-
-
-#else
 /* classSTA and pc are global variables for actual class and method*/
 /* parameter != 0 -> value at parameter-pos*/
 /* parameter ==0 -> value at global var pc and automatic increment */
@@ -36,7 +23,6 @@ u1 getU1(const u1 classId,const u2 pos)
 {
     return *((cs[classId].classFileStartAddress) + ((pos == 0) ? (pc++) : pos));
 }
-#endif
 
 u2 getU2(const u1 classId,const u2 pos)
 {
@@ -317,7 +303,7 @@ u1 findSuperClass(const u1 classId)
 #endif
 }
 
-//#ifndef ENABLE_KCLASS_FORMAT
+#ifndef ENABLE_KCLASS_FORMAT
 u1 findClass(const char* className,const u1 classNameLength)
 {
     for (int classId = 0; classId < numClasses; classId++)
@@ -337,7 +323,7 @@ u1 findClass(const char* className,const u1 classNameLength)
     }
     return INVALID_CLASS_ID;
 }
-//#else
+#else
 u2 getClassIndex(u2 classId)
 {
     for (int i = 0; i < numClasses; i++) {
@@ -361,7 +347,7 @@ u2 getClassID(u2 classIndex){
     }
     return INVALID_CLASS_ID;
 }
-//#endif
+#endif
 
 void analyzeClass(const u1 classId)
 {

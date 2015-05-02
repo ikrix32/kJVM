@@ -193,7 +193,7 @@
 #define     T_DOUBLE            0x7               // aaray type boolean
 #define     T_BYTE              0x8               // aaray type boolean
 #define     T_SHORT             0x9               // aaray type boolean
-#define     T_INT                   0xa           // aaray type boolean
+#define     T_INT               0xa               // aaray type boolean
 #define     T_LONG              0xb               // aaray type boolean
 
 

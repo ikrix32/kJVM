@@ -32,7 +32,7 @@ public class KJVMClassPoolProcessor
 					case ConstantPoolInfo.INTERFACE_METHOD_REF:	
 					case ConstantPoolInfo.METHOD_REF:
 					{
-						convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
+						//convertMethodRefToKMethodRef(cp, (RefInfo) cpi, pk);
 					}
 					break;
 					case ConstantPoolInfo.FIELD_REF:

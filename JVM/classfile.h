@@ -3,7 +3,7 @@
 #define __KJVM_CLASSFILE__
 #include "typedefinitions.h"
 
-//#define getU1(classId,pos) *(cs[classId].classFileStartAddress)
+//#define getU1(classId,pos) 0//*(cs[classId].classFileStartAddress)
 //#define getU2(...) 0
 //#define getU4(...) 0
 //#define getFloat(...) 0

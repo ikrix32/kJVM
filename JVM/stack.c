@@ -32,6 +32,7 @@ slot*   opSp;
 u2*     methodSp;
 #endif                                            // AVR8
 #endif
+
 void opStackInit(slot** m)                        /* per thread, fixed size */
 {
 
