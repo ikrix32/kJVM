@@ -88,11 +88,5 @@ u2 readClassBin(const u1* bin,const u4 binSize, char* addr)
 
 void linuxExit(int n)
 {
-#ifdef DEBUGOPSTACK
-    printf(" maxOperandenStack: x%x",maxOpStack);
-#endif                                        //DEBUOPSTACK
-#ifdef DEBUGMETHODSTACK
-    printf(" maxMethodStack: x%x\n",maxMethodStack);
-#endif                                        //DEBUGMETHODSTACK
     exit(n);
 }

@@ -6,6 +6,7 @@
 #include "classfile.h"
 #include "stack.h"
 #include "scheduler.h"
+#include "heap.h"
 
 void interruptThread(ThreadControlBlock* thread)
 {
@@ -39,7 +40,7 @@ ThreadControlBlock* findThreadCB(const slot obj)
         }
     }
 
-    errorExit(78, "thread not found");
+    ERROREXIT(78, "thread not found");
 
     return NULL;
 }
@@ -110,7 +111,7 @@ void releaseMutexOnObject(ThreadControlBlock* t,const slot obj,
     if (i == MAXLOCKEDTHREADOBJECTS)
     {
 
-        errorExit(-1, "Unlock Exception\n");
+        ERROREXIT(-1, "Unlock Exception\n");
 
         return;
 
@@ -156,9 +157,7 @@ void setMutexOnObject(ThreadControlBlock* t,const slot obj)
                 break;
         if (i == MAXLOCKEDTHREADOBJECTS)
         {
-
-            errorExit(-1, "too many locks\n");
-
+            ERROREXIT(-1, "too many locks\n");
         }
         // entry for this object in the array of mutexed objects for the thread
         t->lockCount[i] = 1;
@@ -179,7 +178,7 @@ void createThread (void)
 {
     if(numThreads == MAXTHREADS)
     {
-        errorExit       (-2, "to many threads\n");
+        ERROREXIT(-2, "to many threads\n");
     }
     ThreadControlBlock* t = (ThreadControlBlock*) malloc(sizeof(ThreadControlBlock));
 
@@ -201,6 +200,7 @@ void createThread (void)
         }
         currentThreadCB = t;
         t->obj = NULLOBJECT;
+        u4 mainThreadPriority[2];
         mainThreadPriority[0] = (u4) NORMPRIORITY;// priority (and alive) of main thread -> immutable
         mainThreadPriority[1] = (u4) 1;           // alive -> doesnt need for main thread??
         t->pPriority = mainThreadPriority;
@@ -211,9 +211,9 @@ void createThread (void)
         //if (!findFieldByRamName("priority", 8, "I", 1))
         if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
         {
-            errorExit(77, "field priority not found");
+            ERROREXIT(77, "field priority not found");
         }
-        t->pPriority = (u4*) (heapBase + opStackGetValue(local).stackObj.pos + fN + 1);
+        t->pPriority = (u4*) (heapGetBase() + opStackGetValue(local).stackObj.pos + fN + 1);
         // position of int field priority of the thread creating object, next field is aLive
         // restore class number of object
         cN = opStackGetValue(local).stackObj.classNumber;
@@ -232,7 +232,7 @@ void createThread (void)
 
             cN = findSuperClass(cN);
             if (cN == INVALID_CLASS_ID)
-                errorExit(123, "run method not found");
+                ERROREXIT(123, "run method not found");
         }
         *(t->methodStackBase + 0) = (u2) 0;
         *(t->methodStackBase + 1) = cN;
@@ -328,6 +328,17 @@ void deleteNotCurrentThread(ThreadControlBlock** t)
     numThreads--;
 }
 
+void setupCurrentThread()
+{
+    methodStackSetBase(currentThreadCB->methodStackBase);
+    methodStackSetSpPos(currentThreadCB->methodSpPos);
+    opStackSetBase(currentThreadCB->opStackBase);
+    opStackSetSpPos(methodStackPop());
+    pc = methodStackPop();
+    mN = methodStackPop();
+    cN = methodStackPop();
+    local = methodStackPop();
+}
 
 // Delete actualThread by Christopher-Eyk Hrabia
 void deleteThread(void)
@@ -345,14 +356,8 @@ void deleteThread(void)
     free(currentThreadCB->opStackBase);
     free(currentThreadCB);
     currentThreadCB = threadPriorities[i].cb;
-    methodStackBase = currentThreadCB->methodStackBase;
-    methodStackSetSpPos(currentThreadCB->methodSpPos);
-    opStackBase = currentThreadCB->opStackBase;
-    opStackSetSpPos(methodStackPop());
-    pc = methodStackPop();
-    mN = methodStackPop();
-    cN = methodStackPop();
-    local = methodStackPop();
+    setupCurrentThread();
+
     numThreads--;
 }
 
@@ -420,7 +425,7 @@ void scheduler(void)
     }                                             // end for p
     if (!threadFound)
     {
-        errorExit(111, "SCHEDULING ERROR!\n");
+        ERROREXIT(111, "SCHEDULING ERROR!\n");
     }
     // assume: not all threads are blocked
     if (found == currentThreadCB /*&& ((found->state)==THREADNOTBLOCKED)*/) {
@@ -440,13 +445,6 @@ void scheduler(void)
     threadPriorities[*currentThreadCB->pPriority - 1].cb = currentThreadCB;
     //reset numTicks
     currentThreadCB->numTicks = *currentThreadCB->pPriority;
-    methodStackBase = currentThreadCB->methodStackBase;
-    methodStackSetSpPos(currentThreadCB->methodSpPos);
-    opStackBase = currentThreadCB->opStackBase;
-    opStackSetSpPos(methodStackPop());
-    pc = methodStackPop();
-    mN = methodStackPop();
-    cN = methodStackPop();
-    local = methodStackPop();
+    setupCurrentThread();
 }
 #endif

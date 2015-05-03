@@ -16,13 +16,13 @@
 #include "kjvm.h"
 #include "stack.h"
 #include "object.h"
+#include "heap.h"
 
 #ifndef TINYBAJOS_MULTITASKING
 /* "java/lang/Object","notify","notifyAll","wait","waitTime","getDataAddress"*/
 char notify()
 {
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex
-        != MUTEXBLOCKED)
+    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
     {
         exit(253);
     }

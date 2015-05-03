@@ -10,42 +10,41 @@
 
 #include "heap.h"
 
+static slot* heapBase;
+static u2    heapTop = MAXHEAP;
+
+
 /* heap */
 void heapInit()
 {
-#if (AVR8||LINUX||AVR32LINUX)
-    if ((heapBase = ( slot*)malloc(sizeof(slot) * (size_t)MAXHEAP))==NULL)
-    {
-#ifdef AVR8 // change all avr8 string to flash strings gives more data ram space for java!!
-        printf_P(PSTR("malloc error\n"));
-#else
+    if ((heapBase = ( slot*) malloc(sizeof(slot) * (size_t)MAXHEAP)) == NULL){
         printf("malloc error\n");
-#endif
-        exit(-1);                                 /* heap fixed size!!*/
+        exit(-1);// heap fixed size!!
     }
-#else
-    // make it better
-    heapBase = (slot*) ((u4)(appClassFileBase + MAXBYTECODE));
-#endif
+
     while (heapTop > 0)
         *(heapBase + (--heapTop)) = NULLOBJECT;
+
     DEBUGPRINTHEAP;
 }
 
+slot* heapGetBase(){
+    return heapBase;
+}
 
-inline slot heapGetElement(const u2 pos)
+slot heapGetElement(const u2 pos)
 {
     return *(heapBase + pos);
 }
 
 
-inline void heapSetElement(const slot e,const u2 pos)
+void heapSetElement(const slot e,const u2 pos)
 {
     *(heapBase + pos) = e;
 }
 
 
-inline u2 getNextHeapObjectPos(const u2 pos)
+u2 getNextHeapObjectPos(const u2 pos)
 {
     return ((pos + HEAPOBJECTMARKER(pos).length) < heapTop) ? pos + HEAPOBJECTMARKER(pos).length : (heapTop + 1);
 }

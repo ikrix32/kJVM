@@ -15,7 +15,7 @@ void classLoader_init(void){
 #if (AVR32LINUX || LINUX)
     classFileBase=(char*)malloc((size_t) MAXBYTECODE);
     if (classFileBase==NULL)
-        errorExit(-1,"malloc error while trying to allocate %d bytes for class files.\n", MAXBYTECODE);
+        ERROREXIT(-1,"malloc error while trying to allocate %d bytes for class files.\n", MAXBYTECODE);
 #endif
     numClasses = 0;
     crtByteCodeSize = 0;

@@ -28,24 +28,10 @@
 
 #define PRINTF(format, ...) printf(format,  ## __VA_ARGS__)
 
-#ifdef TINYBAJOS_ERROREXIT
-    #define ERROREXIT(nr, format, ...) exit((nr))
-#else
-	#define ERROREXIT(nr, format, ...) errorExitFunction ((nr), (format),  ## __VA_ARGS__)
-#endif
+#define ERROREXIT(nr, format, ...) {exit(nr); printf(format,  ## __VA_ARGS__);}
 
 #define STRNCMPRAMFLASH     stringsNotEquals
 #define STRNCMPFLASHFLASH   stringsNotEquals
-
-#ifndef TINYBAJOS_ERROREXIT
-#ifdef AVR8                                       // change all avr8 string to flash strings gives more data ram space for java!!
-#define errorExit(nr, format, ...) errorExitFunction ((nr), PSTR((format)),  ## __VA_ARGS__)
-#else
-#define errorExit(nr, format, ...) errorExitFunction ((nr), (format),  ## __VA_ARGS__)
-#endif
-#else
-#define errorExit(nr, format, ...) exit((nr))
-#endif
 
 #ifndef TINYBAJOS_PRINTF
 #define verbosePrintf( format, ...) PRINTF ((format),  ## __VA_ARGS__)
@@ -68,32 +54,32 @@
 #define CLASSCASTEXCEPTION raiseExceptionFromIdentifier(CLASS_CAST_EXCEPTION)
 #define ILLEGALMONITORSTATEEXCEPTION raiseExceptionFromIdentifier(ILLEGAL_MONITOR_STATE_EXCEPTION)
 
-#define DNOTSUPPORTED errorExit(-2, "Double precision primitive data types (double and long) are not supported.\n")
-#define CLASSNOTFOUNDERR(classname,classnamelength) {errorExit(-3, "Class '%s' not found.\n", classname);}
-#define UNHANDLEDEXCEPTIONERR(exceptionname) errorExit(-4, "Unhandled exception of type '%s'.\n", exceptionname)
-#define FIELDNOTFOUNDERR(fieldname, classname) errorExit(-5, "Field '%s' in class '%s' not found.\n", fieldname, classname)
-#define METHODNOTFOUNDERR(methodname, classname) errorExit(-6, "Method '%s' in class '%s' not found.\n", methodname, classname)
-#define MALLOCERR(count, target) errorExit(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
+#define DNOTSUPPORTED ERROREXIT(-2, "Double precision primitive data types (double and long) are not supported.\n")
+#define CLASSNOTFOUNDERR(classname,classnamelength) {ERROREXIT(-3, "Class '%s' not found.\n", classname);}
+#define UNHANDLEDEXCEPTIONERR(exceptionname) ERROREXIT(-4, "Unhandled exception of type '%s'.\n", exceptionname)
+#define FIELDNOTFOUNDERR(fieldname, classname) ERROREXIT(-5, "Field '%s' in class '%s' not found.\n", fieldname, classname)
+#define METHODNOTFOUNDERR(methodname, classname) ERROREXIT(-6, "Method '%s' in class '%s' not found.\n", methodname, classname)
+#define MALLOCERR(count, target) ERROREXIT(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
 #else
-#define ARRAYINDEXOUTOFBOUNDSEXCEPTION errorExit(-8, "ARRAYINDEXOUTOFBOUNDS\n")
-#define NEGATIVEARRAYSIZEEXCEPTION errorExit(-2, "NEGATIVEARRAYSIZE\n")
-#define NULLPOINTEREXCEPTION errorExit(-2, "NULLPOINTER\n")
-#define ARITHMETICEXCEPTION errorExit(-2, "ARITHMETIC\n")
-#define CLASSCASTEXCEPTION errorExit(-2, "CLASSCAST\n")
-#define ILLEGALMONITORSTATEEXCEPTION  errorExit(-2, "ILLEGALMONITORSTATE\n")
-#define DNOTSUPPORTED errorExit(-2, "Double precision primitive data types (double and long) are not supported.\n")
-#define CLASSNOTFOUNDERR(classname,classnamelength) {errorExit(-3, "Class '%s' not found.\n", classname);}
-#define UNHANDLEDEXCEPTIONERR(exceptionname) errorExit(-4, "Unhandled exception of type '%s'.\n", exceptionname)
-#define FIELDNOTFOUNDERR(fieldname, classname) errorExit(-5, "Field '%s' in class '%s' not found.\n", fieldname, classname)
-#define METHODNOTFOUNDERR(methodname, classname) errorExit(-6, "Method '%s' in class '%s' not found.\n", methodname, classname)
-#define MALLOCERR(count, target) errorExit(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
+#define ARRAYINDEXOUTOFBOUNDSEXCEPTION ERROREXIT(-8, "ARRAYINDEXOUTOFBOUNDS\n")
+#define NEGATIVEARRAYSIZEEXCEPTION ERROREXIT(-2, "NEGATIVEARRAYSIZE\n")
+#define NULLPOINTEREXCEPTION ERROREXIT(-2, "NULLPOINTER\n")
+#define ARITHMETICEXCEPTION ERROREXIT(-2, "ARITHMETIC\n")
+#define CLASSCASTEXCEPTION ERROREXIT(-2, "CLASSCAST\n")
+#define ILLEGALMONITORSTATEEXCEPTION  ERROREXIT(-2, "ILLEGALMONITORSTATE\n")
+#define DNOTSUPPORTED ERROREXIT(-2, "Double precision primitive data types (double and long) are not supported.\n")
+#define CLASSNOTFOUNDERR(classname,classnamelength) {ERROREXIT(-3, "Class '%s' not found.\n", classname);}
+#define UNHANDLEDEXCEPTIONERR(exceptionname) ERROREXIT(-4, "Unhandled exception of type '%s'.\n", exceptionname)
+#define FIELDNOTFOUNDERR(fieldname, classname) ERROREXIT(-5, "Field '%s' in class '%s' not found.\n", fieldname, classname)
+#define METHODNOTFOUNDERR(methodname, classname) ERROREXIT(-6, "Method '%s' in class '%s' not found.\n", methodname, classname)
+#define MALLOCERR(count, target) ERROREXIT(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
 #endif
 
 // constantpool entry n of class m
 #define CP(m,n)             (cs[m].constant_pool[n])
 #define BYTECODEREF         ((byte1 << 8) | byte2)
-#define HEAPOBJECTMARKER(pos)       ((*(heapBase+(pos))).heapObjMarker)
-#define HEAPOBJECT(pos)         (*(heapBase+pos))
+#define HEAPOBJECTMARKER(pos)       ((*(slot*)(heapGetBase() + pos)).heapObjMarker)
+#define HEAPOBJECT(pos)         (*(heapGetBase() + pos))
 
 #define METHODBASE(classId,methodId)       (cs[classId].method_info[methodId])
 #define METHODACCESSFLAG(classId,methodId)     getU2(METHODBASE(classId,methodId))

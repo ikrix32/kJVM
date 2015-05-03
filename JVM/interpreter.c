@@ -342,7 +342,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             }BREAK;
             CASE(LDC_W):
             {
-                errorExit(-4, "LDC_W not yet realized\n");
+                ERROREXIT(-4, "LDC_W not yet realized\n");
             }BREAK;
             CASE(ILOAD):
             CASE(FLOAD):
@@ -1183,7 +1183,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     //  goto nativeVoidReturn;
                     }else
                     {
-                        errorExit(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
+                        ERROREXIT(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
                     }
                 }
                 pc = getStartPC(cN,mN);
@@ -1271,7 +1271,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     }
                     else
                     {
-                        errorExit(-3, "native method not found cN: %d mN: %d", cN, mN);
+                        ERROREXIT(-3, "native method not found cN: %d mN: %d", cN, mN);
                     }
                 }
                 pc = getStartPC(cN,mN);
@@ -1524,7 +1524,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                         else break;
                     if (i == MAXLOCKEDTHREADOBJECTS)
                     {
-                        errorExit(-1, "too many locks\n");
+                        ERROREXIT(-1, "too many locks\n");
                     }// count
                     currentThreadCB->lockCount[i] = 1;
                     currentThreadCB->hasMutexLockForObject[i] = first;
@@ -1895,7 +1895,7 @@ u1 isThreadLocked(const u1 pcOffset,slot obj_slot,const u1 methodOffset)
                     break;
             if (i == MAXLOCKEDTHREADOBJECTS)
             {
-                errorExit(-1, "too many locks\n");
+                ERROREXIT(-1, "too many locks\n");
             }
             // entry for this object in the array of mutexed objects for the thread
             // count (before 0)

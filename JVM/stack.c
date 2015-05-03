@@ -16,8 +16,8 @@
 static slot* opSp;
 static u2*   methodSp;
 
-//GLOBAL slot* opStackBase INIT__(NULL);
-//GLOBAL u2*   methodStackBase INIT__(NULL);
+static slot* opStackBase;
+static u2*   methodStackBase;
 
 void opStackInit(slot** m)// per thread, fixed size
 {
@@ -28,9 +28,6 @@ void opStackInit(slot** m)// per thread, fixed size
 void opStackPush(const slot val)
 {
     *(opSp++) = val;
-#ifdef DEBUGOPSTACK
-    if ((opSp - opStackBase)>maxOpStack) maxOpStack = opSp - opStackBase;
-#endif// DEBUGOPSTACK
 }
 
 /*  sp grothws with increasing addresses*/
@@ -74,24 +71,26 @@ u2 opStackGetSpPos()
 void opStackSetSpPos(const u2 pos)
 {
     opSp = pos + opStackBase;
-#ifdef DEBUGOPSTACK
-    if ((opSp - opStackBase) > maxOpStack) maxOpStack = opSp - opStackBase;
-#endif                                        // DEBUGOPSTACK
+}
+
+void opStackSetBase(slot* base){
+    opStackBase = base;
+}
+
+slot* opStackGetBase(){
+    return opStackBase;
 }
 
 /** Methods stack **/
 void methodStackInit(u2** m)
 {
-    if ((*m=(u2*)calloc((size_t)METHODSTACKSIZE,sizeof(u2)))==NULL)
+    if ((*m = (u2*)calloc((size_t)METHODSTACKSIZE,sizeof(u2)))==NULL)
         MALLOCERR(METHODSTACKSIZE * sizeof(u2), "method stack");
 }
 
 void methodStackPush(const u2 val)
 {
     *(methodSp++) = val;
-#ifdef DEBUGMETHODSTACK
-    if ((methodSp-methodStackBase)>maxMethodStack) maxMethodStack=methodSp-methodStackBase;
-#endif                                        // DEB0UGME TODSTACK
 }
 
 u2 methodStackPop()
@@ -113,9 +112,6 @@ u2 methodStackGetSpPos()
 void methodStackSetSpPos(const u2 pos)
 {
     methodSp = pos + methodStackBase;
-#ifdef DEBUGMETHODSTACK
-    if ((methodSp - methodStackBase) > maxMethodStack) maxMethodStack = methodSp - methodStackBase;
-#endif// DEBUGMETODSTACK
 }
 
 
@@ -123,3 +119,13 @@ u1 methodStackEmpty()
 {
     return (methodSp == methodStackBase) ? 1 : 0;
 }
+
+void    methodStackSetBase(u2* base){
+    methodStackBase = base;
+}
+u2*     methodStackGetBase(){
+    return methodStackBase;
+}
+
+
+

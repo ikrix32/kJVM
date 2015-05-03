@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define __DEF_GLOBALS__
 #include "kjvm.h"
 #include "heap.h"
 #include "stack.h"
@@ -30,9 +29,9 @@ void vm_init() /* read, analyze classfiles and fill structures*/
 
 #ifndef TINYBAJOS_MULTITASKING
     createThread();                           /* for main*/
-    opStackBase = currentThreadCB->opStackBase;
+    opStackSetBase(currentThreadCB->opStackBase);
     opStackSetSpPos(0);
-    methodStackBase = currentThreadCB->methodStackBase;
+    methodStackSetBase(currentThreadCB->methodStackBase);
     methodStackSetSpPos(0);
 #else
     opStackInit(&opStackBase);
@@ -80,18 +79,3 @@ s1 vm_run(const u1 classId){
     PRINTF("no main method found");
     return -1;
 }
-
-#ifndef TINYBAJOS_ERROREXIT
-    void errorExitFunction(int nr, const char *format, ...)
-    {
-        va_list list;
-        va_start(list, format);
-#ifdef AVR8
-        vfprintf_P(stdout, format, list);         //vprintf_P does not exist in current avr-libc
-#else
-        vprintf(format, list);
-#endif
-        va_end(list);
-        exit(nr);
-    }
-#endif
