@@ -16,8 +16,10 @@
 static slot* opSp;
 static u2*   methodSp;
 
+//GLOBAL slot* opStackBase INIT__(NULL);
+//GLOBAL u2*   methodStackBase INIT__(NULL);
 
-void opStackInit(slot** m)                        /* per thread, fixed size */
+void opStackInit(slot** m)// per thread, fixed size
 {
     if ((*m = (slot*) malloc((size_t)OPSTACKSIZE * sizeof(slot))) == NULL)
         MALLOCERR(OPSTACKSIZE * sizeof(slot), "op stack");
@@ -77,7 +79,7 @@ void opStackSetSpPos(const u2 pos)
 #endif                                        // DEBUGOPSTACK
 }
 
-
+/** Methods stack **/
 void methodStackInit(u2** m)
 {
     if ((*m=(u2*)calloc((size_t)METHODSTACKSIZE,sizeof(u2)))==NULL)

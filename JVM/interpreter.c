@@ -23,10 +23,10 @@ getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) 
 #include "microkernel.h"
 #endif
 
-static slot first;
-static slot second;
-static slot third;
-static slot fourth;
+//static slot first;
+//static slot second;
+//static slot third;
+//static slot fourth;
 
 
 #ifdef ENABLE_KCLASS_FORMAT
@@ -63,7 +63,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
         DEBUGPRINT_OPC("\t\t\t\t");
 #endif
 #ifdef USE_LABELS
-        /*const static void* const opclabels_data[256] = {
+        const static void* const opclabels_data[256] = {
             &&OPC_NOP         ,//0x00
             &&OPC_ACONST_NULL ,//0x01                      // modified by mb jf
             &&OPC_ICONST_M1   ,//0x02
@@ -280,10 +280,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             &&OPC_JSR_W       ,//0xc9                      //mb jf
         };
         register uintptr_t *dispatch_table = (uintptr_t*)&opclabels_data[0];
-       */// DISPATCH(code);
-#else
-        switch (code)
 #endif
+        DISPATCH(code)
         {
             CASE(NOP):
             {
@@ -333,29 +331,11 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 const u1 type = GET_TAG(cN, getU1(cN,0));
                 if (type == CONSTANT_String)
                 {
-#ifdef LOAD_STRING_CONSTANT_ON_HEAP
-                    const u2 strPos = getU2(cN,CP(cN, byte1) + 1);
-                    const u2 strLen = UTF8_GET_LENGTH(cN,strPos);
-                    const char* str = UTF8_GET_STRING(cN,strPos);
-
-                    u2 heapPos = getFreeHeapSpace(strLen + 1);         // char arr length + marker
-
-                    first.stackObj.pos = heapPos;
-                    first.stackObj.magic = OBJECTMAGIC;
-                    first.stackObj.arrayLength = (u1)strLen;         // char array length
-                    opStackPush(first);
-
-                    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;
-                    HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
-                    HEAPOBJECTMARKER(heapPos++).mutex = MUTEXNOTBLOCKED;
-                    for (u1 i = 0; i < strLen; i++)
-                        heapSetElement(toSlot((u4)(*(str + i))), heapPos++);
-#else
+                    slot first;
                     first.stackObj.magic = CPSTRINGMAGIC;
                     first.stackObj.classNumber = cN;
                     first.stackObj.pos = (u2)(byte1);//((u2)cN <<8));
                     opStackPush(first);
-#endif
                 } else // int or float const value on stack
                     opStackPush(toSlot( getU4(cN,CP(cN, byte1) + 1) ));
                 DEBUGPRINTLN_OPC(",=> x%x", opStackPeek().UInt);
@@ -407,7 +387,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(SALOAD):
             {
                 const s2 count = (s2)opStackPop().Int;
-                first = opStackPop();
+                const slot first = opStackPop();
 #ifdef DEBUG
                 if(code == IALOAD) DEBUGPRINTLN_OPC("iaload");
                 if(code == FALOAD) DEBUGPRINTLN_OPC("faload");
@@ -487,9 +467,9 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 //short
                 if(code == SASTORE) DEBUGPRINTLN_OPC("sastore");
 #endif
-                second = opStackPop();
+                const slot second = opStackPop();
                 s2 count = (s2)(opStackPop().Int);
-                first = opStackPop();
+                const slot first = opStackPop();
                 const u4 lengthArray = first.stackObj.arrayLength;
                 if (first.UInt == NULLOBJECT.UInt)
                 {
@@ -503,17 +483,17 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     heapSetElement(second, first.stackObj.pos + count + 1);
                 }
             }BREAK;
+            CASE(POP2):
+            {
+                DEBUGPRINTLN_OPC("POP2");
+                opStackPop();
+            }
             CASE(POP):
             {
                 DEBUGPRINTLN_OPC("POP %x",opStackPeek().UInt);
                 opStackPop();
             }BREAK;
-            CASE(POP2):
-            {
-                DEBUGPRINTLN_OPC("POP2");
-                opStackPop();
-                opStackPop();
-            }BREAK;
+
             CASE(DUP):
             {
                 DEBUGPRINTLN_OPC("dup");
@@ -522,66 +502,66 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(DUP_X1):
             {
                 DEBUGPRINTLN_OPC("DUP_X1");
-                second = opStackPop();
-                first = opStackPop();
-                opStackPush(second);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
                 opStackPush(first);
                 opStackPush(second);
+                opStackPush(first);
             }BREAK;
             CASE(DUP_X2):
             {
                 DEBUGPRINTLN_OPC("DUP_X2");
-                second = opStackPop();
-                first = opStackPop();
-                third = opStackPop();
-                opStackPush(second);
-                opStackPush(third);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
+                const slot third = opStackPop();
                 opStackPush(first);
+                opStackPush(third);
                 opStackPush(second);
+                opStackPush(first);
             }BREAK;
             CASE(DUP2):
             {
                 DEBUGPRINTLN_OPC("DUP2");
-                second = opStackPop();
-                first = opStackPop();
-                opStackPush(first);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
                 opStackPush(second);
                 opStackPush(first);
                 opStackPush(second);
+                opStackPush(first);
             }BREAK;
             CASE(DUP2_X1):
             {
                 DEBUGPRINTLN_OPC("DUP2_X1");
-                second = opStackPop();
-                first = opStackPop();
-                third = opStackPop();
-                opStackPush(first);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
+                const slot third = opStackPop();
                 opStackPush(second);
+                opStackPush(first);
                 opStackPush(third);
-                opStackPush(first);
                 opStackPush(second);
+                opStackPush(first);
             }BREAK;
             CASE(DUP2_X2):
             {
                 DEBUGPRINTLN_OPC("DUP2_X2");
-                second = opStackPop();
-                first = opStackPop();
-                third = opStackPop();
-                fourth = opStackPop();
-                opStackPush(first);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
+                const slot third = opStackPop();
+                const slot fourth = opStackPop();
                 opStackPush(second);
+                opStackPush(first);
                 opStackPush(fourth);
                 opStackPush(third);
-                opStackPush(first);
                 opStackPush(second);
+                opStackPush(first);
             }BREAK;
             CASE(SWAP):
             {
                 DEBUGPRINTLN_OPC("SWAP");
-                second = opStackPop();
-                first = opStackPop();
-                opStackPush(second);
+                const slot first = opStackPop();
+                const slot second = opStackPop();
                 opStackPush(first);
+                opStackPush(second);
             }BREAK;
             CASE(IADD):
             {
@@ -596,13 +576,13 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(ISUB):
             {
                 DEBUGPRINTLN_OPC("ISUB");
-                first = opStackPop(); // mb fj changed substraction order
+                const slot first = opStackPop(); // mb fj changed substraction order
                 opStackPoke(toSlot((opStackPeek().Int - first.Int)));
             }BREAK;
             CASE(FSUB):
             {
                 DEBUGPRINTLN_OPC("Fsub");
-                first = opStackPop(); // mb fj changed substraction order
+                const slot first = opStackPop(); // mb fj changed substraction order
                 opStackPoke(toSlot((opStackPeek().Float - first.Float)));
             }BREAK;
             CASE(IMUL):
@@ -618,7 +598,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(IDIV):
             {
                 DEBUGPRINTLN_OPC("IDIV");
-                first = opStackPop(); // mb fj changed dividend order
+                const slot first = opStackPop(); // mb fj changed dividend order
                 if (first.Int == 0)
                     ARITHMETICEXCEPTION;
                 else
@@ -627,7 +607,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(FDIV):
             {
                 DEBUGPRINTLN_OPC("FDIV");
-                first = opStackPop(); //mb fj changed dividend order
+                const slot first = opStackPop(); //mb fj changed dividend order
                 if (first.Float == 0.0)
                     ARITHMETICEXCEPTION;
                 else
@@ -636,7 +616,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(IREM):
             {
                 DEBUGPRINTLN_OPC("IREM");
-                if (((first = opStackPop()).Int) == 0)
+                const slot first = opStackPop();
+                if (first.Int == 0)
                     ARITHMETICEXCEPTION;
                 else
                     opStackPoke(toSlot((opStackPeek().Int % first.Int)));
@@ -737,8 +718,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(FCMPG):
             {
                 DEBUGPRINTLN_OPC("fcmpg");
-                second = opStackPop();
-                first = opStackPop();
+                const slot second = opStackPop();
+                const slot first = opStackPop();
                 if (first.Float == 0x7fc00000 || second.Float == 0x7fc00000)
                 {
                     opStackPush(toSlot((s4)(code == FCMPG ? 1 : -1)));
@@ -988,7 +969,9 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             {
                 DEBUGPRINTLN_OPC("put/get field");
                 methodStackPush(cN);
-                first = opStackPop();
+                slot first = opStackPop();
+
+                slot second;
                	if(code == PUTFIELD){
                     second = opStackPop();
                 }
@@ -1311,18 +1294,20 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(RETURN):
             {
                 DEBUGPRINTLN_OPC("return");
+                slot first;
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(cN,METHODBASE(cN,mN))&ACC_SYNCHRONIZED)
+                if (getU2(cN,METHODBASE(cN,mN)) & ACC_SYNCHRONIZED)
                 {
                     // have I always the lock ?
-                    if (getU2(cN,METHODBASE(cN,mN))&ACC_STATIC)
-                        first=cs[cN].classInfo;
-                    else first=opStackGetValue(local);
+                    if (getU2(cN,METHODBASE(cN,mN)) & ACC_STATIC)
+                        first = cs[cN].classInfo;
+                    else
+                        first = opStackGetValue(local);
 
                     int i = 0;
                     // must be in
                     for ( i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
-                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt==first.UInt) break;
+                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt == first.UInt) break;
                     // fertig
                     if (currentThreadCB->lockCount[i]>1) currentThreadCB->lockCount[i]--;
                     else // last lock
@@ -1431,16 +1416,19 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 
                 cN = methodStackPop();
-                u2 heapPos=getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
-                first.stackObj.pos=heapPos;
-                first.stackObj.magic=OBJECTMAGIC;
-                first.stackObj.classNumber=cN;
+                u2 heapPos = getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
+
+                slot first;
+                first.stackObj.pos = heapPos;
+                first.stackObj.magic = OBJECTMAGIC;
+                first.stackObj.classNumber = cN;
                 DEBUGPRINTLN_OPC(" -> push %x\n",heapPos);
-                opStackPush(first);               //reference to.stackObject on opStack
+                opStackPush(first);//reference to.stackObject on opStack
                 HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
                 HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-                for (int i = 0; i < fN; i++)        // initialize the heap elements
+
+                for (int i = 0; i < fN; i++)// initialize the heap elements
                     heapSetElement(toSlot((u4)0), heapPos + i + 1);
 
                 mN = methodStackPop();
@@ -1464,12 +1452,13 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
                 // + marker
                 u2 heapPos=getFreeHeapSpace(count + 1);
-                first.stackObj.pos=heapPos;
-                first.stackObj.magic=OBJECTMAGIC;
-                first.stackObj.arrayLength=(u1)count;
+                slot first;
+                first.stackObj.pos = heapPos;
+                first.stackObj.magic = OBJECTMAGIC;
+                first.stackObj.arrayLength = (u1)count;
                 opStackPush(first);
-                HEAPOBJECTMARKER(heapPos).status=HEAPALLOCATEDARRAY;
-                HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
+                HEAPOBJECTMARKER(heapPos).status= HEAPALLOCATEDARRAY;
+                HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
                 HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
                 heapPos++;
                 switch (byte1) // array type, init array with 0 on heap
@@ -1509,7 +1498,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(ARRAYLENGTH):
             {
                 DEBUGPRINTLN_OPC("arraylength");
-                first = opStackPop();
+                const slot first = opStackPop();
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
@@ -1523,7 +1512,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(MONITORENTER):
             {
 #ifndef TINYBAJOS_MULTITASKING
-                first=opStackPop();
+                const slot first=opStackPop();
                 if ( HEAPOBJECTMARKER(first.stackObj.pos).mutex==MUTEXNOTBLOCKED)
                 {
                     int i = 0;
@@ -1567,7 +1556,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(MONITOREXIT):                 // have I always the lock ?
             {
 #ifndef TINYBAJOS_MULTITASKING
-                first=opStackPop();
+                const slot first=opStackPop();
 
                 int i = 0;
                 // must be in
@@ -1620,7 +1609,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 DEBUGPRINTLN_OPC(code == INSTANCEOF ? "instanceof" : "checkcast");
                 // In general, we try to cast as much as possible.
                 // Only if we perfectly know that this cast is invalid, break it.
-                first = code == INSTANCEOF ? opStackPop() : opStackPeek();
+                slot first = code == INSTANCEOF ? opStackPop() : opStackPeek();
 
                 u1 performcheck = 1;
                 u1 invalidcast = 0;
@@ -2064,6 +2053,7 @@ void raiseExceptionFromIdentifier(const Exception exception)
 
     // + marker
     u2 heapPos = getFreeHeapSpace(getU2(cN,cs[cN].fields_count) + 1);
+    slot first;
     first.stackObj.pos = heapPos;
     first.stackObj.magic = OBJECTMAGIC;
     first.stackObj.classNumber = cN;
@@ -2077,25 +2067,6 @@ void raiseExceptionFromIdentifier(const Exception exception)
     {
         heapSetElement(toSlot((u4) 0), heapPos + i + 1);
     }
-
-    /*
-     mN = FIND_METHOD_BYNAME("<init>", 6, "()V", 3);
-     if (mN == INVALID_METHOD_ID) {
-        METHODNOTFOUNDERR("<init>", identifier);
-     }
-
-     #ifdef AVR8	// change all avr8 string to flash strings gives more data ram space for java!!
-     printf_P(PSTR("running <init> of %s\n"), identifier);
-     #else
-     printf("running <init> of %s\n", identifier);
-     #endif
-
-     methodStackPush(pc);
-     methodStackPush(local);
-     run();
-     methodStackPop(local);
-     methodStackPop(pc);
-     */
 
     mN = methodStackPop();
     cN = methodStackPop();
@@ -2183,7 +2154,7 @@ void handleException()
     else
     {
         DEBUGPRINTLN_OPC("popping stack frame");
-        first = opStackPop();
+        const slot first = opStackPop();
         opStackSetSpPos(methodStackPop());
         pc = methodStackPop() + 2;
         mN = methodStackPop();

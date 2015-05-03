@@ -8,8 +8,9 @@ slot opStackPeek(void);
 void opStackPoke(const slot val);
 slot opStackGetValue(const u2 pos);
 void opStackSetValue(const u2 pos,const slot val);
-u2 opStackGetSpPos(void);
+u2   opStackGetSpPos(void);
 void opStackSetSpPos(const u2 pos);
+//void opStackSetBase(slot* base);
 
 
 void methodStackInit(u2** m);

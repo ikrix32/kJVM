@@ -94,10 +94,6 @@ typedef struct ThreadPriorityList
 } ThreadPriorityList;
 #endif
 
-#define methodStartPC (methodInfoStart+6)
-
-#define CONSTANTPOOLCOUNT(cN)   ((u2) *cs[cN].classFileStartAddress+8)
-
 typedef struct
 {
     char* classFileStartAddress;                  // Speicheradresse fuer classfile-bytes

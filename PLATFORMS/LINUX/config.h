@@ -24,8 +24,6 @@
 
 #define ENABLE_TESTS
 
-//#define LOAD_STRING_CONSTANT_ON_HEAP//not working
-
 #ifdef NRF51
 //#define BLE_CONSOLE
 

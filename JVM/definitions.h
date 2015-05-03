@@ -89,8 +89,7 @@
 #define MALLOCERR(count, target) errorExit(-7, "Malloc error while trying to allocate %d bytes for %s\n", count, target)
 #endif
 
-//#define CLASSSTA            (cs[classId].classFileStartAddress)
-                                                  // constantpool entry n of class m
+// constantpool entry n of class m
 #define CP(m,n)             (cs[m].constant_pool[n])
 #define BYTECODEREF         ((byte1 << 8) | byte2)
 #define HEAPOBJECTMARKER(pos)       ((*(heapBase+(pos))).heapObjMarker)

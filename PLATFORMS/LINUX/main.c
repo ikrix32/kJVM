@@ -38,12 +38,12 @@ void setPin(int pin,bool on){
 extern const char* getClassName(const u2 classId)
 {
 #ifdef USE_MICROKERNEL
-    extern const int getNoMicroKernelClasses();
+    extern int getNoMicroKernelClasses();
     const int  noMicroClasses = getNoMicroKernelClasses();
     if(classId < noMicroClasses)
     {
 #ifdef DEBUG_KCLASS
-        extern const char* getMicroKernelClassName(const u2 classId);
+        extern char* getMicroKernelClassName(const u2 classId);
         return getMicroKernelClassName(classId);
 #else
         return "kernelclass";
@@ -57,7 +57,7 @@ extern const char* getClassName(const u2 classId)
 extern const char* getDebugMethodName(const u2 classId,const u2 methodId)
 {
 #ifdef USE_MICROKERNEL
-    extern const int getNoMicroKernelClasses();
+    extern int getNoMicroKernelClasses();
     const int  noMicroClasses = getNoMicroKernelClasses();
     if(classId < noMicroClasses)
     {

@@ -347,6 +347,7 @@ void analyzeConstantPool(const u1 classId)
     {
         cs[classId].constant_pool[n] = pc;
         const u1 type = getU1(classId,0);
+        
         switch (type)
         {
             case CONSTANT_KClass:/*    16 */

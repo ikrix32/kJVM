@@ -17,9 +17,9 @@
 
 extern void loadMicroKernel()
 {
-    extern const int getNoMicroKernelClasses();
-    extern const u1* getMicroKernelBinary();
-    extern const u4 getMicroKernelBinarySize(const int i);
+    extern int getNoMicroKernelClasses();
+    extern u1* getMicroKernelBinary();
+    extern u4 getMicroKernelBinarySize(const int i);
 
     const int  noBins = getNoMicroKernelClasses();
     for (int i = 0; i < noBins; i++)
