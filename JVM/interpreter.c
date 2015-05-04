@@ -1088,11 +1088,14 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 {
                     if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
                     {
+
 #ifdef ENABLE_KCLASS_FORMAT
+#ifdef USE_MICROKERNEL
                         cN = getClassIndex(JAVA_LANG_STRING_CLASS_ID());
 #ifdef DEBUG_KCLASS
                         className = getClassName(JAVA_LANG_STRING_CLASS_ID());
                         classNameLength = stringLength(className);
+#endif
 #endif
 #else
                         className = "java/lang/String";

@@ -114,12 +114,12 @@ functionForNativeMethodType functionForNativeInterruptThreadMethod[] = {
 #endif
 
 /* insert array of function pointer*/
-const functionForNativeMethodType* funcArray[] = {
-    functionForNativePlatFormMethod, functionForNativeObjectMethod,
-    functionForNativeStringMethod,
+const functionForNativeMethodType* funcArray[] = {//2288bytes
+    functionForNativePlatFormMethod, functionForNativeObjectMethod,//332bytes
+    functionForNativeStringMethod,//244bytes
 #ifndef TINYBAJOS_MULTITASKING
-    functionForNativeThreadMethod, functionForNativeLockMethod,
-    functionForNativeInterruptThreadMethod,
+    functionForNativeThreadMethod, functionForNativeLockMethod,//620bytes
+    functionForNativeInterruptThreadMethod,//248bytes
 #endif
-    functionForNativeFloatMethod
+    functionForNativeFloatMethod//844bytes
 };

@@ -257,7 +257,7 @@ u2 getClassID(u2 classIndex){
 }
 #endif
 
-void analyzeClass(const u1 classId)
+void analyzeClass(const u1 classId)//3956bytes all analyze methods
 {
     pc = 0;
 
@@ -431,7 +431,7 @@ void analyzeConstantPool(const u1 classId)
 }
 
 
-void analyzeMethods(const u1 classId)//4700bytes
+void analyzeMethods(const u1 classId)//2900bytes
 {
     //int i, n, m, a;
     //u2 etl;

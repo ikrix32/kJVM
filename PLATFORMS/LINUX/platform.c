@@ -32,8 +32,12 @@ extern void loadMicroKernel()
 
 #ifdef ENABLE_KCLASS_FORMAT
 extern u2 getExceptionClassId(const Exception exception){
+#ifdef USE_MICROKERNEL
     extern u2 getMicroKernelExceptionClassId(const int exception);
     return getMicroKernelExceptionClassId(exception);
+#else
+    return 0;
+#endif
 }
 #else
 const static char* exceptionClassNames[]=
