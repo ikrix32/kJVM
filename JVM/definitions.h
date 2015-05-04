@@ -28,7 +28,7 @@
 
 #define PRINTF(format, ...) printf(format,  ## __VA_ARGS__)
 
-#define ERROREXIT(nr, format, ...) {exit(nr); printf(format,  ## __VA_ARGS__);}
+#define ERROREXIT(nr, format, ...) {PRINTF(format,  ## __VA_ARGS__);exit(nr);}
 
 #define STRNCMPRAMFLASH     stringsNotEquals
 #define STRNCMPFLASHFLASH   stringsNotEquals

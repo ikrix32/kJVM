@@ -11,7 +11,7 @@
 /* invokestatic: Operand Stack*/
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
-#include <stdio.h>
+//#include <stdio.h>
 #include "kjvm.h"
 #include "classfile.h"
 #include "stack.h"
@@ -63,7 +63,7 @@ int stringLength(const char* str){
     return len;
 }
 
-char stringsNotEquals(const char* str1,const char* str2,const size_t len){
+char stringsNotEquals(const char* str1,const char* str2,const u4 len){
     for(int i = 0; i < len;i++){
         if(str1[i] != str2[i]){
             return 1;

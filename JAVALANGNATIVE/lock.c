@@ -12,7 +12,7 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 #include "config.h"
 #ifndef TINYBAJOS_MULTITASKING
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"

@@ -11,7 +11,7 @@
 // invokestatic: Operand Stack
 // ..., [arg0, [arg1 ...]] -> ..
 
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 #ifndef NRF51
 #include <termios.h>

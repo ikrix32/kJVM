@@ -2,9 +2,10 @@
  * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
  * See the file "license.terms" for information on usage and redistribution of this file.
  */
-#include <stdio.h>
+
+//#include <stdio.h>
 //#include <stdlib.h>
-#include "typedefinitions.h"
+#include "definitions.h"
 /* insert and update here functionForNativeMethodType-arrays for classes with native methods*/
 /* array length ->  at least up to last native method < methods_count*/
 /* look at methods in the *.java or *.class file in increasing order */
@@ -21,7 +22,7 @@
 #include "nativedispach.h"
 
 u1 nativeDispath(const char* methodName,const char* methodDescription){
-    printf("Calling native method:%s with description:%s\n",methodName,methodDescription);
+    PRINTF("Calling native method:%s with description:%s\n",methodName,methodDescription);
     return 1;
 }
 

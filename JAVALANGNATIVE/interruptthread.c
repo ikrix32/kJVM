@@ -12,7 +12,7 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 #include "config.h"
 #ifndef TINYBAJOS_MULTITASKING
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
@@ -23,9 +23,7 @@
 #include "heap.h"
 #include "lock.h"
 #include "interruptthread.h"
-#ifdef AVR8
-#include <avr/interrupt.h>
-#endif
+
 
 char static_sei()
 {

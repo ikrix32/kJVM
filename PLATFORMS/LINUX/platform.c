@@ -1,4 +1,4 @@
-#include <stdio.h>
+//#include <stdio.h>
 //#include <stdlib.h>
 #ifndef NRF51
 #include <unistd.h>
@@ -60,7 +60,7 @@ void initHW()
 {
 }
 
-u2 readClassFile(char* fileName, char* addr)
+/*u2 readClassFile(char* fileName, char* addr)
 {
 #if LINUX||AVR32LINUX
 #ifndef NRF51
@@ -74,7 +74,7 @@ u2 readClassFile(char* fileName, char* addr)
     return 0;
 #endif
 #endif
-}
+}*/
 
 u2 readClassBin(const u1* bin,const u4 binSize, char* addr)
 {

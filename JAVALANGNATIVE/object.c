@@ -11,8 +11,8 @@
 /* invokestatic: Operand Stack*/
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 #include "kjvm.h"
 #include "stack.h"
 #include "object.h"
@@ -24,7 +24,7 @@ char notify()
 {
     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
     {
-        exit(253);
+        ERROREXIT(253,"Notify on not locked mutex");
     }
 
     notifyThread(opStackGetValue(local));

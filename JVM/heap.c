@@ -3,7 +3,7 @@
  * See the file "license.terms" for information on usage and redistribution of this file.
  */
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include "definitions.h"
 #include "kjvm.h"
 #include "stack.h"

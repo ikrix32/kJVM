@@ -1353,7 +1353,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     else
                     {
 #ifndef TINYBAJOS_MULTITASKING
-                        printf("Normally terminated Thread: %d\n",currentThreadCB->tid);
+                        PRINTF("Normally terminated Thread: %d\n",currentThreadCB->tid);
                         if (threadList.count != 1){
                             deleteThread();
                         }else{
