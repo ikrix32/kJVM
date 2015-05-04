@@ -60,7 +60,7 @@ char nativeWait()
 {
     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
     {
-        exit(254);
+        ERROREXIT(254,"Wait without blocked mutex");
     }
     /*can not be ->IllegalMonitorStateException*/
     HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex= MUTEXNOTBLOCKED;/* free lock for another thread and lock this */

@@ -200,7 +200,7 @@ void createThread (void)
         }
         currentThreadCB = t;
         t->obj = NULLOBJECT;
-        u4 mainThreadPriority[2];
+        u4* mainThreadPriority = (u4*)malloc(2 * sizeof(u4));
         mainThreadPriority[0] = (u4) NORMPRIORITY;// priority (and alive) of main thread -> immutable
         mainThreadPriority[1] = (u4) 1;           // alive -> doesnt need for main thread??
         t->pPriority = mainThreadPriority;
@@ -263,14 +263,14 @@ void createThread (void)
 void insertThreadIntoPriorityList(ThreadControlBlock* t)
 {
     ThreadControlBlock* pos;
-    const u1 prio = *t->pPriority - 1;
-    if (prio > 10)
+    const u1 priority = *t->pPriority - 1;
+    if (priority > MAXPRIORITY)
         exit(99);
 
-    pos = threadPriorities[prio].cb;
+    pos = threadPriorities[priority].cb;
     if (pos == NULL)
     {
-        threadPriorities[prio].cb = t;
+        threadPriorities[priority].cb = t;
         t->pred = t;
         t->succ = t;
     }
@@ -281,10 +281,11 @@ void insertThreadIntoPriorityList(ThreadControlBlock* t)
         pos->succ = t;
         t->succ->pred = t;
     }
-    threadPriorities[prio].count++;
-    if ((*currentThreadCB->pPriority - 1) < prio)
-    {
-        currentThreadCB->numTicks = 0;            // force scheduling
+    threadPriorities[priority].count++;
+    const u1 crtPriority = (*currentThreadCB->pPriority - 1);
+    if (crtPriority < priority)
+    {// force scheduling
+        currentThreadCB->numTicks = 0;
     }
 }
 
@@ -296,24 +297,24 @@ void insertThreadIntoPriorityList(ThreadControlBlock* t)
 void removeThreadFromPriorityList(ThreadControlBlock* t)
 {
     //	ThreadControlBlock* temp=t->succ;
-    const u1 prio = *t->pPriority - 1;
-    if (prio > 10)
+    const u1 priority = *t->pPriority - 1;
+    if (priority > MAXPRIORITY)
         exit(100);
 
-    if (threadPriorities[prio].count == 1)        //last thread of current priority
+    if (threadPriorities[priority].count == 1)        //last thread of current priority
     {
-        threadPriorities[prio].cb = NULL;
+        threadPriorities[priority].cb = NULL;
     }
     else
     {
         t->pred->succ = t->succ;
         t->succ->pred = t->pred;
-        if (t == threadPriorities[prio].cb)
+        if (t == threadPriorities[priority].cb)
         {
-            threadPriorities[prio]. cb = t->pred;
+            threadPriorities[priority]. cb = t->pred;
         }
     }
-    threadPriorities[prio].count--;
+    threadPriorities[priority].count--;
 }
 
 
@@ -347,7 +348,8 @@ void deleteThread(void)
     removeThreadFromPriorityList(currentThreadCB);
 
     int i = MAXPRIORITY - 1;
-    while (threadPriorities[i].count == 0)//it should not be possible that i becomes lower than 0 therefore NO CHECK
+    //it should not be possible that i becomes lower than 0 therefore NO CHECK
+    while (threadPriorities[i].count == 0)
     {
         i--;
     }
@@ -373,23 +375,21 @@ void scheduler(void)
         return;
 
     //A Thread runs until his numTicks is 0
-    if (((currentThreadCB->numTicks--) && ((currentThreadCB->state) == THREADNOTBLOCKED)))
+    if (currentThreadCB->numTicks-- != 0
+    && (currentThreadCB->state == THREADNOTBLOCKED))
         return;
 
     // select a runnable thread
-    u1 threadFound;
     ThreadControlBlock* found = NULL;
+    u1 threadFound = 0;
 
-    threadFound = 0;
-
-    //printf("threads %d\n",numThreads);
-
-    for (int p = (MAXPRIORITY - 1); p != 255; p--)
+    for (int p = (MAXPRIORITY - 1); p >= 0; p--)
     {
-        //printf("Prio %d\n",p);
-        if ((found = threadPriorities[p].cb) == NULL)
+        if ( threadPriorities[p].cb == NULL)
             continue;
 
+        found = threadPriorities[p].cb;
+        //printf("Current %d, Found thread:%d, next:%d\n",currentThreadCB->tid,found->tid,found->succ->tid);
         for (int n = 0; n < threadPriorities[p].count; n++)
         {
             found = found->succ;
@@ -433,7 +433,6 @@ void scheduler(void)
         return;
     }
 
-
     // scheduling -> next thread
     methodStackPush(local);
     methodStackPush(cN);
@@ -441,8 +440,11 @@ void scheduler(void)
     methodStackPush(pc);
     methodStackPush((u2)(opStackGetSpPos()));
     currentThreadCB->methodSpPos = methodStackGetSpPos();
+
+    //printf("Switch threads: crt:%d next:%d, priority:%d\n",currentThreadCB->tid,found->tid,priority);
     currentThreadCB = found;
-    threadPriorities[*currentThreadCB->pPriority - 1].cb = currentThreadCB;
+    const u1 priority = (*currentThreadCB->pPriority - 1);
+    threadPriorities[priority].cb = currentThreadCB;
     //reset numTicks
     currentThreadCB->numTicks = *currentThreadCB->pPriority;
     setupCurrentThread();
