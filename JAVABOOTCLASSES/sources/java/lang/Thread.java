@@ -24,7 +24,7 @@ public abstract class Thread {
 	// Extra instance state follows:
 
 	private String name; // field 0
-	private int priority = 5; // field 1
+	private int priority = NORM_PRIORITY; // field 1
 	private boolean isAlive = false; // field 2
 
 	public native void start();
@@ -104,10 +104,10 @@ public abstract class Thread {
 	 *            must be between MIN_PRIORITY and MAX_PRIORITY.
 	 */
 	public final void setPriority(int priority) {
-		if (isAlive)
-			nativeSetPriority(priority);
-		else
-			this.priority = ((priority > 0) && (priority <= 10)) ? priority
+		//if (isAlive)
+		//	nativeSetPriority(priority);
+		//else
+		this.priority = ((priority > 0) && (priority <= MAX_PRIORITY)) ? priority
 					: NORM_PRIORITY;
 	}
 

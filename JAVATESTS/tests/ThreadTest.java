@@ -22,8 +22,8 @@ public class ThreadTest extends Thread{
 	{
 		System.out.println("Main started.");
 		ThreadTest t = new ThreadTest();
-		t.setPriority(MIN_PRIORITY);
 		t.start();
+		t.setPriority(MIN_PRIORITY);
 		
 		ThreadTest t1 = new ThreadTest();
 		t1.start();

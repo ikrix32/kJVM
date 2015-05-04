@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-
+#define __DEF_GLOBALS__
 #include "kjvm.h"
 #include "heap.h"
 #include "stack.h"
@@ -18,7 +18,6 @@
 #if !(AVR32LINUX || LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104)
 #error You need a valid target device: AVR32LINUX||LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104
 #endif
-
 
 /* all class files stored for linux in DS (malloc)*/
 void vm_init() /* read, analyze classfiles and fill structures*/

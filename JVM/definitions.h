@@ -155,15 +155,6 @@
 #define PRINT(format, ...)
 #define PRINTLN(format, ...)
 
-#define PRINTEXITTHREAD(a,b) {\
-    PRINTF(a,b);\
-    if (numThreads == 1) \
-    { \
-        return; \
-    }\
-    else {  deleteThread();} \
-}
-
 #define  COLOR_BLACK     0                        /* VT102 Color Codes                                  */
 #define  COLOR_RED       1
 #define  COLOR_GREEN     2

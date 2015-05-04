@@ -10,30 +10,45 @@
 #include "definitions.h"
 #include "scheduler.h"
 
+#ifdef __DEF_GLOBALS__
+#define GLOBAL
+#define INIT__(_a) =(_a)
+#else
+#define GLOBAL extern
+#define INIT__(_a)
+#endif
+#undef __DEF_GLOBALS__
+
+
 void vm_init(void);
 s1 vm_run(const u1 classId);
 
-u2 pc;                                // active thread
-u1 cN;                                // class structure Number
-u1 mN;                                // method Number in class structure
-u1 fN;                       		  // field number in class or object
-u1 local;
+GLOBAL u2 pc;                                     // active thread
+GLOBAL u1 cN;                                     // class structure Number
+GLOBAL u1 mN;                                     // method Number in class structure
+GLOBAL u1 fN;                       		  // field number in class or object
+GLOBAL u1 local INIT__(0);
+
 
 #ifndef AVR8
-char* classFileBase;
-u4    crtByteCodeSize;
+GLOBAL char* classFileBase INIT__(NULL);
+GLOBAL u4    crtByteCodeSize;
 #endif
 
-u1 numClasses;
+GLOBAL u1 numClasses INIT__(0);
+
 #ifndef TINYBAJOS_MULTITASKING
-ThreadControlBlock* currentThreadCB;
-u1 numThreads;
-u1 tid;
-//array of priority		lists
-ThreadPriorityList threadPriorities[MAXPRIORITY] ;
-ThreadControlBlock* interruptVectors[NUMBEROFINTERRUPTS];
+GLOBAL ThreadControlBlock* currentThreadCB INIT__(NULL);
+GLOBAL u1 tid INIT__(0);
+
+//priority		lists
+GLOBAL ThreadPriorityList threadList;
+GLOBAL ThreadControlBlock* interruptVectors[NUMBEROFINTERRUPTS];
 #endif
 
-classStructure cs[MAXCLASSES];	// static allocated !!!
+GLOBAL classStructure cs[MAXCLASSES];	// static allocated !!!
+
+
+
  
 #endif

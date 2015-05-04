@@ -31,64 +31,53 @@ char notify()
     return 0;
 }
 
+void updateThreadState(const u1 newThreadState,const slot object)
+{
+    const u1 oldThreadState = newThreadState == THREADNOTBLOCKED ? THREADMUTEXBLOCKED : THREADWAITBLOCKED;
 
+    /*can not be ->IllegalMonitorStateException*/
+    ThreadControlBlock* cb = threadList.cb;
+    for (int k = 0; k < threadList.count; k++)
+    {
+        if (cb->state == oldThreadState
+        && (cb->isMutexBlockedOrWaitingForObject).UInt == object.UInt)
+        {
+            cb->state = newThreadState;
+            if(newThreadState == THREADNOTBLOCKED)
+                cb->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+        }
+        cb = cb->succ;
+    }
+}
 char notifyAll()
 {
-    ThreadControlBlock* cb;
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
+    const slot obj = opStackGetValue(local);
+    if (HEAPOBJECTMARKER(obj.stackObj.pos).mutex != MUTEXBLOCKED)
     {
         exit(249);
     }
-    /*can not be ->IllegalMonitorStateException*/
-    for (int i = 0; i < (MAXPRIORITY); i++)
-    {
-        const u1 max = (threadPriorities[i].count);
-        cb = threadPriorities[i].cb;
-        for (int k = 0; k < max; k++)
-        {
-            if ((cb->state == THREADWAITBLOCKED)
-            && ((cb->isMutexBlockedOrWaitingForObject).UInt == opStackGetValue(local).UInt))
-                cb->state = THREADWAITAWAKENED;
-            cb = cb->succ;
-        }
-    }
+    updateThreadState(THREADWAITAWAKENED, obj);
+    
     return 0;
 }
 
-
 char nativeWait()
 {
-    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
+    const slot object = opStackGetValue(local);
+    if (HEAPOBJECTMARKER(object.stackObj.pos).mutex != MUTEXBLOCKED)
     {
         ERROREXIT(254,"Wait without blocked mutex");
     }
     /*can not be ->IllegalMonitorStateException*/
-    HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex= MUTEXNOTBLOCKED;/* free lock for another thread and lock this */
+    HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;/* free lock for another thread and lock this */
 
-    ThreadControlBlock* myTCB;
-    for (int i = 0; i < (MAXPRIORITY); i++)
-    {
-        const u1 max = (threadPriorities[i].count);
-        myTCB = threadPriorities[i].cb;
-        for (int k = 0; k < max; k++)
-        {
-            //alle blocked for object wecken!
-            if ((myTCB->isMutexBlockedOrWaitingForObject.UInt == opStackGetValue(local).UInt)
-            && (myTCB->state == THREADMUTEXBLOCKED))
-            {
-                myTCB->state = THREADNOTBLOCKED;  //!!
-                myTCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-            }
+    updateThreadState(THREADNOTBLOCKED,object);
 
-            myTCB = myTCB->succ;
-        }
-    }
     //its better to change own state after notify, to avoid cycles
-    currentThreadCB->isMutexBlockedOrWaitingForObject = opStackGetValue(local);
+    currentThreadCB->isMutexBlockedOrWaitingForObject = object;
     currentThreadCB->state = THREADWAITBLOCKED;
     return 0;
 }
-
 
 char waitTime()
 {

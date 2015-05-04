@@ -235,5 +235,6 @@ void handleException(void);
 u2 subCheck(const u2 classId,const u2 target,const u2 addr);
 
 slot createDims(const u4 dimsLeft, s2 *count);
-u1 isThreadLocked(const u1 pcOffset,slot obj_slot,const u1 methodOffset);
+u1 isThreadLocked(const slot obj_slot,const u1 a);
+void updateThreadLock(const slot object);
 #endif

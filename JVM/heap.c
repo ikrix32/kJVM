@@ -145,9 +145,7 @@ void checkObjects()
     // Will this be enough?
     // Do I bump heap objects (rootCheck = 1), the other I give abschu free !!
     u2 nextElementPos = 0;
-#ifndef TINYBAJOS_MULTITASKING
-    ThreadControlBlock* tCB;
-#endif
+
     do
     {
         HEAPOBJECTMARKER(nextElementPos).rootCheck = 0;
@@ -158,11 +156,8 @@ void checkObjects()
             continue;
         }
 #ifndef TINYBAJOS_MULTITASKING
-        for (int i = 0; i < (MAXPRIORITY); i++)//searching for root objects on stack
-        {
-            tCB = threadPriorities[i].cb;
-            const int max = (threadPriorities[i].count);
-            for (int k = 0; k < max; k++)
+            ThreadControlBlock* tCB = threadList.cb;
+            for (int k = 0; k < threadList.count; k++)
             {
                 u2 opSPPos = *(tCB->methodStackBase + tCB->methodSpPos - 1);
                 while (opSPPos > 0)
@@ -183,8 +178,7 @@ void checkObjects()
             if (HEAPOBJECTMARKER(nextElementPos).rootCheck == 1)
             {
                 break;
-            };
-        }
+            }
 #else
         u2 opSPPos=opStackGetSpPos();
         while (opSPPos > 0)

@@ -49,9 +49,11 @@ extern const char* getClassName(const u2 classId)
         return "kernelclass";
 #endif
     }
-#endif
+
     extern const char* testNames[];
     return testNames[classId - noMicroClasses];
+#endif
+    return "";
 }
 
 extern const char* getDebugMethodName(const u2 classId,const u2 methodId)
@@ -68,9 +70,11 @@ extern const char* getDebugMethodName(const u2 classId,const u2 methodId)
         return "kernelMethod";
 #endif
     }
-#endif
+
     extern const char* getClassMethodName(const u2 classId,const u2 methodId);
     return getClassMethodName(classId - noMicroClasses,methodId);
+#endif
+    return "";
 }
 
 #endif
@@ -117,6 +121,12 @@ void main()
             printf("\n========== End %s =========\n",testNames[i]);
             printf("Heap free space %d\n",getHeapFreeSpace());
         }
+#else
+        const u1 classIndex = classLoader_loadClass(NULL, 10);
+
+        classLoader_clinitClass(classIndex);
+        if(vm_run(0) == 0)//run main on last loaded class
+            unloadLastClass();
 #endif
 				
 #ifdef NRF51

@@ -28,16 +28,13 @@ void interruptThread(ThreadControlBlock* thread)
 // finds corresponding ThreadCB to java object by ceh
 ThreadControlBlock* findThreadCB(const slot obj)
 {
-    for (int i = 0; i < (MAXPRIORITY); i++)
+    for (int k = 0; k < threadList.count; k++)
     {
-        for (int k = 0; k < (threadPriorities[i].count); k++)
+        if ((threadList.cb->obj).UInt == obj.UInt)
         {
-            if ((threadPriorities[i].cb->obj).UInt == obj.UInt)
-            {
-                return threadPriorities[i].cb;
-            }
-            threadPriorities[i].cb = threadPriorities[i].cb->succ;
+            return threadList.cb;
         }
+        threadList.cb = threadList.cb->succ;
     }
 
     ERROREXIT(78, "thread not found");
@@ -48,22 +45,16 @@ ThreadControlBlock* findThreadCB(const slot obj)
 // notifys a waiting blocked thread for given object by ceh
 void notifyThread(const slot obj)
 {
-    ThreadControlBlock* cb;
-
-    for (int i = 0; i < (MAXPRIORITY); i++)
+    ThreadControlBlock* cb = threadList.cb;
+    for (int k = 0; k < threadList.count; k++)
     {
-        const u1 max = (threadPriorities[i].count);
-        cb = threadPriorities[i].cb;
-        for (int k = 0; k < max; k++)
+        if ((cb->state == THREADWAITBLOCKED)
+        && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
         {
-            if ((cb->state == THREADWAITBLOCKED)
-            && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
-            {
-                cb->state = THREADWAITAWAKENED;
-                return;
-            }
-            cb = cb->succ;
+            cb->state = THREADWAITAWAKENED;
+            return;
         }
+        cb = cb->succ;
     }
 }
 
@@ -71,23 +62,17 @@ void notifyThread(const slot obj)
 // notifys a waiting blocked threadfor given object by ceh
 void awakeThreadFromMutex(const slot obj)
 {
-    ThreadControlBlock* cb;
-
-    for (int i = 0; i < (MAXPRIORITY); i++)
+    ThreadControlBlock* cb = threadList.cb;
+    for (int k = 0; k < threadList.count; k++)
     {
-        const u1 max = (threadPriorities[i].count);
-        cb = threadPriorities[i].cb;
-        for (int k = 0; k < max; k++)
+        if ((cb->state == THREADMUTEXBLOCKED)
+        && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
         {
-            if ((cb->state == THREADMUTEXBLOCKED)
-            && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
-            {
-                cb->state = THREADNOTBLOCKED;
-                setMutexOnObject(cb, obj);
-                return;
-            }
-            cb = cb->succ;
+            cb->state = THREADNOTBLOCKED;
+            setMutexOnObject(cb, obj);
+            return;
         }
+        cb = cb->succ;
     }
 }
 
@@ -108,6 +93,7 @@ void releaseMutexOnObject(ThreadControlBlock* t,const slot obj,
     for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)  /* must be in*/
         if (t->hasMutexLockForObject[i].UInt == obj.UInt)
             break;
+
     if (i == MAXLOCKEDTHREADOBJECTS)
     {
 
@@ -176,7 +162,7 @@ void setMutexOnObject(ThreadControlBlock* t,const slot obj)
 // generates a new thread by ceh
 void createThread (void)
 {
-    if(numThreads == MAXTHREADS)
+    if(threadList.count == MAXTHREADS)
     {
         ERROREXIT(-2, "to many threads\n");
     }
@@ -184,20 +170,13 @@ void createThread (void)
 
     opStackInit(&(t->opStackBase));
     methodStackInit(&(t->methodStackBase));
-    t->methodSpPos = (numThreads == 0) ? 0 : 5;
+    t->methodSpPos = (threadList.count == 0) ? 0 : 5;
     t->tid = tid++;
     t->state = THREADNOTBLOCKED;
 
     //set thread in matching priority list
     if (currentThreadCB == NULL)//==the first thread (main thread) is created
     {
-        //init priority array because first thread is created
-        int i;
-        for (i = 0; i < (MAXPRIORITY); i++)
-        {
-            threadPriorities[i].cb = NULL;
-            threadPriorities[i].count = 0;
-        }
         currentThreadCB = t;
         t->obj = NULLOBJECT;
         u4* mainThreadPriority = (u4*)malloc(2 * sizeof(u4));
@@ -222,18 +201,21 @@ void createThread (void)
     *((t->pPriority) + 1) = (u4) 1;               // isALive == true
     t->numTicks = *(t->pPriority);
     insertThreadIntoPriorityList(t);
-    if (numThreads != 0)
+
+    if (t->tid != 0)//not main thread
     {
-        for (;;)
+        do
         {
             mN = findMethodByName(cN,"run", 3, "()V", 3);
             if (mN != INVALID_METHOD_ID)
                 break;
 
             cN = findSuperClass(cN);
-            if (cN == INVALID_CLASS_ID)
-                ERROREXIT(123, "run method not found");
-        }
+        }while((cN != INVALID_CLASS_ID));
+#if DEBUG//only n debug throw exception
+        if(mN == INVALID_CLASS_ID)
+             ERROREXIT(123, "run method not found");
+#endif
         *(t->methodStackBase + 0) = (u2) 0;
         *(t->methodStackBase + 1) = cN;
         *(t->methodStackBase + 2) = mN;
@@ -250,7 +232,6 @@ void createThread (void)
         t->lockCount[i] = 0;
     }
     t->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-    numThreads++;
 }
 
 
@@ -262,26 +243,17 @@ void createThread (void)
  */
 void insertThreadIntoPriorityList(ThreadControlBlock* t)
 {
-    ThreadControlBlock* pos;
-    const u1 priority = *t->pPriority - 1;
-    if (priority > MAXPRIORITY)
-        exit(99);
+    if (threadList.cb == NULL)
+        threadList.cb = t;
 
-    pos = threadPriorities[priority].cb;
-    if (pos == NULL)
-    {
-        threadPriorities[priority].cb = t;
-        t->pred = t;
-        t->succ = t;
-    }
-    else
-    {
-        t->pred = pos;
-        t->succ = pos->succ;
-        pos->succ = t;
-        t->succ->pred = t;
-    }
-    threadPriorities[priority].count++;
+    //find apropiate priority before insert
+    t->pred = threadList.cb;
+    t->succ = threadList.cb->succ;
+    threadList.cb->succ = t;
+    t->succ->pred = t;
+
+    threadList.count++;
+    const u1 priority = (*t->pPriority - 1);
     const u1 crtPriority = (*currentThreadCB->pPriority - 1);
     if (crtPriority < priority)
     {// force scheduling
@@ -290,43 +262,38 @@ void insertThreadIntoPriorityList(ThreadControlBlock* t)
 }
 
 /* Function does only remove the given Thread from his current list
- * but does not deleteth>e thread
+ * but does not delete the thread
  * list will be recognised by *(thread->pPriority)!! Do not edit before!
  * by Christopher-Eyk Hrabia
  */
 void removeThreadFromPriorityList(ThreadControlBlock* t)
 {
-    //	ThreadControlBlock* temp=t->succ;
-    const u1 priority = *t->pPriority - 1;
-    if (priority > MAXPRIORITY)
-        exit(100);
-
-    if (threadPriorities[priority].count == 1)        //last thread of current priority
+    if (threadList.count == 1)        //last thread of current priority
     {
-        threadPriorities[priority].cb = NULL;
+        threadList.cb = NULL;
     }
     else
     {
         t->pred->succ = t->succ;
         t->succ->pred = t->pred;
-        if (t == threadPriorities[priority].cb)
+        if (t == threadList.cb)
         {
-            threadPriorities[priority]. cb = t->pred;
+            threadList.cb = t->pred;
         }
     }
-    threadPriorities[priority].count--;
+    threadList.count--;
 }
 
 
 // Delete one thread, which is not actualThread by Christopher-Eyk Hrabia
 void deleteNotCurrentThread(ThreadControlBlock** t)
 {
+    *(((*t)->pPriority) + 1) = (u4) 0; // isALive == false
     removeThreadFromPriorityList(*t);
     free((*t)->methodStackBase);
     free((*t)->opStackBase);
     free((*t));
     *t = NULL;
-    numThreads--;
 }
 
 void setupCurrentThread()
@@ -344,23 +311,15 @@ void setupCurrentThread()
 // Delete actualThread by Christopher-Eyk Hrabia
 void deleteThread(void)
 {
-    *((currentThreadCB->pPriority) + 1) = (u4) 0; // isALive == false
-    removeThreadFromPriorityList(currentThreadCB);
+    deleteNotCurrentThread(&currentThreadCB);
+    //*((currentThreadCB->pPriority) + 1) = (u4) 0; // isALive == false
+    //removeThreadFromPriorityList(currentThreadCB);
 
-    int i = MAXPRIORITY - 1;
-    //it should not be possible that i becomes lower than 0 therefore NO CHECK
-    while (threadPriorities[i].count == 0)
-    {
-        i--;
-    }
-
-    free(currentThreadCB->methodStackBase);
-    free(currentThreadCB->opStackBase);
-    free(currentThreadCB);
-    currentThreadCB = threadPriorities[i].cb;
+    //free(currentThreadCB->methodStackBase);
+    //free(currentThreadCB->opStackBase);
+    //free(currentThreadCB);
+    currentThreadCB = threadList.cb;
     setupCurrentThread();
-
-    numThreads--;
 }
 
 
@@ -371,11 +330,11 @@ void deleteThread(void)
  */
 void scheduler(void)
 {
-    if (numThreads == 1)
+    if (threadList.count == 1)
         return;
 
     //A Thread runs until his numTicks is 0
-    if (currentThreadCB->numTicks-- != 0
+    if (currentThreadCB->numTicks-- > 0
     && (currentThreadCB->state == THREADNOTBLOCKED))
         return;
 
@@ -383,50 +342,44 @@ void scheduler(void)
     ThreadControlBlock* found = NULL;
     u1 threadFound = 0;
 
-    for (int p = (MAXPRIORITY - 1); p >= 0; p--)
+    found = threadList.cb;
+    //printf("Current %d, Found thread:%d, next:%d\n",currentThreadCB->tid,found->tid,found->succ->tid);
+    for (int n = 0; n < threadList.count; n++)
     {
-        if ( threadPriorities[p].cb == NULL)
+        found = found->succ;
+        //printf("in sched prio: %d, n: %d, t->state: %d\n",p,found->tid,found->state);
+        if ((found->state) == THREADNOTBLOCKED)
+        {
+            //printf("New Thread= %d\n",found->tid);
+            threadFound = 1;                  //signal nested loop break
+            break;
+        }                                     // I take it
+
+        if ((found->state) == THREADMUTEXBLOCKED)
+            continue;                         // next n
+
+        if ((found->state) == THREADWAITBLOCKED)
+            continue;                         // next n
+
+        if (((found->state) == THREADWAITAWAKENED)
+        && ((HEAPOBJECTMARKER((found->isMutexBlockedOrWaitingForObject).stackObj.pos).mutex) == MUTEXBLOCKED))
             continue;
 
-        found = threadPriorities[p].cb;
-        //printf("Current %d, Found thread:%d, next:%d\n",currentThreadCB->tid,found->tid,found->succ->tid);
-        for (int n = 0; n < threadPriorities[p].count; n++)
-        {
-            found = found->succ;
-            //printf("in sched prio: %d, n: %d, t->state: %d\n",p,found->tid,found->state);
-            if ((found->state) == THREADNOTBLOCKED)
-            {
-                //printf("New Thread= %d\n",found->tid);
-                threadFound = 1;                  //signal nested loop break
-                break;
-            }                                     // I take it
-
-            if ((found->state) == THREADMUTEXBLOCKED)
-                continue;                         // next n
-
-            if ((found->state) == THREADWAITBLOCKED)
-                continue;                         // next n
-
-            if (((found->state) == THREADWAITAWAKENED)
-            && ((HEAPOBJECTMARKER((found->isMutexBlockedOrWaitingForObject).stackObj.pos).mutex) == MUTEXBLOCKED))
-                continue;
-
-            /* awakened and mutexnotblocked*/
-            //if ((found->state)==THREADWAITAWAKENED)	{ //not nesessary because no other state ist possible
-            HEAPOBJECTMARKER((found->isMutexBlockedOrWaitingForObject).stackObj.pos).mutex = MUTEXBLOCKED;
-            found->state = THREADNOTBLOCKED;
-            found->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-            threadFound = 1;                      //signal nested loop break
-            break;
-            //}
-        }                                         // end for n
-        if (threadFound)
-            break;
-    }                                             // end for p
+        /* awakened and mutexnotblocked*/
+        //if ((found->state)==THREADWAITAWAKENED)	{ //not nesessary because no other state ist possible
+        HEAPOBJECTMARKER((found->isMutexBlockedOrWaitingForObject).stackObj.pos).mutex = MUTEXBLOCKED;
+        found->state = THREADNOTBLOCKED;
+        found->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+        threadFound = 1;                      //signal nested loop break
+        break;
+        //}
+    }                                         // end for n
+#if DEBUG
     if (!threadFound)
     {
         ERROREXIT(111, "SCHEDULING ERROR!\n");
     }
+#endif
     // assume: not all threads are blocked
     if (found == currentThreadCB /*&& ((found->state)==THREADNOTBLOCKED)*/) {
         currentThreadCB->numTicks = *(currentThreadCB->pPriority);
@@ -441,10 +394,9 @@ void scheduler(void)
     methodStackPush((u2)(opStackGetSpPos()));
     currentThreadCB->methodSpPos = methodStackGetSpPos();
 
-    //printf("Switch threads: crt:%d next:%d, priority:%d\n",currentThreadCB->tid,found->tid,priority);
+    //printf("Switch threads: crt:%d next:%d nextPriority:%d\n",currentThreadCB->tid,found->tid,*found->pPriority);
     currentThreadCB = found;
-    const u1 priority = (*currentThreadCB->pPriority - 1);
-    threadPriorities[priority].cb = currentThreadCB;
+    threadList.cb = currentThreadCB;
     //reset numTicks
     currentThreadCB->numTicks = *currentThreadCB->pPriority;
     setupCurrentThread();

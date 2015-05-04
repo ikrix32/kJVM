@@ -420,7 +420,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if(code == FSTORE) DEBUGPRINTLN_OPC("FSTORE  pop -> local(%d)=>,\n",byte1);
                 if(code == ASTORE) DEBUGPRINTLN_OPC("ASTORE  pop -> local(%x)=>,\n",byte1);
 #endif
-                opStackSetValue(local+getU1(cN,0),opStackPop());
+                opStackSetValue(local + getU1(cN,0),opStackPop());
 
             }BREAK;
             CASE(ISTORE_0):
@@ -455,7 +455,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(SASTORE):
             {
 #ifdef DEBUG
-               if(code == IASTORE) DEBUGPRINTLN_OPC("iastore stack -> local");
+                if(code == IASTORE) DEBUGPRINTLN_OPC("iastore stack -> local");
                 //float
                 if(code == FASTORE) DEBUGPRINTLN_OPC("fastore");
                 //float
@@ -872,8 +872,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             {
                 DEBUGPRINTLN_OPC(code == LOOKUPSWITCH ? "lookupswitch" : "tableswitch");
                 {
-                    // aa		tableswitch		ab          lookupswitch
-                    // 0  0  0 	padding			0  0        padding
+                    // aa           tableswitch		ab          lookupswitch
+                    // 0  0  0      padding			0  0        padding
                     // 0 0 0 2		DefaultByte	0  0  0 25  defaultByte
                     // 0 0 0 1		LowByte		0  0  0  2  npairs
                     // 0 0 0 3		HighByte	0  0  0  1  match
@@ -1162,14 +1162,28 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 //&& STRNCMPRAMFLASH(methodName,"append",6) == 0
                 //&& STRNCMPRAMFLASH(methodDescr,"([CII)Ljava/lang/StringBuilder;",30) == 0)
                 //    printf("");
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
+                const u2 methodInfo = getU2(cN,METHODBASE(cN, mN));
+                opStackSetSpPos(opStackGetSpPos() + (methodInfo & ACC_NATIVE ? 0 : findMaxLocals(cN,mN)));
 
-                if(isThreadLocked( 0, opStackGetValue(local), k + 1))
-                    break;
-
+#ifndef TINYBAJOS_MULTITASKING
+                if ( methodInfo & ACC_SYNCHRONIZED)
+                {
+                    if(isThreadLocked(opStackGetValue(local),1))
+                    {   // thread sleeps, try it later
+                        // (BYTECODEREF));
+                        opStackSetSpPos(methodStackPop() + k + 1);
+                        // before invoke
+                        pc = methodStackPop() - 1;
+                        mN = methodStackPop();
+                        cN = methodStackPop();
+                        local = methodStackPop();
+                        break;
+                    }
+                }
+#endif
                 // no synchronized,or I have the lock
                 // now call method
-                if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
+                if (methodInfo & ACC_NATIVE)
                 {
                     //printf("Invoke native method:%s->%s\n",className,methodName);
                     //goto nativeVoidReturn;
@@ -1252,14 +1266,29 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 }
                 //printf("%s->%s:%s \n",UTF8_GET_STRING(cN,getClassID(cN)),methodName,methodDescr);
 #endif
-                opStackSetSpPos(opStackGetSpPos() + ((getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
+                const u2 methodInfo = getU2(cN,METHODBASE(cN, mN));
+                opStackSetSpPos(opStackGetSpPos() + ((methodInfo & ACC_NATIVE) ? 0 : findMaxLocals(cN,mN)));
 
-                if(isThreadLocked(code == INVOKEINTERFACE ? -2 : 0, cs[cN].classInfo, k))
-                    break;
-
+#ifndef TINYBAJOS_MULTITASKING
+                if ( methodInfo & ACC_SYNCHRONIZED)
+                {
+                    if(isThreadLocked(cs[cN].classInfo,1))
+                    {   // thread sleeps, try it later
+                        // (BYTECODEREF));
+                        opStackSetSpPos(methodStackPop() + k);
+                        // before invoke
+                        pc = methodStackPop() - 1;
+                        pc += (code == INVOKEINTERFACE ? -2 : 0);
+                        mN = methodStackPop();
+                        cN = methodStackPop();
+                        local = methodStackPop();
+                        break;
+                    }
+                }
+#endif
                 // no synchronized,or I have the lock
                 // now call the method
-                if (getU2(cN,METHODBASE(cN, mN)) & ACC_NATIVE)
+                if (methodInfo & ACC_NATIVE)
                 {
                     if ((cs[cN].nativeFunction != NULL)
                     && (cs[cN].nativeFunction[mN] != NULL))
@@ -1294,49 +1323,16 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(RETURN):
             {
                 DEBUGPRINTLN_OPC("return");
-                slot first;
+
 #ifndef TINYBAJOS_MULTITASKING
-                if (getU2(cN,METHODBASE(cN,mN)) & ACC_SYNCHRONIZED)
+                const u2 methodInfo = getU2(cN,METHODBASE(cN,mN));
+                if (methodInfo & ACC_SYNCHRONIZED)
                 {
                     // have I always the lock ?
-                    if (getU2(cN,METHODBASE(cN,mN)) & ACC_STATIC)
-                        first = cs[cN].classInfo;
+                    if (methodInfo & ACC_STATIC)
+                       updateThreadLock(cs[cN].classInfo);
                     else
-                        first = opStackGetValue(local);
-
-                    int i = 0;
-                    // must be in
-                    for ( i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
-                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt == first.UInt) break;
-                    // fertig
-                    if (currentThreadCB->lockCount[i]>1) currentThreadCB->lockCount[i]--;
-                    else // last lock
-                    {
-                        currentThreadCB->lockCount[i]=0;
-                        // give lock free
-                        currentThreadCB->hasMutexLockForObject[i]=NULLOBJECT;
-                        currentThreadCB->isMutexBlockedOrWaitingForObject=NULLOBJECT;
-                        HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXNOTBLOCKED;
-                        ThreadControlBlock* myTCB=currentThreadCB;
-
-                        int k,max;
-
-                        for(i = 0; i < (MAXPRIORITY); i++)
-                        {
-                            max=(threadPriorities[i].count);
-                            myTCB=threadPriorities[i].cb;
-                            for(k = 0; k < max; k++)
-                            {
-                                if ((myTCB->isMutexBlockedOrWaitingForObject.UInt==first.UInt)
-                                &&  (myTCB->state==THREADMUTEXBLOCKED))
-                                {
-                                    myTCB->state=THREADNOTBLOCKED;
-                                    myTCB->isMutexBlockedOrWaitingForObject=NULLOBJECT;
-                                }
-                                myTCB=myTCB->succ;
-                            }
-                        }
-                    }
+                       updateThreadLock(opStackGetValue(local));
                 }
 #endif
                 if (methodStackEmpty())
@@ -1354,7 +1350,12 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     else
                     {
 #ifndef TINYBAJOS_MULTITASKING
-                        PRINTEXITTHREAD("normally terminated Thread: %d\n",currentThreadCB->tid);
+                        printf("Normally terminated Thread: %d\n",currentThreadCB->tid);
+                        if (threadList.count != 1){
+                            deleteThread();
+                        }else{
+                            return;
+                        }
 #else
                         free(methodStackBase);
                         free(opStackBase);
@@ -1362,7 +1363,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                         break;
                     }
                 }
-                first = opStackPop();// ret val
+                const slot first = opStackPop();// ret val
                 opStackSetSpPos(methodStackPop());
                 pc = methodStackPop() + 2;
                 mN = methodStackPop();
@@ -1512,42 +1513,12 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(MONITORENTER):
             {
 #ifndef TINYBAJOS_MULTITASKING
-                const slot first=opStackPop();
-                if ( HEAPOBJECTMARKER(first.stackObj.pos).mutex==MUTEXNOTBLOCKED)
-                {
-                    int i = 0;
-                    // get the lock
-                    HEAPOBJECTMARKER(first.stackObj.pos).mutex=MUTEXBLOCKED;
-                    for (i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
-                        if ((currentThreadCB->hasMutexLockForObject[i]).UInt != NULLOBJECT.UInt)
-                            continue;
-                        else break;
-                    if (i == MAXLOCKEDTHREADOBJECTS)
-                    {
-                        ERROREXIT(-1, "too many locks\n");
-                    }// count
-                    currentThreadCB->lockCount[i] = 1;
-                    currentThreadCB->hasMutexLockForObject[i] = first;
-                }
-                else // mutex == 0
-                {
-                    int i = 0;
-                    // have I always the lock ?
-                    for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
-                        if (currentThreadCB->hasMutexLockForObject[i].UInt == first.UInt)
-                            break;
-                    if (i == MAXLOCKEDTHREADOBJECTS)
-                    {   // mutex blocked
-                        currentThreadCB->state=THREADMUTEXBLOCKED;
-                        currentThreadCB->isMutexBlockedOrWaitingForObject=first;
-                        // thread sleeps, try it later
-                        opStackSetSpPos(methodStackPop() + findNumArgs(cN,BYTECODEREF) + 1);
-                        pc = pc-1;                // before monitorenter
-                        break;                    // let the scheduler work
-                    }
-                    else                          // yes I have lock
-                        // count
-                        currentThreadCB->lockCount[i]++;
+                const slot first = opStackPop();
+                if(isThreadLocked(first,0)){
+                    // thread sleeps, try it later
+                    opStackSetSpPos(methodStackPop() + findNumArgs(cN,BYTECODEREF) + 1);
+                    pc = pc - 1;              // before monitorenter
+                    break;
                 }
 #else
                 DNOTSUPPORTED;
@@ -1556,7 +1527,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(MONITOREXIT):                 // have I always the lock ?
             {
 #ifndef TINYBAJOS_MULTITASKING
-                const slot first=opStackPop();
+                const slot first = opStackPop();
 
                 int i = 0;
                 // must be in
@@ -1573,20 +1544,16 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     currentThreadCB->hasMutexLockForObject[i] = NULLOBJECT;
                     HEAPOBJECTMARKER(opStackGetValue(first.stackObj.pos).UInt).mutex = MUTEXNOTBLOCKED;
 
-                    ThreadControlBlock* myTCB;
-                    for(i = 0; i < MAXPRIORITY;i++)
+                    const slot object = opStackGetValue(first.stackObj.pos);
+                    ThreadControlBlock* myTCB = threadList.cb;
+                    for(int k = 0;k < threadList.count;k++)
                     {
-                        u2 max = (threadPriorities[i].count);
-                        myTCB = threadPriorities[i].cb;
-                        for(int k = 0;k < max;k++)
+                        if (myTCB->isMutexBlockedOrWaitingForObject.UInt == object.UInt)
                         {
-                            if (myTCB->isMutexBlockedOrWaitingForObject.UInt==opStackGetValue(first.stackObj.pos).UInt)
-                            {
-                                myTCB->state = THREADNOTBLOCKED;
-                                //myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;
-                            }
-                            myTCB=myTCB->succ;
+                            myTCB->state = THREADNOTBLOCKED;
+                            //myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;
                         }
+                        myTCB=myTCB->succ;
                     }
                 }
 #else
@@ -1875,66 +1842,87 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
 }
 
-
-u1 isThreadLocked(const u1 pcOffset,slot obj_slot,const u1 methodOffset)
+u1 isThreadLocked(const slot obj_slot,const u1 a)
 {
 #ifndef TINYBAJOS_MULTITASKING
-    if (getU2(cN,METHODBASE(cN, mN)) & ACC_SYNCHRONIZED)
+    if (HEAPOBJECTMARKER(obj_slot.stackObj.pos).mutex == MUTEXNOTBLOCKED)
     {
-        if (HEAPOBJECTMARKER(obj_slot.stackObj.pos).mutex== MUTEXNOTBLOCKED)
+        // mutex is free, I (the thread) have not the mutex and I can get the mutex for the object
+        if(a) currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+        HEAPOBJECTMARKER(obj_slot.stackObj.pos).mutex   = MUTEXBLOCKED;// get the lock
+        int i = 0;
+        // I had not the mutex for this object (but perhaps for others), now I have the look
+        for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
+            if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
+                continue;
+            else
+                break;
+        if (i == MAXLOCKEDTHREADOBJECTS)
         {
-            // mutex is free, I (the thread) have not the mutex and I can get the mutex for the object
-            currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-            HEAPOBJECTMARKER(obj_slot.stackObj.pos).mutex   = MUTEXBLOCKED;// get the lock
-            int i = 0;
-            // I had not the mutex for this object (but perhaps for others), now I have the look
-            for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
-                if (currentThreadCB->hasMutexLockForObject[i].UInt != NULLOBJECT.UInt)
-                    continue;
-                else
-                    break;
-            if (i == MAXLOCKEDTHREADOBJECTS)
-            {
-                ERROREXIT(-1, "too many locks\n");
-            }
-            // entry for this object in the array of mutexed objects for the thread
-            // count (before 0)
-            currentThreadCB->lockCount[i] = 1;
-            currentThreadCB->hasMutexLockForObject[i] = obj_slot;
-        }// mutex is blocked, is it my mutex ? have I always the lock ?
-        else
-        {
-            int i = 0;
-            // have I always the lock ?
-            for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
-                if (currentThreadCB->hasMutexLockForObject[i].UInt == obj_slot.UInt)
-                    break;
-
-            // another thread has the lock
-            if (i == MAXLOCKEDTHREADOBJECTS)
-            {
-                // mutex blocked
-                currentThreadCB->state = THREADMUTEXBLOCKED;
-                currentThreadCB->isMutexBlockedOrWaitingForObject = obj_slot;
-                // thread sleeps, try it later
-                // (BYTECODEREF));
-                opStackSetSpPos(methodStackPop() + methodOffset);
-                // before invoke
-                pc = methodStackPop() - 1;
-                pc += pcOffset;
-                mN = methodStackPop();
-                cN = methodStackPop();
-                local = methodStackPop();
-                return 1;
-            } // let the scheduler work
-            else      // yes I have the lock count
-                currentThreadCB->lockCount[i]++;
+            ERROREXIT(-1, "too many locks\n");
         }
+        // entry for this object in the array of mutexed objects for the thread
+        // count (before 0)
+        currentThreadCB->lockCount[i] = 1;
+        currentThreadCB->hasMutexLockForObject[i] = obj_slot;
+    }// mutex is blocked, is it my mutex ? have I always the lock ?
+    else
+    {
+        int i = 0;
+        // have I always the lock ?
+        for (i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)
+            if (currentThreadCB->hasMutexLockForObject[i].UInt == obj_slot.UInt)
+                break;
+
+        // another thread has the lock
+        if (i == MAXLOCKEDTHREADOBJECTS)
+        {
+            // mutex blocked
+            currentThreadCB->state = THREADMUTEXBLOCKED;
+            currentThreadCB->isMutexBlockedOrWaitingForObject = obj_slot;
+
+            return 1;
+        } // let the scheduler work
+        else      // yes I have the lock count
+            currentThreadCB->lockCount[i]++;
     }
 #endif
     return 0;
 }
 
+void updateThreadLock(const slot object)
+{
+#ifndef TINYBAJOS_MULTITASKING
+    int i = 0;
+    // must be in
+    for ( i = 0; i < MAXLOCKEDTHREADOBJECTS;i++)
+        if ((currentThreadCB->hasMutexLockForObject[i]).UInt == object.UInt)
+            break;
+    // fertig
+    if (currentThreadCB->lockCount[i] > 1)
+        currentThreadCB->lockCount[i]--;
+    else // last lock
+    {
+        currentThreadCB->lockCount[i]=0;
+        // give lock free
+        currentThreadCB->hasMutexLockForObject[i] = NULLOBJECT;
+        currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+        HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;
+
+        ThreadControlBlock* myTCB = threadList.cb;
+        for(int k = 0; k < threadList.count; k++)
+        {
+            if ((myTCB->isMutexBlockedOrWaitingForObject.UInt == object.UInt)
+            &&  (myTCB->state==THREADMUTEXBLOCKED))
+            {
+                myTCB->state = THREADNOTBLOCKED;
+                myTCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+            }
+            myTCB=myTCB->succ;
+        }
+    }
+#endif
+}
 
 // generalized single comparison of target class with class at addr in cN's constant pool.i
 // keeps cN unchanged if target is no super class of cN.
