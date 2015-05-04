@@ -96,6 +96,12 @@
 #include "tests_DivByZero.h"
 #endif
 
+#ifdef ENABLE_KCLASS_FORMAT
+#include "tests_ThreadTest_k.h"
+#else
+#include "tests_ThreadTest.h"
+#endif
+
 static const u1* testBinaries[] =
 {	tests_HelloWorldBin,
 	tests_ArithmeticBin,
@@ -113,6 +119,7 @@ static const u1* testBinaries[] =
 	tests_QuickSortBin,
 	tests_ErathostenesBin,
 	tests_DivByZeroBin,
+	tests_ThreadTestBin,
 };
 
 static const u4 testBinariesSize[] =
@@ -132,6 +139,7 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_QuickSortBin),
 	sizeof(tests_ErathostenesBin),
 	sizeof(tests_DivByZeroBin),
+	sizeof(tests_ThreadTestBin),
 };
 
 static const char* testNames[] =
@@ -151,6 +159,7 @@ static const char* testNames[] =
 	"tests/QuickSort",
 	"tests/Erathostenes",
 	"tests/DivByZero",
+	"tests/ThreadTest",
 };
 
 static const char** testMethodNames[] =
@@ -170,6 +179,7 @@ static const char** testMethodNames[] =
 	tests_QuickSortMethodNames,
 	tests_ErathostenesMethodNames,
 	tests_DivByZeroMethodNames,
+	tests_ThreadTestMethodNames,
 };
 
 extern const char* getClassMethodName(const u2 classId,const u2 methodId){
