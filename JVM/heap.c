@@ -18,8 +18,7 @@ static u2    heapTop = MAXHEAP;
 void heapInit()
 {
     if ((heapBase = ( slot*) malloc(sizeof(slot) * (size_t)MAXHEAP)) == NULL){
-        printf("malloc error\n");
-        exit(-1);// heap fixed size!!
+        ERROREXIT(-1, "malloc error\n");// heap fixed size!!
     }
 
     while (heapTop > 0)
@@ -99,7 +98,7 @@ u2 getFreeHeapSpace(const u2 length)
     //  merge free heap space to bigger blocks
     int schmelz;
 
-    verbosePrintf("Heap merge\n");
+    PRINTF("Heap merge\n");
     for (schmelz = 0; schmelz < 20; schmelz++)
     {
         nextElementPos = 0;
@@ -130,11 +129,8 @@ u2 getFreeHeapSpace(const u2 length)
         } while ((nextElementPos = getNextHeapObjectPos(nextElementPos))
                  < heapTop);
     }
-    /* alles umsonst*/
-
-    PRINTF(" no free heap space for object/array of length: 0x%x\n",length);
-
-    exit(-1);
+ 
+    ERROREXIT(-1," No free heap space for object/array of length: 0x%x\n",length);
     return 0;
 }
 

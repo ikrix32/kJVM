@@ -18,6 +18,8 @@ ThreadControlBlock* findThreadCB(const slot obj);
 void deleteNotCurrentThread(ThreadControlBlock** t);
 void notifyThread(const slot obj);
 void awakeThreadFromMutex(const slot obj);
+void updateThreadState(const slot object,const u1 oldState,const u1 newState,
+                       const u1 releaseMutexObjectRef,const u1 setMutex,const u1 returnOnFirst);
 void setMutexOnObject(ThreadControlBlock* t,const slot obj);
 void releaseMutexOnObject(ThreadControlBlock* t, slot obj,
 ThreadControlBlock* awakeThread);

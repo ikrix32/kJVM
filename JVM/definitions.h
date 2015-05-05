@@ -24,26 +24,13 @@
 #define THREADMUTEXBLOCKED      1
 #define THREADWAITBLOCKED       2
 #define THREADWAITAWAKENED      3
-#define GARBAGEFUSIONTRIALS     20
+#define THREAD_ANY_STATE        0xff
 
 #define PRINTF(format, ...) printf(format,  ## __VA_ARGS__)
 
 #define ERROREXIT(nr, format, ...) {PRINTF(format,  ## __VA_ARGS__);exit(nr);}
 
-#define STRNCMPRAMFLASH     stringsNotEquals
-#define STRNCMPFLASHFLASH   stringsNotEquals
-
-#ifndef TINYBAJOS_PRINTF
-#define verbosePrintf( format, ...) PRINTF ((format),  ## __VA_ARGS__)
-#else
-#define verbosePrintf( format, ...)
-#endif
-
-#if (AVR32UC3A || AVR32AP7000)
-#define NULLOBJECT          (toSlot(0xfffff000 |  ((u4)OBJECTMAGIC<<8)|((u4)OBJECTMAGIC<<4)|((u4)OBJECTMAGIC)))
-#else
 #define NULLOBJECT          (toSlot(0x000fffff |  ((u4)OBJECTMAGIC<<28)|((u4)OBJECTMAGIC<<24)|((u4)OBJECTMAGIC<<20)))
-#endif
 
 //mb jf
 #ifndef TINYBAJOS_EXCEPTION
@@ -152,9 +139,6 @@
 #define UTF8_GET_LENGTH(classId,id) getU2(classId,CP(classId, id) + 1);// 1 = sizeof(tag)
 #define UTF8_GET_STRING(classId,id) (char*)getAddr(classId,CP(classId, id) + 3)//3 = sizeof(tag) + sizeof(classNameLength)
 
-#define PRINT(format, ...)
-#define PRINTLN(format, ...)
-
 #define  COLOR_BLACK     0                        /* VT102 Color Codes                                  */
 #define  COLOR_RED       1
 #define  COLOR_GREEN     2
@@ -163,12 +147,6 @@
 #define  COLOR_MAGENTA   5
 #define  COLOR_CYAN      6
 #define  COLOR_WHITE     7
-
-#ifdef AM
-#define NUMBEROFINTERRUPTS  57                    //SIZE of interruptvectorarray
-#else
-#define NUMBEROFINTERRUPTS  1
-#endif
 
 #define INVALID_CLASS_ID 0xff
 #define INVALID_METHOD_ID 0xff

@@ -115,7 +115,7 @@ u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fi
 
             if (crtFieldInfo & ACC_FINAL){
                 const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);
-                const u1 isNotObject= STRNCMPRAMFLASH ("L",crtFieldDescr, 1);
+                const u1 isNotObject= STRNCMP ("L",crtFieldDescr, 1);
                 if(isNotObject)
                     continue; // ignore static and non static primitive finals
             }
@@ -130,10 +130,10 @@ u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fi
             if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
             {
                 const char* crtFieldName = UTF8_GET_STRING(class, crtFieldNameId);
-                if(STRNCMPFLASHFLASH(fieldName,crtFieldName, fieldNameLength) == 0)
+                if(STRNCMP(fieldName,crtFieldName, fieldNameLength) == 0)
                 {
                     const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
-                    if( STRNCMPFLASHFLASH(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
+                    if( STRNCMP(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
                     {
                         fN = f;
                     }
@@ -163,7 +163,7 @@ u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char*
         if (len == methodNameLen)
         {
             const char* methodName = UTF8_GET_STRING(classId, methodNameId);
-            if (STRNCMPRAMFLASH(name,methodName,methodNameLen) == 0)
+            if (STRNCMP(name,methodName,methodNameLen) == 0)
             {
                 if (methodDescr != NULL)
                 {
@@ -172,7 +172,7 @@ u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char*
                     if (methodDescrLength == methodDescriptorLength)
                     {
                         const char* methodDescriptorStr = UTF8_GET_STRING(classId, methodDescriptorId);
-                        if (STRNCMPRAMFLASH(methodDescr,methodDescriptorStr,methodDescriptorLength) == 0)
+                        if (STRNCMP(methodDescr,methodDescriptorStr,methodDescriptorLength) == 0)
                             return methodId;
                     }
                 } else
@@ -223,7 +223,7 @@ u1 findClass(const char* className,const u1 classNameLength)
             continue;
 
         const char* cclassName = UTF8_GET_STRING(classId, classNameId);
-        if (STRNCMPRAMFLASH(className,cclassName, classNameLength) == 0)
+        if (STRNCMP(className,cclassName, classNameLength) == 0)
         {
             //printf("\nclass:%s id:%d \n",className,cN);
             return classId;
@@ -463,7 +463,7 @@ void analyzeMethods(const u1 classId)//2900bytes
 #endif
             for (int i = 0; i < numNativeClassNames; i++)
             {
-                if (!STRNCMPRAMFLASH(nativeClassNames[i],className,classNameLength))
+                if (!STRNCMP(nativeClassNames[i],className,classNameLength))
                 {
                     cs[classId].nativeFunction = (functionForNativeMethodType*) funcArray[i];
                     break;
@@ -475,7 +475,7 @@ void analyzeMethods(const u1 classId)//2900bytes
         for (int m = 0; m < a; m++)// attributes of method
         {
             const char* adr = getAddr(classId,CP(classId,getU2(classId,0)) + 1 + 2);
-            if (STRNCMPRAMFLASH("Code", adr, 4) == 0)
+            if (STRNCMP("Code", adr, 4) == 0)
             {
                 DEBUG_CL_PRINTF("\t\tCode: attribute_length: %d\n",getU4(classId,pc));
                 DEBUG_CL_PRINTF("\t\tCode: max_stack: %d\n", getU2(classId,pc + 4));
@@ -506,19 +506,19 @@ void analyzeMethods(const u1 classId)//2900bytes
                 for (int i = 0; i < h; i++)
                 {
                     const char* addr = getAddr(classId,CP(classId,getU2(classId,0)) + 3);
-                    if (STRNCMPRAMFLASH("LineNumberTable", addr, 15) == 0)
+                    if (STRNCMP("LineNumberTable", addr, 15) == 0)
                     {
                         pc = getU4(classId,0) + pc;
                         continue;
                     }
 
-                    if (STRNCMPRAMFLASH("StackMapTable", addr, 13) == 0)
+                    if (STRNCMP("StackMapTable", addr, 13) == 0)
                     {
                         pc = getU4(classId,0) + pc;
                         continue;
                     }
 
-                    if (STRNCMPRAMFLASH("LocalVariableTable", addr, 18) == 0)
+                    if (STRNCMP("LocalVariableTable", addr, 18) == 0)
                     {
                         pc = getU4(classId,0) + pc;
                         continue;
@@ -527,7 +527,7 @@ void analyzeMethods(const u1 classId)//2900bytes
                 }                                 // code attributes
                 continue;
             }                                     // code
-            if (STRNCMPRAMFLASH("Exceptions", adr, 10) == 0)
+            if (STRNCMP("Exceptions", adr, 10) == 0)
             {
                 DEBUG_CL_PRINTF("exception object\n");
                 mN = n;
@@ -543,17 +543,17 @@ void analyzeMethods(const u1 classId)//2900bytes
                 //pc=(u2)getU4(0)+pc;
                 continue;
             }//Exceptions
-            if (STRNCMPRAMFLASH("Synthetic", adr, 9) == 0)
+            if (STRNCMP("Synthetic", adr, 9) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMPRAMFLASH("Deprecated", adr, 10) == 0)
+            if (STRNCMP("Deprecated", adr, 10) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMPRAMFLASH("Signature", adr, 9) == 0)
+            if (STRNCMP("Signature", adr, 9) == 0)
             {
                 pc = (u2) getU4(classId,0) + pc;
                 continue;
@@ -575,7 +575,7 @@ void analyzeFields(const u1 classId)//600bytes
         DEBUG_CL_PRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(classId,pc+4));
         DEBUG_CL_PRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(classId,pc+6));
         const u2 fielddescr = CP(classId,getU2(classId,cs[classId].field_info[n] + 4));
-        const u1 isNotObject= STRNCMPRAMFLASH("L",(const char*) getAddr(classId,fielddescr + 3), 1);
+        const u1 isNotObject= STRNCMP("L",(const char*) getAddr(classId,fielddescr + 3), 1);
 
         //printf("classId %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(classId,fielddescr + 3),fN);
         if ((ACC_STATIC & getU2(classId,pc)) && !((ACC_FINAL & getU2(classId,pc)) && isNotObject))
@@ -591,22 +591,22 @@ void analyzeFields(const u1 classId)//600bytes
             const u1 attribute_name = CP(classId,attribute_name_index);
             const u4 attribute_length = getU4(classId,0);
 
-            if (STRNCMPRAMFLASH("ConstantValue", getAddr(classId,attribute_name + 3), 13) == 0)	// nothing to do for jvm
+            if (STRNCMP("ConstantValue", getAddr(classId,attribute_name + 3), 13) == 0)	// nothing to do for jvm
             {
                 pc += attribute_length;           // continue
                 continue;                         // next attribute test
             }
-            if (STRNCMPRAMFLASH("Synthetic", getAddr(classId,attribute_name + 3), 9) == 0)
+            if (STRNCMP("Synthetic", getAddr(classId,attribute_name + 3), 9) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMPRAMFLASH("Deprecated", getAddr(classId,attribute_name + 3), 10) == 0)
+            if (STRNCMP("Deprecated", getAddr(classId,attribute_name + 3), 10) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMPRAMFLASH("Signature", getAddr(classId,attribute_name + 3), 9) == 0)
+            if (STRNCMP("Signature", getAddr(classId,attribute_name + 3), 9) == 0)
             {
                 pc += 6;
                 continue;
@@ -636,7 +636,7 @@ u2 getStartPC(const u1 classId,const u1 methodId)
      // number of attributes
     for (u2 i = 0; i < getU2(classId,METHODBASE(classId, methodId) + 6); i++)
     {
-        if (STRNCMPRAMFLASH("Code",getAddr(classId,CP(classId,getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)) + 3), 4) == 0)
+        if (STRNCMP("Code",getAddr(classId,CP(classId,getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)) + 3), 4) == 0)
             return (u2) METHODBASE(classId, methodId) + 8 + 14 + attrLength;
      //+attrLength;		????
         attrLength = getU4(classId,METHODBASE(classId, methodId) + 8) + 6;

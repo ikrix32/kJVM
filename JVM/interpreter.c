@@ -1027,7 +1027,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
                     if (code == PUTFIELD)
                     {
-                        if(STRNCMPRAMFLASH( "B",fieldDescr, 1) == 0)
+                        if(STRNCMP( "B",fieldDescr, 1) == 0)
                         {//Truncate Integer input for Byte output
                             first.Int = first.Int & 0x000000ff;
                         }
@@ -1161,9 +1161,9 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     METHODNOTFOUNDERR(methodName, className);
                 }
 #endif
-                //if(STRNCMPRAMFLASH(className,"java/lang/StringBuilder",22) == 0
-                //&& STRNCMPRAMFLASH(methodName,"append",6) == 0
-                //&& STRNCMPRAMFLASH(methodDescr,"([CII)Ljava/lang/StringBuilder;",30) == 0)
+                //if(STRNCMP(className,"java/lang/StringBuilder",22) == 0
+                //&& STRNCMP(methodName,"append",6) == 0
+                //&& STRNCMP(methodDescr,"([CII)Ljava/lang/StringBuilder;",30) == 0)
                 //    printf("");
                 const u2 methodInfo = getU2(cN,METHODBASE(cN, mN));
                 opStackSetSpPos(opStackGetSpPos() + (methodInfo & ACC_NATIVE ? 0 : findMaxLocals(cN,mN)));
@@ -1408,7 +1408,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     for (int i = 0; i < getU2(cN,cs[cN].fields_count); i++)	// count normal fields
                     {
                         u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-                        u1 isNotObject = STRNCMPRAMFLASH("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+                        u1 isNotObject = STRNCMP("L",(const char*) getAddr(cN,fielddescr + 3), 1);
 
                         if ( (getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
                             continue; // ignore static and non static primitive finals
@@ -1539,25 +1539,17 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                         break;
 
                 // fertig
-                if (currentThreadCB->lockCount[i] > 1) currentThreadCB->lockCount[i]--;
+                if (currentThreadCB->lockCount[i] > 1)
+                    currentThreadCB->lockCount[i]--;
                 else
                 {
                     currentThreadCB->lockCount[i] = 0;
                     // give lock free
                     currentThreadCB->hasMutexLockForObject[i] = NULLOBJECT;
-                    HEAPOBJECTMARKER(opStackGetValue(first.stackObj.pos).UInt).mutex = MUTEXNOTBLOCKED;
-
                     const slot object = opStackGetValue(first.stackObj.pos);
-                    ThreadControlBlock* myTCB = threadList.cb;
-                    for(int k = 0;k < threadList.count;k++)
-                    {
-                        if (myTCB->isMutexBlockedOrWaitingForObject.UInt == object.UInt)
-                        {
-                            myTCB->state = THREADNOTBLOCKED;
-                            //myTCB->isMutexBlockedForObjectOrWaiting=NULLOBJECT.UInt;
-                        }
-                        myTCB=myTCB->succ;
-                    }
+                    HEAPOBJECTMARKER(object.UInt).mutex = MUTEXNOTBLOCKED;
+
+                    updateThreadState(object, THREAD_ANY_STATE, THREADNOTBLOCKED, 0, 0, 0);
                 }
 #else
                 DNOTSUPPORTED;
@@ -1740,7 +1732,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(MULTIANEWARRAY):
             {
                 DEBUGPRINTLN_OPC("multianewarray");
-                pc+=2;                            // index into the constant_pool. Bajos performs no verification
+                pc+=2;                            // index into the constant_pool. kjvm performs no verification
                 u1 dim = getU1(cN,0);             // dimensions
 
                 s2 *local_cnt = (s2 *) malloc(sizeof(s2));
@@ -1834,14 +1826,14 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 				//const static void* LABEL1 = &&OPC_NEXT;
 				goto OPC_NOP;
 #endif
-				
+
 
 #ifndef TINYBAJOS_MULTITASKING
         scheduler();
 #endif
     }
 
-    verbosePrintf("Termination\n");
+    PRINTF("Termination\n");
 
 }
 
@@ -1912,17 +1904,7 @@ void updateThreadLock(const slot object)
         currentThreadCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
         HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;
 
-        ThreadControlBlock* myTCB = threadList.cb;
-        for(int k = 0; k < threadList.count; k++)
-        {
-            if ((myTCB->isMutexBlockedOrWaitingForObject.UInt == object.UInt)
-            &&  (myTCB->state==THREADMUTEXBLOCKED))
-            {
-                myTCB->state = THREADNOTBLOCKED;
-                myTCB->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-            }
-            myTCB=myTCB->succ;
-        }
+        updateThreadState(object, THREADMUTEXBLOCKED, THREADNOTBLOCKED, 1, 0, 0);
     }
 #endif
 }
@@ -2026,7 +2008,6 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
 //BH AM not tested
 void raiseExceptionFromIdentifier(const Exception exception)
 {
-
     methodStackPush(cN);
     methodStackPush(mN);
 

@@ -45,37 +45,40 @@ ThreadControlBlock* findThreadCB(const slot obj)
 // notifys a waiting blocked thread for given object by ceh
 void notifyThread(const slot obj)
 {
-    ThreadControlBlock* cb = threadList.cb;
-    for (int k = 0; k < threadList.count; k++)
-    {
-        if ((cb->state == THREADWAITBLOCKED)
-        && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
-        {
-            cb->state = THREADWAITAWAKENED;
-            return;
-        }
-        cb = cb->succ;
-    }
+    updateThreadState(obj, THREADWAITBLOCKED, THREADWAITAWAKENED,0,0,1);
 }
 
 
 // notifys a waiting blocked threadfor given object by ceh
 void awakeThreadFromMutex(const slot obj)
 {
+    updateThreadState(obj,THREADMUTEXBLOCKED,THREADNOTBLOCKED,0,1,1);
+}
+
+void updateThreadState(const slot object,const u1 oldState,const u1 newState,
+                       const u1 releaseMutexObjectRef,const u1 setMutex,const u1 returnOnFirst)
+{
+    /*can not be ->IllegalMonitorStateException*/
     ThreadControlBlock* cb = threadList.cb;
     for (int k = 0; k < threadList.count; k++)
     {
-        if ((cb->state == THREADMUTEXBLOCKED)
-        && ((cb->isMutexBlockedOrWaitingForObject).UInt == obj.UInt))
+        if((oldState == THREAD_ANY_STATE || cb->state == oldState)
+        && (cb->isMutexBlockedOrWaitingForObject).UInt == object.UInt)
         {
-            cb->state = THREADNOTBLOCKED;
-            setMutexOnObject(cb, obj);
-            return;
+            cb->state = newState;
+
+            if(releaseMutexObjectRef)
+                cb->isMutexBlockedOrWaitingForObject = NULLOBJECT;
+
+            if(setMutex)
+                setMutexOnObject(cb, object);
+
+            if(returnOnFirst)
+                return;
         }
         cb = cb->succ;
     }
 }
-
 
 /*
  * release Mutex on given object and given thread by ceh
@@ -223,7 +226,7 @@ void createThread (void)
         *(t->methodStackBase + 4) = findMaxLocals(cN,mN);
         // reference to caller object (from start())
         *(t->opStackBase) = opStackGetValue(local);
-        //verbosePrintf("cN x%x mN x%x startPC x%x\n", cN, mN, *(t->methodStackBase + 3));
+        //PRINTF("cN x%x mN x%x startPC x%x\n", cN, mN, *(t->methodStackBase + 3));
     }
 
     for (int i = 0; i < MAXLOCKEDTHREADOBJECTS; i++)

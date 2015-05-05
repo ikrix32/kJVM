@@ -17,61 +17,46 @@
 #include "stack.h"
 #include "object.h"
 #include "heap.h"
+#include "scheduler.h"
 
 #ifndef TINYBAJOS_MULTITASKING
 /* "java/lang/Object","notify","notifyAll","wait","waitTime","getDataAddress"*/
 char notify()
 {
+#ifdef DEBUG
     if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
-    {
         ERROREXIT(253,"Notify on not locked mutex");
-    }
-
+#endif
     notifyThread(opStackGetValue(local));
     return 0;
 }
 
-void updateThreadState(const u1 newThreadState,const slot object)
-{
-    const u1 oldThreadState = newThreadState == THREADNOTBLOCKED ? THREADMUTEXBLOCKED : THREADWAITBLOCKED;
-
-    /*can not be ->IllegalMonitorStateException*/
-    ThreadControlBlock* cb = threadList.cb;
-    for (int k = 0; k < threadList.count; k++)
-    {
-        if (cb->state == oldThreadState
-        && (cb->isMutexBlockedOrWaitingForObject).UInt == object.UInt)
-        {
-            cb->state = newThreadState;
-            if(newThreadState == THREADNOTBLOCKED)
-                cb->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-        }
-        cb = cb->succ;
-    }
-}
 char notifyAll()
 {
-    const slot obj = opStackGetValue(local);
-    if (HEAPOBJECTMARKER(obj.stackObj.pos).mutex != MUTEXBLOCKED)
-    {
-        exit(249);
-    }
-    updateThreadState(THREADWAITAWAKENED, obj);
-    
+    const slot object = opStackGetValue(local);
+#ifdef DEBUG
+    if (HEAPOBJECTMARKER(object.stackObj.pos).mutex != MUTEXBLOCKED)
+        ERROREXIT(249,"Wait without blocked mutex");
+#endif
+    updateThreadState(object, THREADWAITBLOCKED, THREADWAITAWAKENED,0,0,0);
+
     return 0;
 }
 
 char nativeWait()
 {
     const slot object = opStackGetValue(local);
+#ifdef DEBUG
     if (HEAPOBJECTMARKER(object.stackObj.pos).mutex != MUTEXBLOCKED)
     {
         ERROREXIT(254,"Wait without blocked mutex");
     }
+#endif
     /*can not be ->IllegalMonitorStateException*/
-    HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;/* free lock for another thread and lock this */
+    /* free lock for another thread and lock this */
+    HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;
 
-    updateThreadState(THREADNOTBLOCKED,object);
+    updateThreadState(object,THREADMUTEXBLOCKED,THREADNOTBLOCKED,1,0,0);
 
     //its better to change own state after notify, to avoid cycles
     currentThreadCB->isMutexBlockedOrWaitingForObject = object;
