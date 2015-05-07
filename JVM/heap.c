@@ -179,8 +179,8 @@ void checkObjects()
         u2 opSPPos=opStackGetSpPos();
         while (opSPPos > 0)
         {
-            if( (nextElementPos == ((*(opStackBase+(--opSPPos))).stackObj.pos))
-            &&(((*(opStackBase+(opSPPos))).stackObj.magic)==OBJECTMAGIC ))
+            if( (nextElementPos == ((*(opStackGetBase() + (--opSPPos))).stackObj.pos))
+            &&(((*(opStackGetBase() + (opSPPos))).stackObj.magic)==OBJECTMAGIC ))
             {
                 HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
                 break;

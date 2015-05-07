@@ -33,9 +33,11 @@ void vm_init() /* read, analyze classfiles and fill structures*/
     methodStackSetBase(currentThreadCB->methodStackBase);
     methodStackSetSpPos(0);
 #else
-    opStackInit(&opStackBase);
+    slot* stackBase = opStackGetBase();
+    opStackInit(&stackBase);
     opStackSetSpPos(0);
-    methodStackInit(&methodStackBase);
+    u2* methodBase = methodStackGetBase();
+    methodStackInit(&methodBase);
     methodStackSetSpPos(0);
 #endif
 

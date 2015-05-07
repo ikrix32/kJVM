@@ -40,13 +40,10 @@ f4 getFloat(const u1 classId,const u2 pos)
     return getU4(classId, pos);
 }
 
-
-//BH#define	getAddr(m)	(CLASSSTA+m)
 void* getAddr(const u1 classId,const u2 pos)
 {
     return (cs[classId].classFileStartAddress) + pos;
 }
-
 
 u1 findNumArgs(const u1 classId,const u2 methodRef)
 {
@@ -152,8 +149,7 @@ u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fi
 
 //Returns methodId(mN)
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,const u1 methodDescrLength)
-{
-    // in: classNumber cN, out: methodNumber mN
+{   // in: classNumber cN, out: methodNumber mN
     // non recursiv
     const u2 methodsCount = getU2(classId,cs[classId].methods_count);
     for (u1 methodId = 0; methodId < methodsCount; methodId++)

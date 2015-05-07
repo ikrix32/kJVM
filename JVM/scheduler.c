@@ -190,11 +190,10 @@ void createThread (void)
     else
     {
         cN = opStackGetValue(local).stackObj.classNumber;
-        //if (!findFieldByRamName("priority", 8, "I", 1))
-        if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
+        /*if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
         {
-            ERROREXIT(77, "field priority not found");
-        }
+            //  ERROREXIT(77, "field priority not found");
+        }*/
         t->pPriority = (u4*) (heapGetBase() + opStackGetValue(local).stackObj.pos + fN + 1);
         // position of int field priority of the thread creating object, next field is aLive
         // restore class number of object

@@ -62,6 +62,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
         DEBUGPRINTLOCALS;
         DEBUGPRINT_OPC("\t\t\t\t");
 #endif
+
 #ifdef USE_LABELS
         const static void* const opclabels_data[256] = {
             &&OPC_NOP         ,//0x00
@@ -250,7 +251,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             &&OPC_LRETURN     ,//0xad                      //mb, jf
             &&OPC_FRETURN     ,//0xae                      //mb, jf
             &&OPC_DRETURN     ,//0xaf                      //mb, jf
-            
+
             &&OPC_ARETURN     ,//0xb0                      //mb, jf
             &&OPC_RETURN      ,//0xb1                      // modified by mb jf
             &&OPC_GETSTATIC   ,//0xb2                      //mb jf
@@ -267,7 +268,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             &&OPC_ANEWARRAY   ,//0xbd                      //mb jf
             &&OPC_ARRAYLENGTH ,//0xbe                      //mb jf
             &&OPC_ATHROW      ,//0xbf
-            
+
             &&OPC_CHECKCAST   ,//0xc0                      // to do
             &&OPC_INSTANCEOF  ,//0xc1                      // to do
             &&OPC_MONITORENTER    ,//0xc2
@@ -355,30 +356,30 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #endif
                 opStackPush(opStackGetValue(local + getU1(cN,0)));
             }BREAK;
-            case ILOAD_0:
-            case ILOAD_1:
-            case ILOAD_2:
-            case ILOAD_3:
+            CASE(ILOAD_0):
+            CASE(ILOAD_1):
+            CASE(ILOAD_2):
+            CASE(ILOAD_3):
             {
                 DEBUGPRINTLN_OPC("ILOAD_%d local -> push\t...,=>",code - ILOAD_0);
                 opStackPush(opStackGetValue(local + code - ILOAD_0));
             }BREAK;
-            case FLOAD_0:
-            case FLOAD_1:
-            case FLOAD_2:
-            case FLOAD_3:
+            CASE(FLOAD_0):
+            CASE(FLOAD_1):
+            CASE(FLOAD_2):
+            CASE(FLOAD_3):
             {
                  DEBUGPRINTLN_OPC("FLOAD_%d local -> push\t...,=>",code - FLOAD_0);
                  opStackPush(opStackGetValue(local + code - FLOAD_0));
             }BREAK;
-            case ALOAD_0:
-            case ALOAD_1:
-            case ALOAD_2:
-            case ALOAD_3:
+            CASE(ALOAD_0):
+            CASE(ALOAD_1):
+            CASE(ALOAD_2):
+            CASE(ALOAD_3):
             {
                  DEBUGPRINTLN_OPC("aload_%d local -> push\t...,=>",code - ALOAD_0);
                  opStackPush(opStackGetValue(local + code - ALOAD_0));
-            }break;
+            }BREAK;
             CASE(IALOAD):
             CASE(FALOAD):
             CASE(AALOAD):
@@ -1360,8 +1361,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                             return;
                         }
 #else
-                        free(methodStackBase);
-                        free(opStackBase);
+                        free(methodStackGetBase());
+                        free(opStackGetBase());
 #endif
                         break;
                     }
@@ -1816,6 +1817,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(DRETURN):
             CASE(LRETURN):
             CASE(NOT_SUPPORTED):
+            //default:
             {
                 DEBUGPRINT_OPC("code:%d",code);
                 DNOTSUPPORTED;
