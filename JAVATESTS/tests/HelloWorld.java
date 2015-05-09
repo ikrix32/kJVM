@@ -5,7 +5,7 @@ public class HelloWorld {
 		public void print(){
 			System.out.println("HALLO");
 		}
-	public static void main(String args[]){
+	public static void runTest() {
 		final int currentTime = (int)System.currentTimeMillis();
 		
 		System.out.println("Hello World: "+currentTime+" milliseconds");

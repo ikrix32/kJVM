@@ -38,7 +38,7 @@ public class ArrayTest {
 		return s;
 	}
 
-	public static void main(String[] args) {
+	public static void runTest() {
 		byte[] arr = multiply(array, a);
 		System.out.println(""+arrayToString(array)+" * "+a+" = "+arrayToString(arr));
 		arr = subtract(array, b);

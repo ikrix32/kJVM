@@ -20,7 +20,7 @@ class OneClass {
     System.out.println("OneClass.printVals: " + this.a + "/" + this.b);
   }
 
-  public static void main(String[] args) {
+  public static void runTest() {
     OneClass oneClass = new OneClass(1,2);
     AnotherClass anotherClass0 = new AnotherClass(3);
     AnotherClass anotherClass1 = new AnotherClass(4);

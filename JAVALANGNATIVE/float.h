@@ -4,6 +4,6 @@
  */
 
 // Float
-char nativeParseFloat(void);
+//char nativeParseFloat(void);
 char typeConvert(void);
-char floatToCharArray(void);
+//char floatToCharArray(void);

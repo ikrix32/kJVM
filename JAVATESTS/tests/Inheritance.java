@@ -12,7 +12,7 @@ class Inheritance {
     System.out.println("Inheritance.methodA()");
   }
 
-  public static void main(String[] args) {
+  public static void runTest() {
     InheritanceA inheritanceA = new InheritanceB();
     InheritanceB inheritanceB = new InheritanceB();
     InheritanceA inheritanceC = new InheritanceA();

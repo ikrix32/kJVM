@@ -25,6 +25,10 @@
 #include "stack.h"
 #include "thread.h"
 
+extern u1 cN;
+extern u1 local;
+extern ThreadControlBlock* currentThreadCB;
+
 char start()
 {
     cN = opStackGetValue(local).stackObj.classNumber;

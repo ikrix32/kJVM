@@ -217,16 +217,9 @@
 
 #define NOT_SUPPORTED   0xFF
 
-//#define USE_LABELS
-#ifndef USE_LABELS
 #define CASE(x) case x
 #define BREAK break
 #define DISPATCH(opcode) switch(opcode)
-#else
-#define CASE(x) OPC_##x
-#define BREAK goto OPC_NEXT
-#define DISPATCH(opcode) goto *(void*)dispatch_table[opcode];
-#endif
 
 void interpreter_run(const u1 classId,const u1 methodId);
 u1  checkInstance(const u2 classId,const u2 target);

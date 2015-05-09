@@ -17,6 +17,10 @@
 #include "stack.h"
 #include "nstring.h"
 
+extern u1 cN;
+extern u1 local;
+extern classStructure cs[MAXCLASSES];
+
 char nativeStringLength()
 {
     const slot mySlot = opStackGetValue(local);

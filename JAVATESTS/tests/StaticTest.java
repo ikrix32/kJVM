@@ -8,7 +8,7 @@ class StaticTest {
   static int b = 11;
   static String c = "Nase";
 
-  public static void main(String[] args) {
+  public static void runTest() {
     System.out.println("StaticTest");
     System.out.println("a = " + a);
     System.out.println("b = " + b);

@@ -9,7 +9,7 @@ class StringAndHeapTest {
     System.out.println("test: "+a);
   }
 
-  public static void main(String[] args) {
+  public static void runTest() {
     int i = 12;
 
     System.out.println("A String");

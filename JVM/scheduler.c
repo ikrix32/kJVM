@@ -8,6 +8,19 @@
 #include "scheduler.h"
 #include "heap.h"
 
+extern u2 pc;
+extern u1 cN;
+extern u1 fN;
+extern u1 mN;
+extern u1 local;
+
+extern u1 tid;
+extern ThreadControlBlock* currentThreadCB;
+
+//priority		lists
+extern ThreadPriorityList threadList;
+
+
 void interruptThread(ThreadControlBlock* thread)
 {
     if ((thread))
@@ -342,7 +355,6 @@ void scheduler(void)
 
     // select a runnable thread
     ThreadControlBlock* found = NULL;
-    u1 threadFound = 0;
 
     found = threadList.cb;
     //printf("Current %d, Found thread:%d, next:%d\n",currentThreadCB->tid,found->tid,found->succ->tid);
@@ -353,7 +365,6 @@ void scheduler(void)
         if ((found->state) == THREADNOTBLOCKED)
         {
             //printf("New Thread= %d\n",found->tid);
-            threadFound = 1;                  //signal nested loop break
             break;
         }                                     // I take it
 
@@ -372,7 +383,6 @@ void scheduler(void)
         HEAPOBJECTMARKER((found->isMutexBlockedOrWaitingForObject).stackObj.pos).mutex = MUTEXBLOCKED;
         found->state = THREADNOTBLOCKED;
         found->isMutexBlockedOrWaitingForObject = NULLOBJECT;
-        threadFound = 1;                      //signal nested loop break
         break;
         //}
     }                                         // end for n

@@ -97,9 +97,9 @@ public final class Float {
 	 */
 	private final float value;
 
-	public static native char[] floatToCharArray(float f);
+	//public static native char[] floatToCharArray(float f);
 	
-	public static native float nativeParseFloat(char[] arr);
+	//public static native float nativeParseFloat(char[] arr);
 
 	/**
 	 * Convert the float to the IEEE 754 floating-point "single format" bit
@@ -222,7 +222,7 @@ public final class Float {
 		dec += "." + prec.substring(1, prec.length());
 		
 		return dec;*/
-		return new String(floatToCharArray(f));
+		return ftoa(f);//new String(floatToCharArray(f));
 	}
 
 	/**
@@ -312,21 +312,7 @@ public final class Float {
 	 * @since 1.2
 	 */
 	public static float parseFloat(String str) {
-		/*String dec = str;
-		String prec = null;
-		final int dotIndex = str.indexOf('.');
-		if(dotIndex >= 0){
-			dec = str.substring(0,dotIndex);
-		}
-		if(dotIndex < str.length() - 1)
-			prec= str.substring(dotIndex + 1,str.length());
-		
-		float result = Integer.parseInt(dec);
-		if(prec != null){
-			int p = Integer.parseInt(s)
-		}*/
-		
-		return nativeParseFloat(str.toCharArray());
+		return parseFloat(str.toCharArray());
 	}
 
 	/**
@@ -464,4 +450,108 @@ public final class Float {
 	 * 
 	 * return x > y ? 1 : -1; }
 	 */
+	public static float parseFloat(final char[] p)
+	{
+		int i = 0;
+	    int sign;
+	    float value, scale;
+	    final int pLength = p.length;
+	    // Skip leading white space, if any.
+	    while (i < pLength && Character.isSpace(p[i])){
+	        ++i;
+	    }
+
+	    // Get sign, if any.
+	    sign = 1;
+	    if(i < pLength){
+	    	if (p[i] == '-') {
+	    		sign = -1;
+	    		++i;
+	    	} else if (p[i] == '+') {
+	    		++i;
+	    	}
+	    }
+
+	    // Get digits before decimal point or exponent, if any.
+	    value = 0.0f;
+	    for (;i < pLength && Character.isDigit(p[i]) ; ++i) {
+	        value = value * 10f + (p[i] - '0');
+	    }
+
+	    // Get digits after decimal point, if any.
+	    if (i < pLength && p[i] == '.') {
+	        float pow10 = 10f;
+	        ++i;
+	        while (i < pLength && Character.isDigit(p[i])) {
+	            value += (p[i] - '0') / pow10;
+	            pow10 *= 10f;
+	            ++i;
+	        }
+	    }
+
+	    // Handle exponent, if any.
+	    boolean frac = false;
+	    scale = 1.0f;
+	    if (i < pLength && (p[i] == 'e' || p[i] == 'E')) {
+	        int expon;
+
+	        // Get sign of exponent, if any.
+	        ++i;
+	        if(i < pLength)
+	        {
+		        if (p[i] == '-') {
+		            frac = true;
+		            ++i;
+		        } else if (p[i] == '+') {
+		            ++i;
+		        }
+	        }
+	        // Get digits of exponent, if any.
+	        for (expon = 0;i < pLength && Character.isDigit(p[i]); ++i) {
+	            expon = expon * 10 + (p[i] - '0');
+	        }
+	        if (expon > 308) expon = 308;
+
+	        // Calculate scaling factor.
+	       // while (expon >= 50) { scale *= 1E50; expon -= 50; }
+	        while (expon >=  8) { scale *= 1E8f;  expon -=  8; }
+	        while (expon >   0) { scale *= 10f; expon -=  1; }
+	    }
+	    // Return signed and scaled floating point result.
+	    return sign * (frac ? (value / scale) : (value * scale));
+	}
+	
+	static String ftoa(float val)
+	{
+		if(val == 0)
+			return "0";
+	
+	    int i = (int)val;
+	    
+	    String result = Integer.toString(i);
+	    
+	    val -= i;
+	    
+	    i = (int)(val * 1000000);
+	    
+	    if(i != 0)
+	    {
+	    	result += '.';
+	    	val = val * 10;
+	    	
+	    	while (((int)val) == 0) {
+	    		result += '0';
+	    		val = val * 10;
+	    	}
+	    
+	    	if (i < 0) 
+	    		i = - i;
+	    	//remove end zeros
+	    	while (i % 10 == 0)
+	    		i = i / 10;
+	    
+	    	result += Integer.toString(i);;
+	    }
+	    return result;
+	}
 }

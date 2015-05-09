@@ -48,7 +48,7 @@ class QuickSort {
   }
 
   /* test it */
-  public static void main (String args[]) {
+  public static void runTest() {
     int test[] = {32,123,12,-12,65,-2,66,-64,-2,2,122,19,1234};
     System.out.println("Before sorting:");
     printArray(test);

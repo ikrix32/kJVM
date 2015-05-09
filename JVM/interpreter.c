@@ -33,6 +33,17 @@ getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) 
 extern char* getClassName(const u2 classId);
 #endif
 
+extern u2 pc;
+extern u1 cN;
+extern u1 fN;
+extern u1 mN;
+extern u1 local;
+
+extern classStructure cs[MAXCLASSES];
+
+extern ThreadControlBlock* currentThreadCB;
+extern ThreadPriorityList threadList;
+
 void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  methodNumber cN, mN
 {   //u1 code, byte1, byte2;
     //u2 heapPos;
@@ -63,225 +74,6 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
         DEBUGPRINT_OPC("\t\t\t\t");
 #endif
 
-#ifdef USE_LABELS
-        const static void* const opclabels_data[256] = {
-            &&OPC_NOP         ,//0x00
-            &&OPC_ACONST_NULL ,//0x01                      // modified by mb jf
-            &&OPC_ICONST_M1   ,//0x02
-            &&OPC_ICONST_0    ,//0x03
-            &&OPC_ICONST_1    ,//0x04
-            &&OPC_ICONST_2    ,//0x05
-            &&OPC_ICONST_3    ,//0x06
-            &&OPC_ICONST_4    ,//0x07
-            &&OPC_ICONST_5    ,//0x08
-            &&OPC_LCONST_0    ,//0x09                      //long
-            &&OPC_LCONST_1    ,//0x0a
-            &&OPC_FCONST_0    ,//0x0b
-            &&OPC_FCONST_1    ,//0x0c
-            &&OPC_FCONST_2    ,//0x0d
-            &&OPC_DCONST_0    ,//0x0e
-            &&OPC_DCONST_1    ,//0x0f
-
-            &&OPC_BIPUSH      ,//0x10
-            &&OPC_SIPUSH      ,//0x11
-            &&OPC_LDC         ,//0x12
-            &&OPC_LDC_W       ,//0x13
-            &&OPC_LDC2_W      ,//0x14
-            &&OPC_ILOAD       ,//0x15
-            &&OPC_LLOAD       ,//0x16
-            &&OPC_FLOAD       ,//0x17
-            &&OPC_DLOAD       ,//0x18
-            &&OPC_ALOAD       ,//0x19
-            &&OPC_ILOAD_0     ,//0x1a
-            &&OPC_ILOAD_1     ,//0x1b
-            &&OPC_ILOAD_2     ,//0x1c
-            &&OPC_ILOAD_3     ,//0x1d
-            &&OPC_NOT_SUPPORTED,//OPC_LLOAD_0     ,//0x1e
-            &&OPC_NOT_SUPPORTED,//OPC_LLOAD_1     ,//0x1f
-
-            &&OPC_NOT_SUPPORTED,//LLOAD_2     ,//0x20
-            &&OPC_NOT_SUPPORTED,//LLOAD_3     ,//0x21
-            &&OPC_FLOAD_0     ,//0x22
-            &&OPC_FLOAD_1     ,//0x23
-            &&OPC_FLOAD_2     ,//0x24
-            &&OPC_FLOAD_3     ,//0x25
-            &&OPC_DLOAD_0     ,//0x26
-            &&OPC_DLOAD_1     ,//0x27
-            &&OPC_DLOAD_2     ,//0x28
-            &&OPC_DLOAD_3     ,//0x29
-            &&OPC_ALOAD_0     ,//0x2a
-            &&OPC_ALOAD_1     ,//0x2b
-            &&OPC_ALOAD_2     ,//0x2c
-            &&OPC_ALOAD_3     ,//0x2d
-            &&OPC_IALOAD      ,//0x2e
-            &&OPC_LALOAD      ,//0x2f
-
-            &&OPC_FALOAD      ,//0x30
-            &&OPC_DALOAD      ,//0x31
-            &&OPC_AALOAD      ,//0x32
-            &&OPC_BALOAD      ,//0x33
-            &&OPC_CALOAD      ,//0x34
-            &&OPC_SALOAD      ,//0x35
-            &&OPC_ISTORE      ,//0x36
-            &&OPC_LSTORE      ,//0x37
-            &&OPC_FSTORE      ,//0x38
-            &&OPC_DSTORE      ,//0x39
-            &&OPC_ASTORE      ,//0x3A
-            &&OPC_ISTORE_0    ,//0x3B
-            &&OPC_ISTORE_1    ,//0x3C
-            &&OPC_ISTORE_2    ,//0x3D
-            &&OPC_ISTORE_3    ,//0x3E
-            &&OPC_LSTORE_0    ,//0x3F
-
-            &&OPC_LSTORE_1    ,//0x40
-            &&OPC_LSTORE_2    ,//0x41
-            &&OPC_LSTORE_3    ,//0x42
-            &&OPC_FSTORE_0    ,//0x43
-            &&OPC_FSTORE_1    ,//0x44
-            &&OPC_FSTORE_2    ,//0x45
-            &&OPC_FSTORE_3    ,//0x46
-            &&OPC_DSTORE_0    ,//0x47
-            &&OPC_DSTORE_1    ,//0x48
-            &&OPC_DSTORE_2    ,//0x49
-            &&OPC_DSTORE_3    ,//0x4A
-            &&OPC_ASTORE_0    ,//0x4b
-            &&OPC_ASTORE_1    ,//0x4c
-            &&OPC_ASTORE_2    ,//0x4d
-            &&OPC_ASTORE_3    ,//0x4e
-            &&OPC_IASTORE     ,//0x4F                      //mb jf
-
-            &&OPC_LASTORE     ,//0x50                      //mb jf
-            &&OPC_FASTORE     ,//0x51                      //mb jf
-            &&OPC_DASTORE     ,//0x52                      //mb jf
-            &&OPC_AASTORE     ,//0x53                      //mb jf
-            &&OPC_BASTORE     ,//0x54                      //mb jf
-            &&OPC_CASTORE     ,//0x55                      //mb jf
-            &&OPC_SASTORE     ,//0x56                      //mb jf
-            &&OPC_POP         ,//0x57
-            &&OPC_POP2        ,//0x58
-            &&OPC_DUP         ,//0x59
-            &&OPC_DUP_X1      ,//0x5a
-            &&OPC_DUP_X2      ,//0x5b
-            &&OPC_DUP2        ,//0x5c
-            &&OPC_DUP2_X1     ,//0x5d
-            &&OPC_DUP2_X2     ,//0x5e
-            &&OPC_SWAP        ,//0x5f
-
-            &&OPC_IADD        ,//0x60
-            &&OPC_LADD        ,//0x61
-            &&OPC_FADD        ,//0x62
-            &&OPC_DADD        ,//0x63
-            &&OPC_ISUB        ,//0x64                      // modified by mb jf
-            &&OPC_LSUB        ,//0x65
-            &&OPC_FSUB        ,//0x66
-            &&OPC_DSUB        ,//0x67                      // modified by mb jf
-            &&OPC_IMUL        ,//0x68
-            &&OPC_LMUL        ,//0x69
-            &&OPC_FMUL        ,//0x6A                      // modified by mb jf
-            &&OPC_DMUL        ,//0x6B
-            &&OPC_IDIV        ,//0x6C                      // modified by mb jf
-            &&OPC_LDIV        ,//0x6D
-            &&OPC_FDIV        ,//0x6E                      // modified by mb jf
-            &&OPC_DDIV        ,//0x6F
-
-            &&OPC_IREM        ,//0x70
-            &&OPC_LREM        ,//0x71
-            &&OPC_FREM        ,//0x72
-            &&OPC_DREM        ,//0x73
-            &&OPC_INEG        ,//0x74
-            &&OPC_LNEG        ,//0x75
-            &&OPC_FNEG        ,//0x76
-            &&OPC_DNEG        ,//0x77
-            &&OPC_ISHL        ,//0x78
-            &&OPC_LSHL        ,//0x79
-            &&OPC_ISHR        ,//0x7A
-            &&OPC_LSHR        ,//0x7B
-            &&OPC_IUSHR       ,//0x7C
-            &&OPC_LUSHR       ,//0x7D
-            &&OPC_IAND        ,//0x7E
-            &&OPC_LAND        ,//0x7F
-
-            &&OPC_IOR         ,//0x80
-            &&OPC_LOR         ,//0x81
-            &&OPC_IXOR        ,//0x82
-            &&OPC_LXOR        ,//0x83
-            &&OPC_IINC        ,//0x84                      //modified: mb, jf
-            &&OPC_I2L         ,//0x85
-            &&OPC_I2F         ,//0x86
-            &&OPC_I2D         ,//0x87
-            &&OPC_L2I         ,//0x88
-            &&OPC_L2F         ,//0x89
-            &&OPC_L2D         ,//0x8A
-            &&OPC_F2I         ,//0x8B
-            &&OPC_F2L         ,//0x8C
-            &&OPC_F2D         ,//0x8D
-            &&OPC_D2I         ,//0x8E
-            &&OPC_D2L         ,//0x8F
-
-            &&OPC_D2F         ,//0x90
-            &&OPC_I2B         ,//0x91
-            &&OPC_I2C         ,//0x92
-            &&OPC_I2S         ,//0x93
-            &&OPC_LCMP        ,//0x94
-            &&OPC_FCMPL       ,//0x95
-            &&OPC_FCMPG       ,//0x96
-            &&OPC_DCMPL       ,//0x97
-            &&OPC_DCMPG       ,//0x98
-            &&OPC_IFEQ        ,//0x99                      //mb, jf
-            &&OPC_IFNE        ,//0x9a                      //mb, jf
-            &&OPC_IFLT        ,//0x9b                      //mb, jf
-            &&OPC_IFGE        ,//0x9c                      //mb, jf
-            &&OPC_IFGT        ,//0x9d                      //mb, jf
-            &&OPC_IFLE        ,//0x9e                      //mb, jf
-            &&OPC_IF_ICMPEQ   ,//0x9f                      //mb, jf
-
-            &&OPC_IF_ICMPNE   ,//0xa0                      //mb, jf
-            &&OPC_IF_ICMPLT   ,//0xa1                      //mb, jf
-            &&OPC_IF_ICMPGE   ,//0xa2                      //mb, jf
-            &&OPC_IF_ICMPGT   ,//0xa3                      //mb, jf
-            &&OPC_IF_ICMPLE   ,//0xa4                      //mb, jf
-            &&OPC_IF_ACMPEQ   ,//0xa5                      //mb, jf
-            &&OPC_IF_ACMPNE   ,//0xa6                      //mb, jf
-            &&OPC_GOTO        ,//0xa7                      //mb, jf
-            &&OPC_JSR         ,//0xa8                      //mb, jf
-            &&OPC_RET         ,//0xa9                      //mb, jf
-            &&OPC_TABLESWITCH ,//0xaa                      //mb, jf
-            &&OPC_LOOKUPSWITCH    ,//0xab                  //mb, jf
-            &&OPC_IRETURN     ,//0xac                      //mb, jf
-            &&OPC_LRETURN     ,//0xad                      //mb, jf
-            &&OPC_FRETURN     ,//0xae                      //mb, jf
-            &&OPC_DRETURN     ,//0xaf                      //mb, jf
-
-            &&OPC_ARETURN     ,//0xb0                      //mb, jf
-            &&OPC_RETURN      ,//0xb1                      // modified by mb jf
-            &&OPC_GETSTATIC   ,//0xb2                      //mb jf
-            &&OPC_PUTSTATIC   ,//0xb3                      //mb jf
-            &&OPC_GETFIELD    ,//0xb4                      // modified by mb jf
-            &&OPC_PUTFIELD    ,//0xb5                      // modified by mb jf
-            &&OPC_INVOKEVIRTUAL   ,//0xb6                  // modified by mb jf
-            &&OPC_INVOKESPECIAL   ,//0xb7                  // modified by mb jf
-            &&OPC_INVOKESTATIC    ,//0xb8                  // modified by mb jf
-            &&OPC_INVOKEINTERFACE ,//0xb9
-            &&OPC_NOT_SUPPORTED,//XXXUNUSEDXXX    ,//0xba
-            &&OPC_NEW         ,//0xbb                      // modified by mb jf
-            &&OPC_NEWARRAY    ,//0xbc                      //mb jf
-            &&OPC_ANEWARRAY   ,//0xbd                      //mb jf
-            &&OPC_ARRAYLENGTH ,//0xbe                      //mb jf
-            &&OPC_ATHROW      ,//0xbf
-
-            &&OPC_CHECKCAST   ,//0xc0                      // to do
-            &&OPC_INSTANCEOF  ,//0xc1                      // to do
-            &&OPC_MONITORENTER    ,//0xc2
-            &&OPC_MONITOREXIT     ,//0xc3
-            &&OPC_WIDE        ,//0xc4                      //mb jf
-            &&OPC_MULTIANEWARRAY  ,//0xc5                  //mb jf
-            &&OPC_IFNULL      ,//0xc6                      //mb jf
-            &&OPC_IFNONNULL   ,//0xc7                      //mb jf
-            &&OPC_GOTO_W      ,//0xc8                      //mb jf
-            &&OPC_JSR_W       ,//0xc9                      //mb jf
-        };
-        register uintptr_t *dispatch_table = (uintptr_t*)&opclabels_data[0];
-#endif
         DISPATCH(code)
         {
             CASE(NOP):
@@ -1193,6 +985,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     //goto nativeVoidReturn;
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
+                        //PRINTF("Calling native method %d\n",mN);
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
                         else
@@ -1294,9 +1087,11 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 // now call the method
                 if (methodInfo & ACC_NATIVE)
                 {
+                    //printf("Invoke native method:%s->%s\n",className,methodName);
                     if ((cs[cN].nativeFunction != NULL)
                     && (cs[cN].nativeFunction[mN] != NULL))
                     {
+                        //PRINTF("Calling native method %d\n",mN);
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
                         else
@@ -1421,7 +1216,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 
                 cN = methodStackPop();
-                u2 heapPos = getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
+                u2 heapPos = heapGetFreeSpace(fN + 1);// allocate on heap places for stackObject fields
 
                 slot first;
                 first.stackObj.pos = heapPos;
@@ -1456,7 +1251,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 }
 
                 // + marker
-                u2 heapPos=getFreeHeapSpace(count + 1);
+                u2 heapPos = heapGetFreeSpace(count + 1);
                 slot first;
                 first.stackObj.pos = heapPos;
                 first.stackObj.magic = OBJECTMAGIC;
@@ -1823,12 +1618,6 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 DNOTSUPPORTED;
             }BREAK;
         }// switch
-#ifdef USE_LABELS
-        OPC_NEXT:
-				//const static void* LABEL1 = &&OPC_NEXT;
-				goto OPC_NOP;
-#endif
-
 
 #ifndef TINYBAJOS_MULTITASKING
         scheduler();
@@ -1987,7 +1776,7 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
     else
     {
         // + marker
-        u2 heapPos = getFreeHeapSpace(*dimSize + 1);
+        u2 heapPos = heapGetFreeSpace(*dimSize + 1);
         act_array.stackObj.pos = heapPos;
         act_array.stackObj.magic = OBJECTMAGIC;
         act_array.stackObj.arrayLength = *dimSize;
@@ -2026,7 +1815,7 @@ void raiseExceptionFromIdentifier(const Exception exception)
     }
 
     // + marker
-    u2 heapPos = getFreeHeapSpace(getU2(cN,cs[cN].fields_count) + 1);
+    u2 heapPos = heapGetFreeSpace(getU2(cN,cs[cN].fields_count) + 1);
     slot first;
     first.stackObj.pos = heapPos;
     first.stackObj.magic = OBJECTMAGIC;

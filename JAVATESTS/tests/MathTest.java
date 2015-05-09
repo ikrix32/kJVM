@@ -12,7 +12,7 @@ class MathTest {
     System.out.println("tan("+val+")="+ (float)Math.tan(val));
   }
 
-  public static void main(String[] args) {
+  public static void runTest() {
     printfn((float)-Math.PI);
     printfn(0.0f);
     printfn((float)Math.PI);

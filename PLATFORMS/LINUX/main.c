@@ -99,15 +99,12 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < noTests; i++)
     {
-        printf("\n========== Start %s (id: %d) =========\n",testNames[i],i);
         const u1 classIndex = classLoader_loadClass(testBinaries[i], testBinariesSize[i]);
 
         classLoader_clinitClass(classIndex);
 
         if(vm_run(classIndex) == 0)//run main on last loaded class
             unloadLastClass();
-        printf("\n========== End %s =========\n",testNames[i]);
-        printf("Heap free space %d\n",getHeapFreeSpace());
     }
 #else
     const u1 classIndex = classLoader_loadClass(NULL, 10);

@@ -11,7 +11,7 @@ class FloatTest {
   }
 */
 
-  public static void main(String[] args) {
+  public static void runTest() {
     int i0=1;
     int i1=20;
     for(float a=i0; a<=i1; a+=1.0f) {

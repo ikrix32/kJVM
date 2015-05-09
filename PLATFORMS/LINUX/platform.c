@@ -15,6 +15,8 @@
 
 #ifdef USE_MICROKERNEL
 
+extern u1 numClasses;
+
 extern void loadMicroKernel()
 {
     extern int getNoMicroKernelClasses();

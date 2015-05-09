@@ -25,7 +25,7 @@ public class NativeMethodsTest {
 	
 	private native byte[] nativeMethod();
 	
-	public static void main(String[] args) {
+	public static void runTest() {
 		NativeMethodsTest mTest = new NativeMethodsTest();
 		mTest.nativeVoidMetod();
 		mTest.nativeMethod(0x1);

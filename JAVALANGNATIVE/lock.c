@@ -23,6 +23,9 @@
 #include "heap.h"
 #include "lock.h"
 
+extern u1 local;
+extern ThreadControlBlock* currentThreadCB;
+
 char lock()
 {
     setMutexOnObject(currentThreadCB, opStackGetValue(local));

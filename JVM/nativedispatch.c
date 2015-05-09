@@ -29,9 +29,8 @@ u1 nativeDispath(const char* methodName,const char* methodDescription){
 //end krix
 
 /* fill this array with classes containing native methods*/
-
 const char* nativeClassNames[] = {
-    "platform/PlatForm", "java/lang/Object",
+    "platform/PlatForm","java/lang/Runtime","java/lang/Object",
     "java/lang/String",
 #ifndef TINYBAJOS_MULTITASKING
     "java/lang/Thread", "java/util/concurrent/Lock",
@@ -76,6 +75,14 @@ functionForNativeMethodType functionForNativePlatFormMethod[] = {
     nativeExit,
     currentTimeMillis
 };
+functionForNativeMethodType functionForNativeRuntimeMethod[] = {
+    NULL,//<clinit>
+    NULL,//<init>
+    NULL,//getRuntime
+    nativeFreeMemory,
+    nativeTotalMemory,
+    nativeCollectGarbage,
+};
 #endif
 
 functionForNativeMethodType functionForNativeStringMethod[] = {
@@ -91,7 +98,7 @@ functionForNativeMethodType functionForNativeThreadMethod[] = {
 #endif
 
 functionForNativeMethodType functionForNativeFloatMethod[] = {
-    floatToCharArray, nativeParseFloat, typeConvert, typeConvert
+    /*floatToCharArray, nativeParseFloat,*/ typeConvert, typeConvert
 };
 
 functionForNativeMethodType functionForNativeObjectMethod[] = {
@@ -116,7 +123,7 @@ functionForNativeMethodType functionForNativeInterruptThreadMethod[] = {
 
 /* insert array of function pointer*/
 const functionForNativeMethodType* funcArray[] = {//2288bytes
-    functionForNativePlatFormMethod, functionForNativeObjectMethod,//332bytes
+    functionForNativePlatFormMethod,functionForNativeRuntimeMethod,functionForNativeObjectMethod,//332bytes
     functionForNativeStringMethod,//244bytes
 #ifndef TINYBAJOS_MULTITASKING
     functionForNativeThreadMethod, functionForNativeLockMethod,//620bytes

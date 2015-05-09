@@ -12,6 +12,14 @@ extern u2 numNativeClassNames;
 extern const functionForNativeMethodType* funcArray[];
 extern functionForNativeMethodType functionForNativePlatFormMethod[];
 
+extern u2 pc;
+extern u1 cN;
+extern u1 fN;
+extern u1 mN;
+
+extern u1 numClasses;
+extern classStructure cs[MAXCLASSES];
+
 /* classSTA and pc are global variables for actual class and method*/
 /* parameter != 0 -> value at parameter-pos*/
 /* parameter ==0 -> value at global var pc and automatic increment */
@@ -611,7 +619,7 @@ void analyzeFields(const u1 classId)//600bytes
         }                                         // field attribute count
     }                                             // numfields
 
-     const u2 heapPos = getFreeHeapSpace(fN + 1);// allocate on heap places for stackObject fields
+     const u2 heapPos = heapGetFreeSpace(fN + 1);// allocate on heap places for stackObject fields
      for (int n = 0; n < fN;n++)         // initialize the heap elements
         heapSetElement(toSlot( (u4) 0), heapPos + n + 1);
 

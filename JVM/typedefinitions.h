@@ -34,7 +34,7 @@ typedef signed long s4;
 
 typedef struct
 {
-    u4 status :2;                                 // 0 -> free for further use; 1 -> allcated static class object; 2-> allocated other object; 3-> allocated arrays
+    u4 status :2;                                 // 0 -> free for further use; 1 -> allocated static class object; 2-> allocated other object; 3-> allocated arrays
     u4 rootCheck :1;                              // 0 -> 1-> root object (opstack or static) or free or "object in object" !!!
     u4 mutex :1;                                  // mutex for object
     u4 length :16;                                // max 8k 4 byte alloated slots for object!!elements for an object,array on the heap, including heapObjMarker
@@ -47,7 +47,7 @@ typedef struct
 
 typedef struct
 {
-    u4 pos :16;                                   // on heap (reataive to base) or for CP-string cN refbyte in CP
+    u4 pos :16;                                   // on heap (relative to base) or for CP-string cN refbyte in CP
 // 2008 if pos==0 or classnumber ==255 or magic+1 -> CP-String!!
     u4 xxx :4;
     u4 classNumber :8;                            // or arrayLength for arrayobjects

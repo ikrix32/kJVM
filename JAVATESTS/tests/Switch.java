@@ -4,7 +4,7 @@ package tests;
  */
 
 class Switch {
-  public static void main(String[] args) {
+  public static void runTest() {
     int[] a = { 1, 4, 2, 3, 5 };
 
     System.out.println("Switch test");

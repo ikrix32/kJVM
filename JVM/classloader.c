@@ -11,6 +11,12 @@
 extern char* getClassName(const u2 classId);
 #endif
 
+extern u1 numClasses;
+extern classStructure cs[MAXCLASSES];
+
+extern char* classFileBase;
+extern u4    crtByteCodeSize;
+
 void classLoader_init(void){
 #if (AVR32LINUX || LINUX)
     classFileBase=(char*)malloc((size_t) MAXBYTECODE);
@@ -27,13 +33,18 @@ u1 classLoader_loadClass(const u1* bin,const u4 binSize)
     if (crtByteCodeSize + binSize > MAXBYTECODE){
        ERROREXIT(-1, "MAXBYTECODE reached!\n");
     }
+    if (numClasses + 1 == MAXCLASSES) {
+        ERROREXIT(-1, "Max count of classes reached!\n");
+    }
     const u1 classIndex = numClasses;
     numClasses++;
     cs[classIndex].classFileStartAddress = classFileBase + crtByteCodeSize;
     cs[classIndex].classFileLength = readClassBin(bin,binSize,cs[classIndex].classFileStartAddress);
     analyzeClass(classIndex);
-    crtByteCodeSize += cs[classIndex].classFileLength;
+    crtByteCodeSize += binSize;//cs[classIndex].classFileLength;
 #ifdef ENABLE_KCLASS_FORMAT
+    if(classIndex == 41)
+        PRINTF("YOYO");
     PRINTF("Loaded class name:%s id:%d bytecode size %d,current loaded bytecode size: %d\n\n",getClassName(getClassID(classIndex)),classIndex,binSize,crtByteCodeSize);
 #else
     PRINTF("Loaded class id:%d bytecode size %d,current loaded bytecode size: %d\n\n",classIndex,binSize,crtByteCodeSize);

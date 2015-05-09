@@ -18,8 +18,7 @@ public class ThreadTest extends Thread{
 			System.out.println("i ="+counter);
 	}
 	
-	public static void main(String args[])
-	{
+	public static void runTest() {
 		System.out.println("Main started.");
 		ThreadTest t = new ThreadTest();
 		t.start();

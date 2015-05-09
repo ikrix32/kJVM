@@ -5,7 +5,7 @@ class ArraySize {
     static float float_array[] = { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f };   
     static Float float_obj_array[] = new Float[7];
 
-    public static void main(String[] args) {
+    public static void runTest() {
     	System.out.println("Byte array length = " + byte_array.length);
     	System.out.println("Int array length = " + int_array.length);
     	System.out.println("Float array length = " + float_array.length);

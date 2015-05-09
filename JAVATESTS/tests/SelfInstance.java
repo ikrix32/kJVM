@@ -19,7 +19,7 @@ class SelfInstance {
     System.out.println("Num is: " + this.b);
   }
 
-  public static void main(String[] args) {
+  public static void runTest() {
     SelfInstance self0 = new SelfInstance(0);
     SelfInstance self1 = new SelfInstance(1);
 
@@ -33,6 +33,9 @@ class SelfInstance {
 
     self0.printString();
     self1.printString();
+    Runtime runtime = Runtime.getRuntime();
+    System.out.println("Free Memory:"+runtime.freeMemory()+". Calling garbage collector.");
+    runtime.gc();
   }
 }
 

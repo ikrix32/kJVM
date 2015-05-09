@@ -19,6 +19,9 @@
 #include "heap.h"
 #include "scheduler.h"
 
+extern u1 local;
+extern ThreadControlBlock* currentThreadCB;
+
 #ifndef TINYBAJOS_MULTITASKING
 /* "java/lang/Object","notify","notifyAll","wait","waitTime","getDataAddress"*/
 char notify()

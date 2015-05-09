@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#define __DEF_GLOBALS__
+//#define __DEF_GLOBALS__
 #include "kjvm.h"
 #include "heap.h"
 #include "stack.h"
@@ -18,6 +18,28 @@
 #if !(AVR32LINUX || LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104)
 #error You need a valid target device: AVR32LINUX||LINUX || AM || CH || XPLAIN || NGW100||STK1000||EVK1100|| EVK1104
 #endif
+
+u2 pc;                                     // active thread
+u1 cN;                                     // class structure Number
+u1 mN;                                     // method Number in class structure
+u1 fN;                                     // field number in class or object
+u1 local=0;
+
+
+char* classFileBase = NULL;
+u4    crtByteCodeSize;
+
+
+#ifndef TINYBAJOS_MULTITASKING
+ThreadControlBlock* currentThreadCB = NULL;
+u1 tid = 0;
+
+//priority		lists
+ThreadPriorityList threadList;
+#endif
+u1 numClasses = 0;
+classStructure cs[MAXCLASSES];	// static allocated !!!
+
 
 /* all class files stored for linux in DS (malloc)*/
 void vm_init() /* read, analyze classfiles and fill structures*/
@@ -77,6 +99,6 @@ s1 vm_run(const u1 classId){
 #endif
     }
 
-    PRINTF("no main method found");
+    //PRINTF("no main method found");
     return -1;
 }

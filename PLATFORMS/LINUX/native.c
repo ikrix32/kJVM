@@ -29,13 +29,14 @@
 #include "heap.h"
 #include "native.h"
 
+extern u1 local;
 // insert and update here arrays for classes with native methods
 // array length ->  at least up to last native method < methods_count
 // lock at methods in the *.java or *.class file in increasing order
 // if method is non native -> insert NULL, otherwise pointer to nativce C-function
 void conOut(char val)
 {
-    printf("%c", val);
+    PRINTF("%c", val);
 }
 
 
@@ -60,7 +61,7 @@ char conIn()
 char nativeCharOut()
 {
     const char val = opStackGetValue(local + 1).UInt;
-    printf("%c", val);
+    PRINTF("%c", val);
     return 0;
 }
 
@@ -102,3 +103,25 @@ char currentTimeMillis()
     return 1;
 #endif
 }
+
+char nativeFreeMemory()
+{
+    const u4 freeMem = heapGetFreeMemory();
+    //PRINTF("nativeFreeMemory:%d",freeMem);
+    opStackPush(toSlot(freeMem));
+    return 1;
+}
+
+char nativeTotalMemory()
+{
+    const u4 totalMem = heapGetTotalMemory();
+    //PRINTF("nativeFreeMemory:%d",totalMem);
+    opStackPush(toSlot(totalMem));
+    return 1;
+}
+
+char nativeCollectGarbage(){
+    heapCollectGarbage();
+    return 1;
+}
+

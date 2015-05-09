@@ -21,96 +21,9 @@
 #include "heap.h"
 #include "float.h"
 
-//
-// Simple and fast atof (ascii to float) function.
-//
-// - Executes about 5x faster than standard MSCRT library atof().
-// - An attractive alternative if the number of calls is in the millions.
-// - Assumes input is a proper integer, fraction, or scientific format.
-// - Matches library atof() to 15 digits (except at extreme exponents).
-// - Follows atof() precedent of essentially no error checking.
-//
-// 09-May-2009 Tom Van Baak (tvb) www.LeapSecond.com
-#define white_space(c) ((c) == ' ' || (c) == '\t')
-#define valid_digit(c) ((c) >= '0' && (c) <= '9')
+extern u1 local;
 
-double atof (const char *p)
-{
-    int frac;
-    double sign, value, scale;
-
-    // Skip leading white space, if any.
-    while (white_space(*p) ) {
-        p += 1;
-    }
-
-    // Get sign, if any.
-
-    sign = 1.0;
-    if (*p == '-') {
-        sign = -1.0;
-        p += 1;
-
-    } else if (*p == '+') {
-        p += 1;
-    }
-
-    // Get digits before decimal point or exponent, if any.
-
-    for (value = 0.0; valid_digit(*p); p += 1) {
-        value = value * 10.0 + (*p - '0');
-    }
-
-    // Get digits after decimal point, if any.
-
-    if (*p == '.') {
-        double pow10 = 10.0;
-        p += 1;
-        while (valid_digit(*p)) {
-            value += (*p - '0') / pow10;
-            pow10 *= 10.0;
-            p += 1;
-        }
-    }
-
-    // Handle exponent, if any.
-
-    frac = 0;
-    scale = 1.0;
-    if ((*p == 'e') || (*p == 'E')) {
-        unsigned int expon;
-
-        // Get sign of exponent, if any.
-
-        p += 1;
-        if (*p == '-') {
-            frac = 1;
-            p += 1;
-
-        } else if (*p == '+') {
-            p += 1;
-        }
-
-        // Get digits of exponent, if any.
-
-        for (expon = 0; valid_digit(*p); p += 1) {
-            expon = expon * 10 + (*p - '0');
-        }
-        if (expon > 308) expon = 308;
-
-        // Calculate scaling factor.
-
-        while (expon >= 50) { scale *= 1E50; expon -= 50; }
-        while (expon >=  8) { scale *= 1E8;  expon -=  8; }
-        while (expon >   0) { scale *= 10.0; expon -=  1; }
-    }
-
-    // Return signed and scaled floating point result.
-    
-    return sign * (frac ? (value / scale) : (value * scale));
-}
-
-char floatToCharArray()//300bytes
+/*char floatToCharArray()//300bytes
 {
     slot mySlot;
     const f4 f = opStackGetValue(local).Float;          // the float
@@ -125,7 +38,7 @@ char floatToCharArray()//300bytes
 #else
     snprintf(buf, 8, "%f", f);//krix was 7
 #endif
-    u2 heapPos = getFreeHeapSpace(8 + 1);         // char arr length + marker
+    u2 heapPos = heapGetFreeSpace(8 + 1);         // char arr length + marker
     mySlot.stackObj.pos = heapPos;
     mySlot.stackObj.magic = OBJECTMAGIC;
     //mySlot.stackObj.type=STACKNEWARRAYOBJECT;
@@ -139,7 +52,7 @@ char floatToCharArray()//300bytes
         heapSetElement(toSlot((u4)(*(buf + i))), heapPos++);
     }
     return 1;
-}
+}*/
 
 
 char typeConvert()
@@ -149,7 +62,7 @@ char typeConvert()
 }
 
 
-/* char arr to float*/
+/* char arr to float* /
 char nativeParseFloat()//500bytes
 {
     const slot mySlot = opStackGetValue(local);         // the char array
@@ -162,10 +75,9 @@ char nativeParseFloat()//500bytes
 #ifdef AVR8
     f = strtod(buf,NULL);
 #else
-    //sscanf(buf, "%f", &f);
-     f = atof(buf);
+    sscanf(buf, "%f", &f);
 #endif
     opStackPush(toSlot( f ));
     return 1;
-}
+}*/
 

@@ -2,7 +2,7 @@ package tests;
 
 
 class Arithmetic {
-  public static void main(String[] args) {
+  public static void runTest() {
     int i = 12;
     int j = -34;
     int k = -410;

@@ -23,11 +23,10 @@
 #define DEBUG_KCLASS//native methods don't work without this
 
 #define ENABLE_TESTS
+//#define TINYBAJOS_MULTITASKING
 
 #ifdef NRF51
 //#define BLE_CONSOLE
-
-//#define TINYBAJOS_MULTITASKING
 
 #define exit(...)
 #ifdef BLE_CONSOLE

@@ -11,7 +11,7 @@
 #define PRINTMAXSTACK
 #endif
 
-/* op stack holds  locals and operanden*/
+/* op stack holds  locals and operands*/
 /* method stack holds global variable (cN, mN, local,..)*/
 static slot* opSp;
 static u2*   methodSp;

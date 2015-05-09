@@ -24,6 +24,8 @@
 #include "lock.h"
 #include "interruptthread.h"
 
+extern u1 local;
+ThreadControlBlock* interruptVectors[NUMBEROFINTERRUPTS];
 
 char static_sei()
 {

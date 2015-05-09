@@ -5,7 +5,7 @@ package tests;
 
 class Erathostenes {
 
-  public static void main(String args[]) {
+  public static void runTest() {
     final int end = 50;//500;
     int count = 1;
     
