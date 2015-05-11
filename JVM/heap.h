@@ -5,10 +5,10 @@ void heapInit(void);
 void heapSetElement(const slot e,const u2 pos);              // mb jf switched order of arguments
 slot heapGetElement(const u2 pos);
 slot*heapGetElementRef(const u2 pos);
-slot*heapGetBase(void);
 u2   heapGetNextObjectPos(const u2 pos);
 
-u2   heapGetFreeSpace(const u2 length);
+u2   heapAllocElement(const u2 length,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck);
+void heapMergeFreeBlocks(void);
 // garbage collection
 void checkObjects(void);
 u1   canItBeAnObject(const u2);

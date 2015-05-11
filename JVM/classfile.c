@@ -573,16 +573,19 @@ void analyzeFields(const u1 classId)//600bytes
     fN = 0; // count static fields
     for (int n = 0 ; n < getU2(classId,cs[classId].fields_count); n++)  //num fields
     {
-     cs[classId].field_info[n] = pc;                    // absolute in classfile
+        cs[classId].field_info[n] = pc;// absolute in classfile
         DEBUG_CL_PRINTF("\tfield %x\taccess_flags: %d\n",n,getU2(classId,pc));
         DEBUG_CL_PRINTF("\tfield %d\tname: %d\n",n,getU2(classId,pc+2));
         DEBUG_CL_PRINTF("\tfield %d\tdescriptor: %d\n",n,getU2(classId,pc+4));
         DEBUG_CL_PRINTF("\tfield %d\tattribute_count: %d\n",n,getU2(classId,pc+6));
-        const u2 fielddescr = CP(classId,getU2(classId,cs[classId].field_info[n] + 4));
-        const u1 isNotObject= STRNCMP("L",(const char*) getAddr(classId,fielddescr + 3), 1);
+
+        const u2 crtFieldDescrId = getU2(classId,cs[classId].field_info[n] + 4);
+        const char* fieldDescriptor = UTF8_GET_STRING(classId, crtFieldDescrId);
+        const u1 isNotObject= STRNCMP("L",fieldDescriptor, 1);
+        const u2 crtFieldInfo = getU2(classId,cs[classId].field_info[n]);
 
         //printf("classId %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(classId,fielddescr + 3),fN);
-        if ((ACC_STATIC & getU2(classId,pc)) && !((ACC_FINAL & getU2(classId,pc)) && isNotObject))
+        if ((ACC_STATIC & crtFieldInfo) && !((ACC_FINAL & crtFieldInfo) && isNotObject))
             // count only normal static fields and final static fields in  class object
             fN++;
 
@@ -591,26 +594,26 @@ void analyzeFields(const u1 classId)//600bytes
                                                  // ConstantValue(6),Synthetic(4),Signature(6) ,Deprecated(4)
         for (int cur_a = 0; cur_a < a; ++cur_a)  // field attributes
         {
-            const u2 attribute_name_index = getU2(classId,0);
-            const u1 attribute_name = CP(classId,attribute_name_index);
-            const u4 attribute_length = getU4(classId,0);
+            const u2    attribute_name_index = getU2(classId,0);
+            const char* attributeName = UTF8_GET_STRING(classId, attribute_name_index);
+            const u4    attribute_length = getU4(classId,0);
 
-            if (STRNCMP("ConstantValue", getAddr(classId,attribute_name + 3), 13) == 0)	// nothing to do for jvm
+            if (STRNCMP("ConstantValue", attributeName, 13) == 0)	// nothing to do for jvm
             {
                 pc += attribute_length;           // continue
                 continue;                         // next attribute test
             }
-            if (STRNCMP("Synthetic", getAddr(classId,attribute_name + 3), 9) == 0)
+            if (STRNCMP("Synthetic",attributeName, 9) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMP("Deprecated", getAddr(classId,attribute_name + 3), 10) == 0)
+            if (STRNCMP("Deprecated",attributeName, 10) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMP("Signature", getAddr(classId,attribute_name + 3), 9) == 0)
+            if (STRNCMP("Signature",attributeName, 9) == 0)
             {
                 pc += 6;
                 continue;
@@ -619,19 +622,13 @@ void analyzeFields(const u1 classId)//600bytes
         }                                         // field attribute count
     }                                             // numfields
 
-     const u2 heapPos = heapGetFreeSpace(fN + 1);// allocate on heap places for stackObject fields
-     for (int n = 0; n < fN;n++)         // initialize the heap elements
-        heapSetElement(toSlot( (u4) 0), heapPos + n + 1);
-
-    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDSTATICCLASSOBJECT;
-    HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-    HEAPOBJECTMARKER(heapPos).rootCheck = 1;
-    HEAPOBJECTMARKER(heapPos).magic= OBJECTMAGIC;
-
-    cs[classId].classInfo.stackObj.pos = heapPos;
-    cs[classId].classInfo.stackObj.magic = OBJECTMAGIC;
     cs[classId].classInfo.stackObj.classNumber = classId;
-}                                                 // end analyze fields
+    // allocate on heap places for stackObject fields
+    const u2 heapPos = heapAllocElement(fN,HEAPALLOCATEDSTATICCLASSOBJECT,&cs[classId].classInfo.stackObj,1);
+
+    for (int i = 0; i < fN;i++)// initialize the heap elements
+        heapSetElement(toSlot( (u4) 0), heapPos + i);
+}// end analyze fields
 
 u2 getStartPC(const u1 classId,const u1 methodId)
 {

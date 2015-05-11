@@ -1,9 +1,7 @@
 /*
- * HWR-Berlin, Fachbereich Berufsakademie, Fachrichtung Informatik
- * See the file "license.terms" for information on usage and redistribution of this file.
+ * @ikrix
  */
 #include <stdlib.h>
-//#include <stdio.h>
 #include "definitions.h"
 #include "kjvm.h"
 #include "stack.h"
@@ -14,8 +12,24 @@ static slot* heapBase;
 static u2    heapTop = MAXHEAP;
 
 extern u1 cN;
+extern ThreadControlBlock* currentThreadCB;
 extern ThreadPriorityList threadList;
 extern classStructure cs[MAXCLASSES];
+
+char* heapElemTypes[4] = { "FREE","STATIC_OBJ","OBJ","ARRAY"};
+void heapPrintBlocks()
+{
+    u2 nextElementPos = 0;
+    do//Search to fit in a slot that was freed
+    {
+        const heapObjectMarker marker = HEAPOBJECTMARKER(nextElementPos);
+        PRINTF("\t[#%d|%s|%d|%s]\n",nextElementPos,heapElemTypes[marker.status],marker.length,(marker.rootCheck ? "true" : "false"));
+        nextElementPos = heapGetNextObjectPos(nextElementPos);
+
+    } while (nextElementPos < heapTop);
+    PRINTF("\n");
+}
+
 
 /* heap */
 void heapInit()
@@ -28,10 +42,6 @@ void heapInit()
         *(heapBase + (--heapTop)) = NULLOBJECT;
 
     DEBUGPRINTHEAP;
-}
-
-slot* heapGetBase(){
-    return heapBase;
 }
 
 slot heapGetElement(const u2 pos)
@@ -49,10 +59,9 @@ void heapSetElement(const slot e,const u2 pos)
     *(heapBase + pos) = e;
 }
 
-
 u2 heapGetNextObjectPos(const u2 pos)
 {
-    return ((pos + HEAPOBJECTMARKER(pos).length) < heapTop) ? pos + HEAPOBJECTMARKER(pos).length : (heapTop + 1);
+    return pos + (heapBase + pos)->heapObjMarker.length;
 }
 
 u4 heapGetFreeMemory(){
@@ -63,77 +72,96 @@ u4   heapGetTotalMemory(void){
     return MAXHEAP;
 }
 
-void heapCollectGarbage(){
-
+void heapCollectGarbage()
+{
+    heapPrintBlocks();
+    checkObjects();
+    heapPrintBlocks();
+    heapMergeFreeBlocks();
+    heapPrintBlocks();
 }
 
-u2 heapGetFreeSpace(const u2 length)
+void heapSetObjectMarker(const u2 position,const u2 length,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck)
 {
+    heapObjectMarker* marker = &(heapBase + position)->heapObjMarker;
+
+    marker->status = type;
+    marker->length = length;// get exact length slots
+    marker->magic = OBJECTMAGIC;
+    marker->mutex = MUTEXNOTBLOCKED;
+    marker->rootCheck = rootCheck;
+
+    stackObjectRef->pos = position;
+    stackObjectRef->magic = OBJECTMAGIC;
+}
+
+/* Returns address to newly allocated element (not heap block marker!)*/
+u2 heapAllocElement(const u2 elemLength,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck)
+{
+    const u2 length = elemLength + 1;
     // circulars are recognizable reference on heap without regard to opstack !!!
-    if ((heapTop + length - 1) < MAXHEAP)
+    if (heapTop + length < MAXHEAP)
     {
-        HEAPOBJECTMARKER(heapTop).length = length;// get exact length slots
+        heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
         heapTop += length;
-        return heapTop - length;
+        heapPrintBlocks();
+        return stackObjectRef->pos + 1;
     }// free space on heap
+
+    //heapMergeFreeBlocks();
+
+    //checkObjects();
+    heapCollectGarbage();
+
     u2 nextElementPos = 0;
-    do// first fit
+    do//Search to fit in a slot that was freed
     {
-        if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-        && ((HEAPOBJECTMARKER(nextElementPos).length) >= length))	{
-            return nextElementPos;	// may be get more space than length
-        }// first fit
-    } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
-
-    checkObjects();
-    // try again
-    nextElementPos = 0;
-    do
-    {
-        if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-            && ((HEAPOBJECTMARKER(nextElementPos).length) >= length))
-            return nextElementPos;// first fit
-    } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
-
-    //  merge free heap space to bigger blocks
-    int schmelz;
-
-    PRINTF("Heap merge\n");
-    for (schmelz = 0; schmelz < 20; schmelz++)
-    {
-        nextElementPos = 0;
-        u2 oldElementPos = 0;
-        while ((nextElementPos = heapGetNextObjectPos(nextElementPos))
-               < heapTop)
-        {
-            /*printf("next %x %x stat: %x magic %x %x\n",nextElementPos,oldElementPos, //HEAPOBJECTMARKER(nextElementPos).status,*/
-            /* HEAPOBJECTMARKER(nextElementPos).magic, HEAPOBJECTMARKER(nextElementPos).rootCheck);		*/
-            if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-            && (HEAPOBJECTMARKER(oldElementPos).status == HEAPFREESPACE))
-            {
-                HEAPOBJECTMARKER(oldElementPos).length += HEAPOBJECTMARKER(nextElementPos).length;
-                break;
-            } else
-                oldElementPos = nextElementPos;
+        const heapObjectMarker marker = (heapBase + nextElementPos)->heapObjMarker;//HEAPOBJECTMARKER(nextElementPos);
+        if (marker.status == HEAPFREESPACE){
+            if(marker.length >= length){
+                PRINTF("Searching for %d free space,found %d at pos %d.\n",length,marker.length,nextElementPos);
+                heapSetObjectMarker(nextElementPos,length,type,stackObjectRef,rootCheck);
+                return nextElementPos + 1;// may be get more space than length
+            }else{
+                PRINTF("Searching for %d free space,not found %d at pos %d.\n",length,marker.length,nextElementPos);
+            }
         }
-        /* jetzt noch mal Probieren*/
-        nextElementPos = 0;
-        do
-        {
-            /*printf("next %x  stat: %x magic %x %x\n",nextElementPos, HEAPOBJECTMARKER(nextElementPos).status,*/
-            /*HEAPOBJECTMARKER(nextElementPos).magic, HEAPOBJECTMARKER(nextElementPos).rootCheck);*/
-            if ((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-            && ((HEAPOBJECTMARKER(nextElementPos).length) >= length))
-                return nextElementPos;            /* first fit	 */
+        nextElementPos = heapGetNextObjectPos(nextElementPos);
+    } while (nextElementPos < heapTop);
 
-        } while ((nextElementPos = heapGetNextObjectPos(nextElementPos))
-                 < heapTop);
-    }
- 
     ERROREXIT(-1," No free heap space for object/array of length: 0x%x\n",length);
     return 0;
 }
 
+void heapMergeFreeBlocks()
+{
+    //PRINTF("Heap merge\n");
+    //heapPrintBlocks();
+    u2 nextElementPos = 0;
+    u2 noFreeBlocks = 0;
+
+    heapObjectMarker* elemMarker = &(heapBase + nextElementPos)->heapObjMarker;
+    while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop)
+    {
+        heapObjectMarker* nextMarker = &(heapBase + nextElementPos)->heapObjMarker;
+
+        if (elemMarker->status == HEAPFREESPACE &&  nextMarker->status == HEAPFREESPACE)
+        {
+            noFreeBlocks++;
+            elemMarker->length += nextMarker->length;
+        } else
+            elemMarker = nextMarker;
+    }
+
+    if(noFreeBlocks > 0){
+        // heapPrintBlocks();
+        PRINTF("Heap merged %d free blocks.\n",noFreeBlocks);
+    }
+
+    if(elemMarker->status == HEAPFREESPACE){
+        heapTop = heapTop - elemMarker->length;
+        PRINTF("Heap top:%d\n",heapTop);
+    }}
 
 void checkObjects()
 {
@@ -142,45 +170,63 @@ void checkObjects()
     // Do I bump heap objects (rootCheck = 1), the other I give abschu free !!
     u2 nextElementPos = 0;
 
+    heapObjectMarker* heapBlockMarker = NULL;
     do
     {
-        HEAPOBJECTMARKER(nextElementPos).rootCheck = 0;
-        if((HEAPOBJECTMARKER(nextElementPos).status == HEAPFREESPACE)
-        || (HEAPOBJECTMARKER(nextElementPos).status == HEAPALLOCATEDSTATICCLASSOBJECT))// empty or static
+        heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
+        heapBlockMarker->rootCheck = 0;//HEAPOBJECTMARKER(nextElementPos).rootCheck = 0;
+        if(heapBlockMarker->status == HEAPFREESPACE
+        || heapBlockMarker->status == HEAPALLOCATEDSTATICCLASSOBJECT)// empty or static
         {
-            HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
+            heapBlockMarker->rootCheck = 1;
             continue;
         }
 #ifndef TINYBAJOS_MULTITASKING
-            ThreadControlBlock* tCB = threadList.cb;
-            for (int k = 0; k < threadList.count; k++)
+        /*methodStackSetBase(currentThreadCB->methodStackBase);
+         methodStackSetSpPos(currentThreadCB->methodSpPos);
+         opStackSetBase(currentThreadCB->opStackBase);
+         opStackSetSpPos(methodStackPop());
+         pc = methodStackPop();
+         mN = methodStackPop();
+         cN = methodStackPop();
+         local = methodStackPop();*/
+        ThreadControlBlock* tCB = threadList.cb;
+        for (int k = 0; k < threadList.count; k++)
+        {
+            u2 opSPPos = 0;
+            if(k == 0){//tCB->tid == currentThreadCB->tid)
+                //current thread
+                opSPPos = opStackGetSpPos();
+            }else{
+                opSPPos = *(tCB->methodStackBase + tCB->methodSpPos - 1);
+            }
+
+            while (opSPPos > 0)
             {
-                u2 opSPPos = *(tCB->methodStackBase + tCB->methodSpPos - 1);
-                while (opSPPos > 0)
+                opSPPos--;
+                if (nextElementPos == (*(tCB->opStackBase + opSPPos)).stackObj.pos
+                && (*(tCB->opStackBase + opSPPos)).stackObj.magic == OBJECTMAGIC)
                 {
-                    if ((nextElementPos == ((*(tCB->opStackBase + (--opSPPos))).stackObj.pos))
-                    && (((*(tCB->opStackBase + (opSPPos))).stackObj.magic) == OBJECTMAGIC))
-                    {
-                        HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
-                        break;
-                    }
-                }
-                if (HEAPOBJECTMARKER(nextElementPos).rootCheck == 1)
-                {
+                    heapBlockMarker->rootCheck = 1;
                     break;
                 }
-                tCB = tCB->succ;
             }
-            if (HEAPOBJECTMARKER(nextElementPos).rootCheck == 1)
+            if (heapBlockMarker->rootCheck == 1)
             {
                 break;
             }
+            tCB = tCB->succ;
+        }
+        if (heapBlockMarker->rootCheck == 1)
+        {
+            break;
+        }
 #else
         u2 opSPPos=opStackGetSpPos();
         while (opSPPos > 0)
         {
             if( (nextElementPos == ((*(opStackGetBase() + (--opSPPos))).stackObj.pos))
-            &&(((*(opStackGetBase() + (opSPPos))).stackObj.magic)==OBJECTMAGIC ))
+               &&(((*(opStackGetBase() + (opSPPos))).stackObj.magic)==OBJECTMAGIC ))
             {
                 HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
                 break;
@@ -188,9 +234,10 @@ void checkObjects()
         }
 #endif
     } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
+
     // All objects are selected from the stacks accessible (root element)
     // Now I am looking only in the heap
-    // Marked objects can referencen keep other objects
+    // Marked objects can reference keep other objects
     // This I mark also, until I find none left
     u1 stillAConcatedObject = 0;
     do
@@ -199,40 +246,55 @@ void checkObjects()
         nextElementPos = 0;
         do
         {
-            if (HEAPOBJECTMARKER(nextElementPos).rootCheck == 1)
-            {
-                /* seraching for "objects in root-objects"*/
-                for (int i = 1; i < HEAPOBJECTMARKER(nextElementPos).length; i++)
-                    if((HEAPOBJECT(nextElementPos + i).stackObj.magic == OBJECTMAGIC)
-                    &&  HEAPOBJECT(nextElementPos + i).UInt != NULLOBJECT.UInt && canItBeAnObject(HEAPOBJECT(nextElementPos + i).stackObj.pos)
-                    && (HEAPOBJECTMARKER(HEAPOBJECT(nextElementPos + i).stackObj.pos).magic == OBJECTMAGIC)
-                    && (HEAPOBJECTMARKER(HEAPOBJECT(nextElementPos + i).stackObj.pos).rootCheck == 0))
+            heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
+            if (heapBlockMarker->rootCheck == 1)
+            {   // seraching for "objects in root-objects"
+                for (int i = 1; i < heapBlockMarker->length; i++)
+                {
+                    const slot heapObject = HEAPOBJECT(nextElementPos + i);
+                    if(heapObject.stackObj.magic == OBJECTMAGIC
+                    && heapObject.UInt != NULLOBJECT.UInt
+                    && canItBeAnObject(heapObject.stackObj.pos))
                     {
-                        HEAPOBJECTMARKER(HEAPOBJECT(nextElementPos + i).stackObj.pos).rootCheck = 1;
-                        stillAConcatedObject = 1;
+                        heapObjectMarker* heapObjectChild = &(heapBase + heapObject.stackObj.pos)->heapObjMarker;
+                        if(heapObjectChild->magic == OBJECTMAGIC && heapObjectChild->rootCheck == 0)
+                        {
+                            heapObjectChild->rootCheck = 1;
+                            stillAConcatedObject = 1;
+                        }
                     }
+                }
             }
-            /*if(stillAConcatedObject) break;*/
         } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
     } while (stillAConcatedObject);
 
     nextElementPos = 0;
-    while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop)
-        if (!HEAPOBJECTMARKER(nextElementPos).rootCheck)
-            HEAPOBJECTMARKER(nextElementPos).status = HEAPFREESPACE;
+    u2 noFreedOjects = 0;
+
+    do
+    {
+        heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
+        if (heapBlockMarker->rootCheck == 0){
+            noFreedOjects++;
+            heapBlockMarker->status = HEAPFREESPACE;
+        }
+    }while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
+
+    if(noFreedOjects > 0){
+        PRINTF("Freed %d objects.\n",noFreedOjects);
+    }
 }
 
 u1 canItBeAnObject(const u2 pos)
 {
-    u1 retV = 0;                                  // can not be an object
     u2 nextElementPos = 0;
     do
     {
         if (nextElementPos == pos)
-        {
-            retV = 1;
-            break;
-        }
-    } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
-    return retV;
+            return 1;
+
+        nextElementPos = heapGetNextObjectPos(nextElementPos);
+    } while (nextElementPos < heapTop);
+    // cannot be an object
+    return 0;
 }

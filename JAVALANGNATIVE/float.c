@@ -22,10 +22,9 @@
 #include "float.h"
 
 extern u1 local;
-
-/*char floatToCharArray()//300bytes
+/*
+char floatToCharArray()//300bytes
 {
-    slot mySlot;
     const f4 f = opStackGetValue(local).Float;          // the float
     char buf[8];
 
@@ -38,19 +37,16 @@ extern u1 local;
 #else
     snprintf(buf, 8, "%f", f);//krix was 7
 #endif
-    u2 heapPos = heapGetFreeSpace(8 + 1);         // char arr length + marker
-    mySlot.stackObj.pos = heapPos;
-    mySlot.stackObj.magic = OBJECTMAGIC;
+    slot mySlot;
+    mySlot.stackObj.arrayLength = (u2) 8;// char array length
     //mySlot.stackObj.type=STACKNEWARRAYOBJECT;
-    mySlot.stackObj.arrayLength = (u1) 8;         // char array length
+
+    const u2 heapPos = heapAllocElement(8,HEAPALLOCATEDARRAY,&mySlot.stackObj);
     opStackPush(mySlot);
-    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;
-    HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
-    HEAPOBJECTMARKER(heapPos++).mutex = MUTEXNOTBLOCKED;
+
     for (u1 i = 0; i < 8; i++)
-    {
-        heapSetElement(toSlot((u4)(*(buf + i))), heapPos++);
-    }
+        heapSetElement(toSlot((u4)(*(buf + i))), heapPos + i);
+
     return 1;
 }*/
 

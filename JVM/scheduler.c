@@ -202,16 +202,17 @@ void createThread (void)
     }
     else
     {
-        cN = opStackGetValue(local).stackObj.classNumber;
-        /*if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
-        {
-            //  ERROREXIT(77, "field priority not found");
-        }*/
-        t->pPriority = (u4*) (heapGetBase() + opStackGetValue(local).stackObj.pos + fN + 1);
+        const slot object = opStackGetValue(local);
+
+        cN = object.stackObj.classNumber;
+        if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
+            ERROREXIT(77, "field priority not found");
+
+        t->pPriority = (u4*) heapGetElementRef(object.stackObj.pos + fN + 1);
         // position of int field priority of the thread creating object, next field is aLive
         // restore class number of object
-        cN = opStackGetValue(local).stackObj.classNumber;
-        t->obj = opStackGetValue(local);
+        cN = object.stackObj.classNumber;
+        t->obj = object;
     }
     *((t->pPriority) + 1) = (u4) 1;               // isALive == true
     t->numTicks = *(t->pPriority);

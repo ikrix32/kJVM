@@ -65,8 +65,8 @@
 // constantpool entry n of class m
 #define CP(m,n)             (cs[m].constant_pool[n])
 #define BYTECODEREF         ((byte1 << 8) | byte2)
-#define HEAPOBJECTMARKER(pos)       ((*(slot*)(heapGetBase() + pos)).heapObjMarker)
-#define HEAPOBJECT(pos)         (*(heapGetBase() + pos))
+#define HEAPOBJECTMARKER(pos)   ((*heapGetElementRef(pos)).heapObjMarker)
+#define HEAPOBJECT(pos)         (*(heapGetElementRef(pos)))
 
 #define METHODBASE(classId,methodId)            (cs[classId].method_info[methodId])
 #define METHODACCESSFLAG(classId,methodId)      getU2(METHODBASE(classId,methodId))

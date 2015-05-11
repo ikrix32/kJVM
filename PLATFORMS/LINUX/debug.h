@@ -34,17 +34,7 @@
     PRINTF("\n"); \
 }
 
-#define DEBUGPRINTHEAP
-{\
-    u2 i,j;\
-    PRINTF("|#|  heap:\n");\
-    for (j=0; j <33; j+=8){\
-        for (i=0; i < 8; i++)\
-            PRINTF(" %8x",(*(heapBase+i+j)).UInt);avr8Printf("\n");}\
-    }\
-    PRINTF("\n");\
- }
-
+#define DEBUGPRINTHEAP heapPrintMemory
 
 #define DEBUGPRINTSTRING(p,l) {\
 u2 _i;\

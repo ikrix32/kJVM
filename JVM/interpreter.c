@@ -194,7 +194,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
-                } else if (count < 0 || lengthArray <= count || count > (MAXHEAPOBJECTLENGTH - 1))
+                } else if (count < 0 || lengthArray <= count || count > MAX_ARRAY_SIZE)
                 {
                     ARRAYINDEXOUTOFBOUNDSEXCEPTION;
                 }
@@ -267,7 +267,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (first.UInt == NULLOBJECT.UInt)
                 {
                     NULLPOINTEREXCEPTION;
-                } else if (count < 0 || lengthArray <= count || count > (MAXHEAPOBJECTLENGTH - 1))
+                } else if (count < 0 || lengthArray <= count || count > MAX_ARRAY_SIZE)
                 {
                     ARRAYINDEXOUTOFBOUNDSEXCEPTION;
                 }
@@ -1216,20 +1216,17 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 } while ((cN = findSuperClass(cN)) != INVALID_CLASS_ID);
                 
                 cN = methodStackPop();
-                u2 heapPos = heapGetFreeSpace(fN + 1);// allocate on heap places for stackObject fields
 
-                slot first;
-                first.stackObj.pos = heapPos;
-                first.stackObj.magic = OBJECTMAGIC;
-                first.stackObj.classNumber = cN;
+                slot stackSlot;
+                stackSlot.stackObj.classNumber = cN;
+                // allocate on heap places for stackObject fields
+                const u2 heapPos = heapAllocElement(fN,HEAPALLOCATEDNEWOBJECT,&stackSlot.stackObj,0);
+
                 DEBUGPRINTLN_OPC(" -> push %x\n",heapPos);
-                opStackPush(first);//reference to.stackObject on opStack
-                HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
-                HEAPOBJECTMARKER(heapPos).magic=OBJECTMAGIC;
-                HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-
+                opStackPush(stackSlot);//reference to.stackObject on opStack
+                
                 for (int i = 0; i < fN; i++)// initialize the heap elements
-                    heapSetElement(toSlot((u4)0), heapPos + i + 1);
+                    heapSetElement(toSlot((u4)0), heapPos + i);
 
                 mN = methodStackPop();
                 cN = methodStackPop();
@@ -1240,59 +1237,40 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(NEWARRAY):
             {
                 DEBUGPRINTLN_OPC("newarray");
-                s2 count = (s2)opStackPop().UInt;
+                const s2 count = (s2)opStackPop().UInt;
                 if (count < 0)
                 {
                     NEGATIVEARRAYSIZEEXCEPTION;
                 }
-                if (count > (MAXHEAPOBJECTLENGTH-1))
+                if (count > MAX_ARRAY_SIZE)
                 {
                     ARRAYINDEXOUTOFBOUNDSEXCEPTION;
                 }
+                if(byte1 == T_DOUBLE || byte1 == T_LONG){
+                    DNOTSUPPORTED;
+                }
 
+                slot stackSlot;
+                stackSlot.stackObj.arrayLength = (u1)count;
                 // + marker
-                u2 heapPos = heapGetFreeSpace(count + 1);
-                slot first;
-                first.stackObj.pos = heapPos;
-                first.stackObj.magic = OBJECTMAGIC;
-                first.stackObj.arrayLength = (u1)count;
-                opStackPush(first);
-                HEAPOBJECTMARKER(heapPos).status= HEAPALLOCATEDARRAY;
-                HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
-                HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-                heapPos++;
-                switch (byte1) // array type, init array with 0 on heap
-                {
-                    case T_BOOLEAN:
-                    case T_CHAR:
-                    case T_BYTE:
-                    case T_SHORT:
-                    case T_INT:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot((u4)0),heapPos++);
-                    }break;
+                const u2 heapPos = heapAllocElement(count,HEAPALLOCATEDARRAY,&stackSlot.stackObj,0);
+                opStackPush(stackSlot);
 
-                    case T_FLOAT:
-                    {
-                        for (int i = 0; i < count; i++)
-                            heapSetElement(toSlot(0.f),heapPos++);
-                    }break;
-                    case T_DOUBLE:
-                    case T_LONG:
-                    {
-                        DNOTSUPPORTED;
-                    }break;
-                }     // switch
+                const slot zero = byte1 == T_FLOAT ? toSlot(0.f) : toSlot((u4)0);
+                for (int i = 0; i < count; i++)
+                    heapSetElement(zero,heapPos + i);
+
                 pc++; // skip type
             }BREAK;
             CASE(ANEWARRAY):
             {
                 DEBUGPRINTLN_OPC("anewarray");
-                pc+=2;                          // index into the constant_pool.no verification
+                pc+=2;
+                // index into the constant_pool.no verification
                 s2 *cnt = (s2 *) malloc(sizeof(s2));
                 *cnt = 0;
-                opStackPush(createDims(1, cnt));// call recursive function to allocate heap for arrays
+                // call recursive function to allocate heap for arrays
+                opStackPush(createDims(1, cnt));
                 free (cnt);
             }BREAK;
             CASE(ARRAYLENGTH):
@@ -1769,24 +1747,22 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
     {
         NEGATIVEARRAYSIZEEXCEPTION;
     }
-    else if (*dimSize > (MAXHEAPOBJECTLENGTH - 1))
+    else if (*dimSize > MAX_ARRAY_SIZE)
     {
         ARRAYINDEXOUTOFBOUNDSEXCEPTION;
     }
     else
     {
-        // + marker
-        u2 heapPos = heapGetFreeSpace(*dimSize + 1);
-        act_array.stackObj.pos = heapPos;
-        act_array.stackObj.magic = OBJECTMAGIC;
         act_array.stackObj.arrayLength = *dimSize;
-        HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDARRAY;
-        HEAPOBJECTMARKER(heapPos++).magic = OBJECTMAGIC;
+        // + marker
+        const u2 heapPos = heapAllocElement(*dimSize,HEAPALLOCATEDARRAY,&act_array.stackObj,0);
+        //why mutex is missing? why status on heapPos and magic on next element
+        //TODO fix this,it's is fucked
         s2 *cnt = (s2 *) malloc(sizeof(s2));
         *cnt = 0;
         for (int i = 0; i < *dimSize; ++i)
         {
-            heapSetElement(createDims(dimsLeft - 1, cnt), heapPos++);
+            heapSetElement(createDims(dimsLeft - 1, cnt), heapPos + i);
         }
         free(cnt);
     }
@@ -1814,21 +1790,17 @@ void raiseExceptionFromIdentifier(const Exception exception)
         CLASSNOTFOUNDERR("Undefined Exception",19);
     }
 
-    // + marker
-    u2 heapPos = heapGetFreeSpace(getU2(cN,cs[cN].fields_count) + 1);
-    slot first;
-    first.stackObj.pos = heapPos;
-    first.stackObj.magic = OBJECTMAGIC;
-    first.stackObj.classNumber = cN;
-    opStackPush(first);// reference to stackObject on opStack
+    const u2 fieldsCount = getU2(cN,cs[cN].fields_count);
 
-    HEAPOBJECTMARKER(heapPos).status = HEAPALLOCATEDNEWOBJECT;
-    HEAPOBJECTMARKER(heapPos).magic = OBJECTMAGIC;
-    HEAPOBJECTMARKER(heapPos).mutex = MUTEXNOTBLOCKED;
-    int j = getU2(cN,cs[cN].fields_count);
-    for (int i = 0; i < j; i++)
+    slot stackSlot;
+    stackSlot.stackObj.classNumber = cN;
+
+    const u2 heapPos = heapAllocElement(fieldsCount,HEAPALLOCATEDNEWOBJECT,&stackSlot.stackObj,0);
+    opStackPush(stackSlot);// reference to stackObject on opStack
+
+    for (int i = 0; i < fieldsCount; i++)
     {
-        heapSetElement(toSlot((u4) 0), heapPos + i + 1);
+        heapSetElement(toSlot((u4) 0), heapPos + i);
     }
 
     mN = methodStackPop();
