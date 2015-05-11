@@ -30,6 +30,29 @@ void heapPrintBlocks()
     PRINTF("\n");
 }
 
+void heapPrintStackReferences(ThreadControlBlock* thread){
+    u2 opStackPos = 0;
+    if(thread->tid == currentThreadCB->tid){//current thread
+        opStackPos = opStackGetSpPos();
+    }else{
+        opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
+    }
+    PRINTF("Print Stack Objects for thread id:%d :\n",thread->tid);
+    while (opStackPos > 0)
+    {
+        opStackPos--;
+        
+        const slot stackSlot = *(thread->opStackBase + opStackPos);
+        if(stackSlot.stackObj.magic == OBJECTMAGIC)
+        {
+            const heapObjectMarker heapMarker =  HEAPOBJECTMARKER(stackSlot.stackObj.pos);
+            PRINTF("\t[#%d|%s|%d|%s]\n",stackSlot.stackObj.pos,heapElemTypes[heapMarker.status],heapMarker.length,(heapMarker.rootCheck ? "true" : "false"));
+        }else{
+            PRINTF("NotAnObject\n");
+        }
+    }
+     PRINTF("End Stack Objects\n");
+}
 
 /* heap */
 void heapInit()
@@ -182,45 +205,43 @@ void checkObjects()
             continue;
         }
 #ifndef TINYBAJOS_MULTITASKING
-        /*methodStackSetBase(currentThreadCB->methodStackBase);
-         methodStackSetSpPos(currentThreadCB->methodSpPos);
-         opStackSetBase(currentThreadCB->opStackBase);
-         opStackSetSpPos(methodStackPop());
-         pc = methodStackPop();
-         mN = methodStackPop();
-         cN = methodStackPop();
-         local = methodStackPop();*/
-        ThreadControlBlock* tCB = threadList.cb;
+        ThreadControlBlock* thread = threadList.cb;
         for (int k = 0; k < threadList.count; k++)
         {
-            u2 opSPPos = 0;
+            heapPrintStackReferences(thread);
+            
+            u2 opStackPos = 0;
             if(k == 0){//tCB->tid == currentThreadCB->tid)
                 //current thread
-                opSPPos = opStackGetSpPos();
+                opStackPos = opStackGetSpPos();
             }else{
-                opSPPos = *(tCB->methodStackBase + tCB->methodSpPos - 1);
+                opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
             }
 
-            while (opSPPos > 0)
+            while (opStackPos > 0)
             {
-                opSPPos--;
-                if (nextElementPos == (*(tCB->opStackBase + opSPPos)).stackObj.pos
-                && (*(tCB->opStackBase + opSPPos)).stackObj.magic == OBJECTMAGIC)
-                {
+                opStackPos--;
+                const slot stackSlot = *(thread->opStackBase + opStackPos);
+                //const heapObjectMarker heapMarker =  HEAPOBJECTMARKER(stackSlot.stackObj.pos);
+                
+                if(stackSlot.stackObj.pos == nextElementPos
+                && stackSlot.stackObj.magic == OBJECTMAGIC)
+                {//Found a reference to this heap memory block mark as root for root check
                     heapBlockMarker->rootCheck = 1;
                     break;
                 }
             }
+            //Found a reference to this heap memory block can go to next block
             if (heapBlockMarker->rootCheck == 1)
             {
                 break;
             }
-            tCB = tCB->succ;
+            thread = thread->succ;
         }
-        if (heapBlockMarker->rootCheck == 1)
+        /*if (heapBlockMarker->rootCheck == 1)
         {
             break;
-        }
+        }*/
 #else
         u2 opSPPos=opStackGetSpPos();
         while (opSPPos > 0)
@@ -235,10 +256,8 @@ void checkObjects()
 #endif
     } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
 
-    // All objects are selected from the stacks accessible (root element)
-    // Now I am looking only in the heap
-    // Marked objects can reference keep other objects
-    // This I mark also, until I find none left
+    // All static objects and stack referenced objects are selected(marked as roots)
+    // Now mark childs of roots
     u1 stillAConcatedObject = 0;
     do
     {
@@ -247,7 +266,7 @@ void checkObjects()
         do
         {
             heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
-            if (heapBlockMarker->rootCheck == 1)
+            if (heapBlockMarker->rootCheck == 1 && heapBlockMarker->status != HEAPFREESPACE)
             {   // seraching for "objects in root-objects"
                 for (int i = 1; i < heapBlockMarker->length; i++)
                 {
