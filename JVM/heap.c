@@ -17,7 +17,7 @@ extern ThreadPriorityList threadList;
 extern u1 numClasses;
 extern classStructure cs[MAXCLASSES];
 
-//#define DEBUG_GARBAGE_COLLECTOR
+///#define DEBUG_GARBAGE_COLLECTOR
 #ifdef DEBUG_GARBAGE_COLLECTOR
 char* heapElemTypes[4] = { "FREE","STATIC_OBJ","OBJ","ARRAY"};
 void heapPrintBlocks(void);
@@ -156,17 +156,16 @@ u2 heapAllocElement(const u2 elemLength,const u1 type,stackObjectInfo* stackObje
         return elemPos + 1;
     }
 
-    /*not working because there are references to heap objects that I should find
-     heapCompactMemory();
+    heapCompactMemory();
 
     //last chance
     elemPos = heapFitElement(length);
     if(elemPos > 0){
         heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
         return elemPos + 1;
-    }*/
+    }
 
-    ERROREXIT(-1," No free heap space for object of size: %d bytes\n",length);
+    ERROREXIT(-1,"Error: OutOfMemory, no free heap space for object of length: %d.\n",length);
     return 0;
 }
 
@@ -177,10 +176,6 @@ void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
     ThreadControlBlock* thread = threadList.cb;
     for (int k = 0; k < threadList.count; k++)
     {
-#ifdef DEBUG_GARBAGE_COLLECTOR
-        heapPrintBlocks();
-        heapPrintStackReferences(thread);
-#endif
         u2 opStackPos = 0;
         if(k == 0){//tCB->tid == currentThreadCB->tid)
             //current thread
@@ -194,15 +189,12 @@ void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
             opStackPos--;
             slot* stackSlot = (thread->opStackBase + opStackPos);
 
-            if(src <= stackSlot->stackObj.pos && stackSlot->stackObj.pos <= src + size)
+            if( stackSlot->stackObj.magic == OBJECTMAGIC
+            &&  src <= stackSlot->stackObj.pos && stackSlot->stackObj.pos <= src + size)
             {
-                PRINTF("[#%d|%d|%x]",opStackPos,stackSlot->stackObj.pos,stackSlot->stackObj.magic);
                 stackSlot->stackObj.pos = stackSlot->stackObj.pos - offset;
             }
         }
-#ifdef DEBUG_GARBAGE_COLLECTOR
-        heapPrintStackReferences(thread);
-#endif
         thread = thread->succ;
     }
 #else
@@ -219,11 +211,44 @@ void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
 #endif
     for(int i = 0; i < numClasses;i++)
     {
-        if(src <= cs[cN].classInfo.stackObj.pos && cs[cN].classInfo.stackObj.pos <= src + size)
+        if(cs[i].classInfo.stackObj.magic == OBJECTMAGIC
+        && src <= cs[i].classInfo.stackObj.pos
+        && cs[i].classInfo.stackObj.pos <= src + size)
         {
-            cs[cN].classInfo.stackObj.pos -= offset;
+            cs[i].classInfo.stackObj.pos -= offset;
         }
     }
+}
+
+void heapUpdateObjectsReferences(const u2 src,const u2 size,const u2 offset)
+{
+    u2 crtBlock = 0;
+    do{
+        heapObjectMarker* heapBlockMarker = &(heapBase + crtBlock)->heapObjMarker;
+        if (heapBlockMarker->status != HEAPFREESPACE)
+        {// seraching objects references
+            for (int i = 1; i < heapBlockMarker->length; i++)
+            {
+                slot* heapObject = (heapBase + crtBlock + i);
+                //can be a object reference
+                if(heapObject->stackObj.magic == OBJECTMAGIC && heapObject->UInt != NULLOBJECT.UInt)
+                {
+                    if(heapObject->stackObj.pos >= src && heapObject->stackObj.pos <= src + size)
+                    {//this can be a reference to an object from the shifted memory block
+                        u2 heapObjectPos = 0;
+                        do
+                        {//find the object
+                            if(heapObjectPos == heapObject->stackObj.pos)
+                                heapObject->stackObj.pos -= offset;
+                           
+                            heapObjectPos = heapGetNextObjectPos(heapObjectPos);
+                        } while (heapObjectPos < src + size);
+
+                    }
+                }
+            }
+        }
+    } while ((crtBlock = heapGetNextObjectPos(crtBlock)) < heapTop);
 }
 
 void heapMemShift(const u2 dest,const u2 src,const u2 size){
@@ -234,10 +259,7 @@ void heapMemShift(const u2 dest,const u2 src,const u2 size){
 
 u1 heapCompactMemory()
 {
-#ifdef DEBUG_GARBAGE_COLLECTOR
-    PRINTF("Compacting memory\n");
-    heapPrintBlocks();
-#endif
+    PRINTF("Warning: Heap compacting is running,this is proccessor intensive,to avoid this increase heap size.\n");
     u2 crtPosition = 0;
     do
     {//find first free space
@@ -252,7 +274,14 @@ u1 heapCompactMemory()
                 {
                     const u2 offset = marker->length;
                     const u2 length= nextPosition - (crtPosition + offset);
+#ifdef DEBUG_GARBAGE_COLLECTOR
+                    PRINTF("Compacting memory [%d,%d] - %d\n",crtPosition + offset,crtPosition + offset + length,offset);
+                    heapPrintBlocks();
+                    heapPrintStackReferences(threadList.cb);
+#endif
+                    heapUpdateObjectsReferences(crtPosition + offset,length,offset);
                     heapMemShift(crtPosition,crtPosition + offset,length);
+                   
                     marker = &(heapBase + nextPosition - offset)->heapObjMarker;
                     marker->status = HEAPFREESPACE;
                     marker->length = nextMarker.length + offset;
@@ -260,12 +289,13 @@ u1 heapCompactMemory()
                     heapUpdateStackReferences(crtPosition + offset,length,offset);
                     nextPosition -= offset;
                     crtPosition = nextPosition;
+#ifdef DEBUG_GARBAGE_COLLECTOR
+                    PRINTF("Done Compacting.\n");
+                    heapPrintBlocks();
+                    heapPrintStackReferences(threadList.cb);
+#endif
                 }
             }
-#ifdef DEBUG_GARBAGE_COLLECTOR
-            PRINTF("Done Compacting.\n");
-            heapPrintBlocks();
-#endif
             return 1;
         }
         crtPosition = heapGetNextObjectPos(crtPosition);

@@ -39,7 +39,7 @@ typedef struct
     u4 mutex :1;                                  // mutex for object
     u4 length :16;                                // max 8k 4 byte alloated slots for object!!elements for an object,array on the heap, including heapObjMarker
 // expandable
-    u4 magic :4;                                  //  um Objects und prim types auf dem heap zu unterscheiden !!!!!
+    u4 magic :4;                                  //  to distinguish heap to Objects and prim types on the !!!!!
     u4 xxx :8;                                    // reducable
 } heapObjectMarker;
 
