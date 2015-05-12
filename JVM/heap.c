@@ -14,45 +14,20 @@ static u2    heapTop = MAXHEAP;
 extern u1 cN;
 extern ThreadControlBlock* currentThreadCB;
 extern ThreadPriorityList threadList;
+extern u1 numClasses;
 extern classStructure cs[MAXCLASSES];
 
+//#define DEBUG_GARBAGE_COLLECTOR
+#ifdef DEBUG_GARBAGE_COLLECTOR
 char* heapElemTypes[4] = { "FREE","STATIC_OBJ","OBJ","ARRAY"};
-void heapPrintBlocks()
-{
-    u2 nextElementPos = 0;
-    do//Search to fit in a slot that was freed
-    {
-        const heapObjectMarker marker = HEAPOBJECTMARKER(nextElementPos);
-        PRINTF("\t[#%d|%s|%d|%s]\n",nextElementPos,heapElemTypes[marker.status],marker.length,(marker.rootCheck ? "true" : "false"));
-        nextElementPos = heapGetNextObjectPos(nextElementPos);
+void heapPrintBlocks(void);
+void heapPrintStackReferences(ThreadControlBlock* thread);
+#endif
 
-    } while (nextElementPos < heapTop);
-    PRINTF("\n");
-}
-
-void heapPrintStackReferences(ThreadControlBlock* thread){
-    u2 opStackPos = 0;
-    if(thread->tid == currentThreadCB->tid){//current thread
-        opStackPos = opStackGetSpPos();
-    }else{
-        opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
-    }
-    PRINTF("Print Stack Objects for thread id:%d :\n",thread->tid);
-    while (opStackPos > 0)
-    {
-        opStackPos--;
-        
-        const slot stackSlot = *(thread->opStackBase + opStackPos);
-        if(stackSlot.stackObj.magic == OBJECTMAGIC)
-        {
-            const heapObjectMarker heapMarker =  HEAPOBJECTMARKER(stackSlot.stackObj.pos);
-            PRINTF("\t[#%d|%s|%d|%s]\n",stackSlot.stackObj.pos,heapElemTypes[heapMarker.status],heapMarker.length,(heapMarker.rootCheck ? "true" : "false"));
-        }else{
-            PRINTF("NotAnObject\n");
-        }
-    }
-     PRINTF("End Stack Objects\n");
-}
+void heapMergeFreeBlocks(void);
+void checkObjects(void);
+u1   canItBeAnObject(const u2);
+u1   heapCompactMemory();
 
 /* heap */
 void heapInit()
@@ -88,7 +63,17 @@ u2 heapGetNextObjectPos(const u2 pos)
 }
 
 u4 heapGetFreeMemory(){
-    return MAXHEAP - heapTop;
+    u2 freeSpace = MAXHEAP - heapTop;
+    u2 crtPosition = 0;
+    do
+    {
+        const heapObjectMarker marker = (heapBase + crtPosition)->heapObjMarker;
+        if(marker.status == HEAPFREESPACE){
+            freeSpace += marker.length;
+        }
+        crtPosition = heapGetNextObjectPos(crtPosition);
+    } while (crtPosition < heapTop);
+    return freeSpace;
 }
 
 u4   heapGetTotalMemory(void){
@@ -97,11 +82,8 @@ u4   heapGetTotalMemory(void){
 
 void heapCollectGarbage()
 {
-    heapPrintBlocks();
     checkObjects();
-    heapPrintBlocks();
     heapMergeFreeBlocks();
-    heapPrintBlocks();
 }
 
 void heapSetObjectMarker(const u2 position,const u2 length,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck)
@@ -118,6 +100,34 @@ void heapSetObjectMarker(const u2 position,const u2 length,const u1 type,stackOb
     stackObjectRef->magic = OBJECTMAGIC;
 }
 
+u2 heapFitElement(const u2 length)
+{//todo - maybe best fit algorithm will be better
+    u2 nextElementPos = 0;
+    do//Search to fit in a slot that was freed
+    {
+        heapObjectMarker* marker = &(heapBase + nextElementPos)->heapObjMarker;
+        if (marker->status == HEAPFREESPACE){
+            if(marker->length >= length)
+            {
+#ifdef DEBUG_GARBAGE_COLLECTOR
+                PRINTF("Searching for %d free space,found %d at pos %d.\n",length,marker->length,nextElementPos);
+#endif
+                marker->length -= length;
+                nextElementPos += marker->length;
+                return nextElementPos;
+            }
+#ifdef DEBUG_GARBAGE_COLLECTOR
+            else
+                PRINTF("Searching for %d free space,not found %d at pos %d.\n",length,marker->length,nextElementPos);
+#endif
+
+        }
+        nextElementPos = heapGetNextObjectPos(nextElementPos);
+    } while (nextElementPos < heapTop);
+
+    return 0;
+}
+
 /* Returns address to newly allocated element (not heap block marker!)*/
 u2 heapAllocElement(const u2 elemLength,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck)
 {
@@ -127,41 +137,151 @@ u2 heapAllocElement(const u2 elemLength,const u1 type,stackObjectInfo* stackObje
     {
         heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
         heapTop += length;
-        heapPrintBlocks();
+        return stackObjectRef->pos + 1;
+    }// free space on heap
+    //todo - check if this is working when having more threads running
+    heapCollectGarbage();
+
+    // maybe freed some memory on top of heap
+    if (heapTop + length < MAXHEAP)
+    {
+        heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
+        heapTop += length;
         return stackObjectRef->pos + 1;
     }// free space on heap
 
-    //heapMergeFreeBlocks();
+    u2 elemPos = heapFitElement(length);
+    if(elemPos > 0){
+        heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
+        return elemPos + 1;
+    }
 
-    //checkObjects();
-    heapCollectGarbage();
+    /*not working because there are references to heap objects that I should find
+     heapCompactMemory();
 
-    u2 nextElementPos = 0;
-    do//Search to fit in a slot that was freed
+    //last chance
+    elemPos = heapFitElement(length);
+    if(elemPos > 0){
+        heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
+        return elemPos + 1;
+    }*/
+
+    ERROREXIT(-1," No free heap space for object of size: %d bytes\n",length);
+    return 0;
+}
+
+void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
+{
+#ifndef TINYBAJOS_MULTITASKING
+
+    ThreadControlBlock* thread = threadList.cb;
+    for (int k = 0; k < threadList.count; k++)
     {
-        const heapObjectMarker marker = (heapBase + nextElementPos)->heapObjMarker;//HEAPOBJECTMARKER(nextElementPos);
-        if (marker.status == HEAPFREESPACE){
-            if(marker.length >= length){
-                PRINTF("Searching for %d free space,found %d at pos %d.\n",length,marker.length,nextElementPos);
-                heapSetObjectMarker(nextElementPos,length,type,stackObjectRef,rootCheck);
-                return nextElementPos + 1;// may be get more space than length
-            }else{
-                PRINTF("Searching for %d free space,not found %d at pos %d.\n",length,marker.length,nextElementPos);
+#ifdef DEBUG_GARBAGE_COLLECTOR
+        heapPrintBlocks();
+        heapPrintStackReferences(thread);
+#endif
+        u2 opStackPos = 0;
+        if(k == 0){//tCB->tid == currentThreadCB->tid)
+            //current thread
+            opStackPos = opStackGetSpPos();
+        }else{
+            opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
+        }
+
+        while (opStackPos > 0)
+        {
+            opStackPos--;
+            slot* stackSlot = (thread->opStackBase + opStackPos);
+
+            if(src <= stackSlot->stackObj.pos && stackSlot->stackObj.pos <= src + size)
+            {
+                PRINTF("[#%d|%d|%x]",opStackPos,stackSlot->stackObj.pos,stackSlot->stackObj.magic);
+                stackSlot->stackObj.pos = stackSlot->stackObj.pos - offset;
             }
         }
-        nextElementPos = heapGetNextObjectPos(nextElementPos);
-    } while (nextElementPos < heapTop);
+#ifdef DEBUG_GARBAGE_COLLECTOR
+        heapPrintStackReferences(thread);
+#endif
+        thread = thread->succ;
+    }
+#else
+    u2 opStackPos = opStackGetSpPos();
+    while (opStackPos > 0)
+    {
+        slot* stackSlot = (thread->opStackBase + opStackPos);
 
-    ERROREXIT(-1," No free heap space for object/array of length: 0x%x\n",length);
+        if(src <= stackSlot->stackObj.pos && stackSlot->stackObj.pos <= src + size)
+        {
+            stackSlot->stackObj.pos = stackSlot->stackObj.pos - offset;
+        }
+    }
+#endif
+    for(int i = 0; i < numClasses;i++)
+    {
+        if(src <= cs[cN].classInfo.stackObj.pos && cs[cN].classInfo.stackObj.pos <= src + size)
+        {
+            cs[cN].classInfo.stackObj.pos -= offset;
+        }
+    }
+}
+
+void heapMemShift(const u2 dest,const u2 src,const u2 size){
+    for(int i = 0;i < size;i++){
+        *(heapBase + dest + i) = *(heapBase + src + i);
+    }
+}
+
+u1 heapCompactMemory()
+{
+#ifdef DEBUG_GARBAGE_COLLECTOR
+    PRINTF("Compacting memory\n");
+    heapPrintBlocks();
+#endif
+    u2 crtPosition = 0;
+    do
+    {//find first free space
+        heapObjectMarker* marker = &(heapBase + crtPosition)->heapObjMarker;
+        if(marker->status == HEAPFREESPACE)
+        {//found free space search next record
+            u2 nextPosition = crtPosition;
+            while ((nextPosition = heapGetNextObjectPos(nextPosition)) < heapTop)
+            {
+                const heapObjectMarker nextMarker = (heapBase + nextPosition)->heapObjMarker;
+                if(nextMarker.status == HEAPFREESPACE)
+                {
+                    const u2 offset = marker->length;
+                    const u2 length= nextPosition - (crtPosition + offset);
+                    heapMemShift(crtPosition,crtPosition + offset,length);
+                    marker = &(heapBase + nextPosition - offset)->heapObjMarker;
+                    marker->status = HEAPFREESPACE;
+                    marker->length = nextMarker.length + offset;
+
+                    heapUpdateStackReferences(crtPosition + offset,length,offset);
+                    nextPosition -= offset;
+                    crtPosition = nextPosition;
+                }
+            }
+#ifdef DEBUG_GARBAGE_COLLECTOR
+            PRINTF("Done Compacting.\n");
+            heapPrintBlocks();
+#endif
+            return 1;
+        }
+        crtPosition = heapGetNextObjectPos(crtPosition);
+    } while (crtPosition < heapTop);
+
     return 0;
 }
 
 void heapMergeFreeBlocks()
 {
-    //PRINTF("Heap merge\n");
-    //heapPrintBlocks();
-    u2 nextElementPos = 0;
+#ifdef DEBUG_GARBAGE_COLLECTOR
+    PRINTF("Heap merge\n");
+    heapPrintBlocks();
     u2 noFreeBlocks = 0;
+#endif
+    u2 nextElementPos = 0;
 
     heapObjectMarker* elemMarker = &(heapBase + nextElementPos)->heapObjMarker;
     while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop)
@@ -170,20 +290,22 @@ void heapMergeFreeBlocks()
 
         if (elemMarker->status == HEAPFREESPACE &&  nextMarker->status == HEAPFREESPACE)
         {
+#ifdef DEBUG_GARBAGE_COLLECTOR
             noFreeBlocks++;
+#endif
             elemMarker->length += nextMarker->length;
         } else
             elemMarker = nextMarker;
     }
-
+#ifdef DEBUG_GARBAGE_COLLECTOR
     if(noFreeBlocks > 0){
-        // heapPrintBlocks();
+        heapPrintBlocks();
         PRINTF("Heap merged %d free blocks.\n",noFreeBlocks);
     }
+#endif
 
     if(elemMarker->status == HEAPFREESPACE){
         heapTop = heapTop - elemMarker->length;
-        PRINTF("Heap top:%d\n",heapTop);
     }}
 
 void checkObjects()
@@ -194,13 +316,20 @@ void checkObjects()
     u2 nextElementPos = 0;
 
     heapObjectMarker* heapBlockMarker = NULL;
+#ifdef DEBUG_GARBAGE_COLLECTOR
+    heapPrintBlocks();
+
+    ThreadControlBlock* thread = threadList.cb;
+    for (int k = 0; k < threadList.count; k++)
+        heapPrintStackReferences(thread);
+#endif
     do
     {
         heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
-        heapBlockMarker->rootCheck = 0;//HEAPOBJECTMARKER(nextElementPos).rootCheck = 0;
+        heapBlockMarker->rootCheck = 0;
         if(heapBlockMarker->status == HEAPFREESPACE
-        || heapBlockMarker->status == HEAPALLOCATEDSTATICCLASSOBJECT)// empty or static
-        {
+        || heapBlockMarker->status == HEAPALLOCATEDSTATICCLASSOBJECT)
+        {// empty or static
             heapBlockMarker->rootCheck = 1;
             continue;
         }
@@ -208,8 +337,6 @@ void checkObjects()
         ThreadControlBlock* thread = threadList.cb;
         for (int k = 0; k < threadList.count; k++)
         {
-            heapPrintStackReferences(thread);
-            
             u2 opStackPos = 0;
             if(k == 0){//tCB->tid == currentThreadCB->tid)
                 //current thread
@@ -222,9 +349,8 @@ void checkObjects()
             {
                 opStackPos--;
                 const slot stackSlot = *(thread->opStackBase + opStackPos);
-                //const heapObjectMarker heapMarker =  HEAPOBJECTMARKER(stackSlot.stackObj.pos);
-                
-                if(stackSlot.stackObj.pos == nextElementPos
+
+                if(stackSlot.stackObj.pos   == nextElementPos
                 && stackSlot.stackObj.magic == OBJECTMAGIC)
                 {//Found a reference to this heap memory block mark as root for root check
                     heapBlockMarker->rootCheck = 1;
@@ -238,24 +364,26 @@ void checkObjects()
             }
             thread = thread->succ;
         }
-        /*if (heapBlockMarker->rootCheck == 1)
-        {
-            break;
-        }*/
 #else
-        u2 opSPPos=opStackGetSpPos();
-        while (opSPPos > 0)
+        u2 opStackPos = opStackGetSpPos();
+        while (opStackPos > 0)
         {
-            if( (nextElementPos == ((*(opStackGetBase() + (--opSPPos))).stackObj.pos))
-               &&(((*(opStackGetBase() + (opSPPos))).stackObj.magic)==OBJECTMAGIC ))
-            {
-                HEAPOBJECTMARKER(nextElementPos).rootCheck = 1;
+            opStackPos--;
+            const slot stackSlot = *(thread->opStackBase + opStackPos);
+
+            if(stackSlot.stackObj.pos   == nextElementPos
+            && stackSlot.stackObj.magic == OBJECTMAGIC)
+            {//Found a reference to this heap memory block can go to next block
+                heapBlockMarker.rootCheck = 1;
                 break;
             }
         }
 #endif
     } while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
 
+#ifdef DEBUG_GARBAGE_COLLECTOR
+    heapPrintBlocks();
+#endif
     // All static objects and stack referenced objects are selected(marked as roots)
     // Now mark childs of roots
     u1 stillAConcatedObject = 0;
@@ -288,20 +416,25 @@ void checkObjects()
     } while (stillAConcatedObject);
 
     nextElementPos = 0;
+#ifdef DEBUG_GARBAGE_COLLECTOR
     u2 noFreedOjects = 0;
-
+#endif
     do
     {
         heapBlockMarker = &(heapBase + nextElementPos)->heapObjMarker;
         if (heapBlockMarker->rootCheck == 0){
-            noFreedOjects++;
             heapBlockMarker->status = HEAPFREESPACE;
+#ifdef DEBUG_GARBAGE_COLLECTOR
+            noFreedOjects++;
+#endif
         }
     }while ((nextElementPos = heapGetNextObjectPos(nextElementPos)) < heapTop);
-
+#ifdef DEBUG_GARBAGE_COLLECTOR
+    heapPrintBlocks();
     if(noFreedOjects > 0){
         PRINTF("Freed %d objects.\n",noFreedOjects);
     }
+#endif
 }
 
 u1 canItBeAnObject(const u2 pos)
@@ -317,3 +450,43 @@ u1 canItBeAnObject(const u2 pos)
     // cannot be an object
     return 0;
 }
+
+#ifdef DEBUG_GARBAGE_COLLECTOR
+void heapPrintBlocks()
+{
+    u2 nextElementPos = 0;
+    do//Search to fit in a slot that was freed
+    {
+        const heapObjectMarker marker = HEAPOBJECTMARKER(nextElementPos);
+        PRINTF("\t[#%d|%s|%d|%s]\n",nextElementPos,heapElemTypes[marker.status],marker.length,(marker.rootCheck ? "true" : "false"));
+        nextElementPos = heapGetNextObjectPos(nextElementPos);
+
+    } while (nextElementPos < heapTop);
+    PRINTF("\n");
+}
+
+void heapPrintStackReferences(ThreadControlBlock* thread){
+    u2 opStackPos = 0;
+    if(thread->tid == currentThreadCB->tid){//current thread
+        opStackPos = opStackGetSpPos();
+    }else{
+        opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
+    }
+    PRINTF("Print Stack Objects for thread id:%d :\n",thread->tid);
+    while (opStackPos > 0)
+    {
+        opStackPos--;
+
+        const slot stackSlot = *(thread->opStackBase + opStackPos);
+        PRINTF("[#%d|%d|%x]",opStackPos,stackSlot.stackObj.pos,stackSlot.stackObj.magic);
+        if(stackSlot.stackObj.magic == OBJECTMAGIC)
+        {
+            const heapObjectMarker heapMarker =  HEAPOBJECTMARKER(stackSlot.stackObj.pos);
+            PRINTF("\t[#%d|%s|%d|%s]\n",stackSlot.stackObj.pos,heapElemTypes[heapMarker.status],heapMarker.length,(heapMarker.rootCheck ? "true" : "false"));
+        }else{
+            PRINTF("\tNotAnObject\n");
+        }
+    }
+    PRINTF("End Stack Objects\n");
+}
+#endif

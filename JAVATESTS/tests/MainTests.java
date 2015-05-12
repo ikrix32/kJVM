@@ -7,7 +7,7 @@ public class MainTests
 	{
 		Runtime runtime = Runtime.getRuntime();
 		System.out.println("Starting Tests, jvm: total memory:"+runtime.totalMemory()+", free memory:"+runtime.freeMemory());
-		/*
+		
 		HelloWorld.runTest();
 		System.out.println("Free Memory:"+runtime.freeMemory());
 		Arithmetic.runTest();
@@ -37,7 +37,7 @@ public class MainTests
 		DivByZero.runTest();
 		System.out.println("Free Memory:"+runtime.freeMemory());
 		ThreadTest.runTest();
-		System.out.println("Free Memory:"+runtime.freeMemory());*/
+		System.out.println("Free Memory:"+runtime.freeMemory());/*/
 		HeapTest.runTest();
 		System.out.println("Free Memory:"+runtime.freeMemory());//*/
 	}

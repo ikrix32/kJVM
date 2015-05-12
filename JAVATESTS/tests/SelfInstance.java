@@ -34,8 +34,6 @@ class SelfInstance {
     self0.printString();
     self1.printString();
     Runtime runtime = Runtime.getRuntime();
-    System.out.println("Free Memory:"+runtime.freeMemory()+". Calling garbage collector.");
-    runtime.gc();
   }
 }
 
