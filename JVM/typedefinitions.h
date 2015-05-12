@@ -98,7 +98,7 @@ typedef struct ThreadPriorityList
 
 typedef struct
 {
-    char* classFileStartAddress;                  // Speicheradresse fuer classfile-bytes
+    char* classFileStartAddress;                  // Memory address for classfile bytes
     u2 classFileLength;                           // << 64K
     u2 magic;                                     // kann weg
     u2 minor_version;                             // kann weg
