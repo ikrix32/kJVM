@@ -743,15 +743,16 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     CLASSNOTFOUNDERR(className,classNameLength);
                 }
 #endif
-
-                if (!findFieldByName(cN,cN,fieldName, fieldNameLength, fieldDescr,fieldDescrLength,1))
+                refInfo ref = findFieldByName(cN,cN,fieldName, fieldNameLength, fieldDescr,fieldDescrLength,1);
+                if (ref.reference == INVALID_FIELD_ID)
                 {
                     FIELDNOTFOUNDERR(fieldName,className);
                 }
+
                 if(code == GETSTATIC){
-                    opStackPush(heapGetElement(cs[cN].classInfo.stackObj.pos + fN + 1));
+                    opStackPush(heapGetElement(cs[ref.classId].classInfo.stackObj.pos + ref.reference + 1));
                 }else{
-                    heapSetElement(opStackPop(),cs[cN].classInfo.stackObj.pos + fN + 1);
+                    heapSetElement(opStackPop(),cs[ref.classId].classInfo.stackObj.pos + ref.reference + 1);
                 }
                 pc += 2;
                 cN = methodStackPop();	// end GETSTATIC/PUTSTATIC
@@ -812,8 +813,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     const u2 instanceClassId = ( code == PUTFIELD ? second.stackObj.classNumber : first.stackObj.classNumber);
 
                     //printf("PUT/GET Field %s defined in :%s, instance class:%s \n",fieldName,className,(char*)getClassName(instanceClassId));
-
-                    if (!findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0))
+                    refInfo ref = findFieldByName(instanceClassId,fieldClassId,fieldName, fieldNameLength, fieldDescr, fieldDescrLength,0);
+                    if (ref.reference == INVALID_FIELD_ID)
                     {
                         FIELDNOTFOUNDERR(fieldName,className);
                     }
@@ -824,9 +825,9 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                         {//Truncate Integer input for Byte output
                             first.Int = first.Int & 0x000000ff;
                         }
-                        heapSetElement(first, second.stackObj.pos + fN + 1);
+                        heapSetElement(first, second.stackObj.pos + ref.reference + 1);
                     }else
-                        opStackPush(toSlot(heapGetElement(first.stackObj.pos + fN +  1).Int));
+                        opStackPush(toSlot(heapGetElement(first.stackObj.pos + ref.reference +  1).Int));
                 }
                 pc += 2;
                 cN = methodStackPop();

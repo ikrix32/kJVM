@@ -205,10 +205,11 @@ void createThread (void)
         const slot object = opStackGetValue(local);
 
         cN = object.stackObj.classNumber;
-        if (!findFieldByName(cN, cN,"priority", 8, "I", 1,0))
+        refInfo ref = findFieldByName(cN, cN,"priority", 8, "I", 1,0);
+        if (ref.reference == INVALID_FIELD_ID)
             ERROREXIT(77, "field priority not found");
 
-        t->pPriority = (u4*) heapGetElementRef(object.stackObj.pos + fN + 1);
+        t->pPriority = (u4*) heapGetElementRef(object.stackObj.pos + ref.reference + 1);
         // position of int field priority of the thread creating object, next field is aLive
         // restore class number of object
         cN = object.stackObj.classNumber;

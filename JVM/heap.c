@@ -82,6 +82,7 @@ u4   heapGetTotalMemory(void){
 
 void heapCollectGarbage()
 {
+    //PRINTF("heapCollectGarbage\n");
     checkObjects();
     heapMergeFreeBlocks();
 }
@@ -132,38 +133,37 @@ u2 heapFitElement(const u2 length)
 u2 heapAllocElement(const u2 elemLength,const u1 type,stackObjectInfo* stackObjectRef,const u1 rootCheck)
 {
     const u2 length = elemLength + 1;
-    // circulars are recognizable reference on heap without regard to opstack !!!
-    if (heapTop + length < MAXHEAP)
-    {
-        heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
-        heapTop += length;
-        return stackObjectRef->pos + 1;
-    }// free space on heap
-    //todo - check if this is working when having more threads running
-    heapCollectGarbage();
+    int tryIndex = 0;
 
-    // maybe freed some memory on top of heap
-    if (heapTop + length < MAXHEAP)
-    {
-        heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
-        heapTop += length;
-        return stackObjectRef->pos + 1;
-    }// free space on heap
+    do{
+        if(tryIndex == 0 || tryIndex == 2 || tryIndex == 5){
+            // circulars are recognizable reference on heap without regard to opstack !!!
+            if (heapTop + length < MAXHEAP)
+            {
+                heapSetObjectMarker(heapTop,length,type,stackObjectRef,rootCheck);
+                heapTop += length;
+                return stackObjectRef->pos + 1;
+            }// free space on heap
+        }
 
-    u2 elemPos = heapFitElement(length);
-    if(elemPos > 0){
-        heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
-        return elemPos + 1;
-    }
+        if(tryIndex == 3 || tryIndex == 6){
+            u2 elemPos = heapFitElement(length);
+            if(elemPos > 0){
+                heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
+                return elemPos + 1;
+            }
+        }
 
-    heapCompactMemory();
+        if(tryIndex == 1){
+            //todo - check if this is working when having more threads running
+            heapCollectGarbage();
+        }
 
-    //last chance
-    elemPos = heapFitElement(length);
-    if(elemPos > 0){
-        heapSetObjectMarker(elemPos,length,type,stackObjectRef,rootCheck);
-        return elemPos + 1;
-    }
+        if(tryIndex == 4){
+            heapCompactMemory();
+        }
+        tryIndex++;
+    }while (tryIndex <= 6);
 
     ERROREXIT(-1,"Error: OutOfMemory, no free heap space for object of length: %d.\n",length);
     return 0;
@@ -176,13 +176,7 @@ void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
     ThreadControlBlock* thread = threadList.cb;
     for (int k = 0; k < threadList.count; k++)
     {
-        u2 opStackPos = 0;
-        if(k == 0){//tCB->tid == currentThreadCB->tid)
-            //current thread
-            opStackPos = opStackGetSpPos();
-        }else{
-            opStackPos = *(thread->methodStackBase + thread->methodSpPos - 1);
-        }
+        u2 opStackPos = k == 0 ? opStackGetSpPos() : *(thread->methodStackBase + thread->methodSpPos - 1);
 
         while (opStackPos > 0)
         {
@@ -190,7 +184,8 @@ void heapUpdateStackReferences(const u2 src,const u2 size,const u2 offset)
             slot* stackSlot = (thread->opStackBase + opStackPos);
 
             if( stackSlot->stackObj.magic == OBJECTMAGIC
-            &&  src <= stackSlot->stackObj.pos && stackSlot->stackObj.pos <= src + size)
+            &&  src <= stackSlot->stackObj.pos
+            && stackSlot->stackObj.pos <= src + size)
             {
                 stackSlot->stackObj.pos = stackSlot->stackObj.pos - offset;
             }

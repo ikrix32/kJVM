@@ -27,7 +27,7 @@ u1 findClass(const char* name,const u1 len);
 u1 findSuperClass(const u1 classId);
 u1 findNumArgs(const u1 classId,const u2 method);
 u2 findMaxLocals(const u1 classId,const u1 methodId);
-u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
+refInfo findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
                    const char* fieldDescr,const u1 fieldDescrLength,const u1 isStatic);
 u1 findMethodByName(const u1 classId,const char* name, const u1 len, const char* methodDescr,
                     const u1 methodDescrLength);

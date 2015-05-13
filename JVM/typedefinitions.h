@@ -65,6 +65,12 @@ typedef union
     heapObjectMarker heapObjMarker;
 } slot;
 
+typedef struct
+{
+    u2 classId;
+    u2 reference;
+} refInfo;
+
 #ifndef NRF51
 #define toSlot(x) (slot)(x)//{x}
 #else

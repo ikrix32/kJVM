@@ -66,6 +66,7 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
     for (u2 i = 0; i < methodDescrLength; i++)
     {
         const u1 c = methodDescr[i];
+
         if (c == '(')
             continue;
 
@@ -82,7 +83,7 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
                 object = 1;
                 n++;
             } else  if((c == 'B') || (c == 'C') || (c == 'F') || (c == 'I')
-                       || (c == 'S') || (c == 'Z'))
+                    || (c == 'S') || (c == 'Z'))
             {
                 n++;
             }
@@ -92,34 +93,31 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
 }
 
 
-u2 findMaxLocals(const u1 classId,const u1 methodId)                                /*cN,mN*/
+u2 findMaxLocals(const u1 classId,const u1 methodId)
 {
     return getU2(classId,getStartPC(classId,methodId) - 6);
 }
 
-
-/* in cN fieldName fieldDescr*/
-/* out cN, fN of normal field in object (non static, non final primitive fields)*/
-/* return 1 -> found */
 //instanceClassId is current intance class,fieldClassId represents class where is defined the field, class fieldId = superClass.fieldsCount+field index
-u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
-                   const char* fieldDescr, const u1 fieldDescrLength,const u1 isStatic)
+refInfo findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fieldName,const u1 fieldNameLength,
+                        const char* fieldDescr, const u1 fieldDescrLength,const u1 isStatic)
 {
-    fN = INVALID_FIELD_ID;
-    u1  class = instanceClassId;
-    u1 f = 0;
+    refInfo ref;
+    ref.classId = INVALID_CLASS_ID;
+    ref.reference = INVALID_FIELD_ID;
+
+    u1 classId = instanceClassId;
+    u2 fieldId = 0;
     do
     {
-        const u1 numFields = getU2(class,cs[class].fields_count);
+        const u1 numFields = getU2(classId,cs[classId].fields_count);
         for (u1 i = 0; i < numFields; ++i)
         {
-            const u2 crtFieldInfo = getU2(class,cs[class].field_info[i]);
-            const u2 crtFieldDescrId = getU2(class,cs[class].field_info[i] + 4);
-
-            //const u2 fielddescr = cs[cN].constant_pool[fieldDescrId];
+            const u2 crtFieldInfo = getU2(classId,cs[classId].field_info[i]);
+            const u2 crtFieldDescrId = getU2(classId,cs[classId].field_info[i] + 4);
 
             if (crtFieldInfo & ACC_FINAL){
-                const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);
+                const char* crtFieldDescr = UTF8_GET_STRING(classId, crtFieldDescrId);
                 const u1 isNotObject= STRNCMP ("L",crtFieldDescr, 1);
                 if(isNotObject)
                     continue; // ignore static and non static primitive finals
@@ -128,31 +126,30 @@ u1 findFieldByName(const u2 instanceClassId,const u2 fieldClassId,const char* fi
             if ((!isStatic && crtFieldInfo & ACC_STATIC) || (isStatic && !(crtFieldInfo & ACC_STATIC)))
                 continue;// ignore static/non static depends what kind of file are we searching
 
-            const u2 crtFieldNameId = getU2(class,cs[class].field_info[i] + 2);
-            const u2 crtFieldNameLen = UTF8_GET_LENGTH(class, crtFieldNameId);// getU2(cN,fieldname + 1);
-            const u2 crtFielsDescLen = UTF8_GET_LENGTH(class, crtFieldDescrId);//getU2(cN,fielddescr + 1);
+            const u2 crtFieldNameId = getU2(classId,cs[classId].field_info[i] + 2);
+            const u2 crtFieldNameLen = UTF8_GET_LENGTH(classId, crtFieldNameId);
+            const u2 crtFielsDescLen = UTF8_GET_LENGTH(classId, crtFieldDescrId);
 
             if(fieldNameLength == crtFieldNameLen && fieldDescrLength == crtFielsDescLen)
             {
-                const char* crtFieldName = UTF8_GET_STRING(class, crtFieldNameId);
+                const char* crtFieldName = UTF8_GET_STRING(classId, crtFieldNameId);
                 if(STRNCMP(fieldName,crtFieldName, fieldNameLength) == 0)
                 {
-                    const char* crtFieldDescr = UTF8_GET_STRING(class, crtFieldDescrId);//(const char*) getAddr(cN,fielddescr + 3);
+                    const char* crtFieldDescr = UTF8_GET_STRING(classId, crtFieldDescrId);
                     if( STRNCMP(fieldDescr, crtFieldDescr, fieldDescrLength) == 0)
                     {
-                        fN = f;
+                        ref.reference = fieldId;
+                        ref.classId = classId;
                     }
                 }
             }
-            f++;
+            fieldId++;
         }
-        if (fN != INVALID_FIELD_ID && class == fieldClassId)
+        if (ref.reference != INVALID_FIELD_ID && ref.classId == fieldClassId)
             break;
-    } while ((class = findSuperClass(class)) != INVALID_CLASS_ID);
-    if(fN != INVALID_FIELD_ID){
-        cN = class;
-    }
-    return fN != INVALID_FIELD_ID;
+    } while ((classId = findSuperClass(classId)) != INVALID_CLASS_ID);
+
+    return ref;
 }
 
 //Returns methodId(mN)
