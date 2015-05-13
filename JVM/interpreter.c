@@ -1375,7 +1375,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                         {
                             while ('[' == *classname)//getU1(classname)=='[')
                             {
-                                // we hope to get useful information
+                                //we hope to get useful information
                                 //from the objects stored in the array.
                                 //this only takes the first object in the array,
                                 //yet it could be extended to gathering

@@ -57,11 +57,11 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
 {
     u2 n = 0;
     u1 object = 0;
-    const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(cN,methodRef);
-    const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(cN,methodNameAndTypeId);
+    const u2 methodNameAndTypeId = METHODREF_GET_NAME_AND_TYPEID(classId,methodRef);
+    const u2 methodDescrId = NAMEANDTYPE_GET_DESCRIPTIONID(classId,methodNameAndTypeId);
 
-    const char* methodDescr = UTF8_GET_STRING(cN,methodDescrId);
-    const u2    methodDescrLength = UTF8_GET_LENGTH(cN,methodDescrId);
+    const char* methodDescr = UTF8_GET_STRING(classId,methodDescrId);
+    const u2    methodDescrLength = UTF8_GET_LENGTH(classId,methodDescrId);
 
     for (u2 i = 0; i < methodDescrLength; i++)
     {
