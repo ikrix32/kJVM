@@ -82,7 +82,7 @@ u1 findNumArgs(const u1 classId,const u2 methodRef)
                 object = 1;
                 n++;
             } else  if((c == 'B') || (c == 'C') || (c == 'F') || (c == 'I')
-                       || (c == 'S') || (c == 'Z'))
+                    || (c == 'S') || (c == 'Z'))
             {
                 n++;
             }

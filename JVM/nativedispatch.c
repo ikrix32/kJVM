@@ -11,6 +11,7 @@
 /* look at methods in the *.java or *.class file in increasing order */
 /* if method is non native -> insert NULL, otherwise pointer to nativce C-function*/
 
+#include <stdlib.h> //malloc
 #include "object.h"
 #include "nstring.h"
 #include "thread.h"
@@ -18,12 +19,204 @@
 #include "lock.h"
 #include "float.h"
 
+#include "stack.h"
+
 //krix
 #include "nativedispach.h"
 
+extern u1 local;
+typedef struct byteArray
+{
+    s1* values;
+    u1  length;
+} byteArray;
+
+typedef struct charArray
+{
+    char* values;
+    u1    length;
+} charArray;
+
+typedef struct shortArray
+{
+    s2*  values;
+    u1   length;
+} shortArray;
+
+typedef struct intArray
+{
+    int* values;
+    u1   length;
+} intArray;
+
+typedef struct floatArray
+{
+    float*  values;
+    u1      length;
+} floatArray;
+
+u1 sizeOfType(char type,u1 isPointer)
+{
+    switch (type) {
+        case 'B':
+        {
+            return isPointer ? sizeof(byteArray*) : sizeof(s1);
+        }break;
+        case 'C':
+        {
+            return isPointer ? sizeof(charArray*) : sizeof(char);
+        }break;
+        case 'I':
+        {
+            return isPointer ? sizeof(intArray*) : sizeof(int);
+        }break;
+        case 'F':
+        {
+            return isPointer ? sizeof(floatArray*) : sizeof(float);
+        }break;
+        case 'Z':
+        {//boolean
+            return isPointer ? sizeof(byteArray*) : sizeof(s1);
+        }break;
+        case 'S':
+        {
+            return isPointer ? sizeof(shortArray*) : sizeof(s2);
+        }break;
+            
+        default:
+        {
+            DNOTSUPPORTED;
+        }break;
+    }
+    return 0;
+}
+
+void* paramReadArray(void* out,char type){
+    switch (type) {
+        case 'Z':
+        case 'B':
+        {
+            s1* p = (s1*)out;
+            p[0] = opStackGetValue(local + 1).Int & 0x000000ff;
+            return ++p;
+        }break;
+        case 'C':
+        {
+            char* p = (char*)out;
+            p[0] = opStackGetValue(local + 1).UInt & 0x000000ff;
+            return ++p;
+        }break;
+        case 'I':
+        {
+            int* p = (int*)out;
+            p[0] = opStackGetValue(local + 1).Int;
+            return ++p;
+        }break;
+        case 'F':
+        {
+            float* p = (float*)out;
+            p[0] = opStackGetValue(local + 1).Float;
+            return ++p;
+        }break;
+        case 'S':
+        {
+            s2* p = (s2*)out;
+            p[0] = opStackGetValue(local + 1).Int & 0x0000ffff;
+            return ++p;
+        }break;
+            
+        default:
+        {
+            DNOTSUPPORTED;
+        }break;
+    }
+
+    return 0;
+}
+
+void* paramRead(void* out,char type,int paramIndex){
+    const slot val = opStackGetValue(local + paramIndex);
+    switch (type)
+    {
+        case 'Z':
+        case 'B':
+        {
+            s1* p = (s1*)out;
+            p[0] = val.Int & 0x000000ff;
+            return ++p;
+        }break;
+        case 'C':
+        {
+            char* p = (char*)out;
+            p[0] = val.UInt & 0x000000ff;
+            return ++p;
+        }break;
+        case 'I':
+        {
+            int* p = (int*)out;
+            p[0] = val.Int;
+            return ++p;
+        }break;
+        case 'F':
+        {
+            float* p = (float*)out;
+            p[0] = val.Float;
+            return ++p;
+        }break;
+        case 'S':
+        {
+            s2* p = (s2*)out;
+            p[0] = val.Int & 0x0000ffff;
+            return ++p;
+        }break;
+            
+        default:
+        {
+            DNOTSUPPORTED;
+        }break;
+    }
+
+}
+
 u1 nativeDispath(const char* methodName,const char* methodDescription){
     PRINTF("Calling native method:%s with description:%s\n",methodName,methodDescription);
+    
+    void* param = NULL;
+    
+    //coumpute parameters size
+    int i = 0;
+    int pSize = 0;
+    //parse parameters
+    while (methodDescription[i] != ')')
+    {
+        if(methodDescription[i] == '[') {
+            i++;
+            pSize += sizeOfType(methodDescription[i],1);
+        }else
+            pSize += sizeOfType(methodDescription[i],0);
+        i++;
+    }
+    param = malloc((size_t) pSize);
+    i = 0;
+    int paramIndex = 0;
+    //parse parameters
+    while (methodDescription[i] != ')')
+    {
+        if (methodDescription[i] == '['){
+            i++;
+            param = paramReadArray( param, methodDescription[i]);
+            paramIndex++;
+        }else{
+            param = paramRead(param, methodDescription[i],paramIndex);
+            paramIndex++;
+        }
+        i++;
+    }
+    
     return 1;
+}
+
+void nativeCall(const u2 classId,const u2 methodId,void* paramters){
 }
 
 //end krix
