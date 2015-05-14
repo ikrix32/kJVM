@@ -173,30 +173,34 @@ public class JavaType {
     	}
 
     	// primitive types
-        if (this.type.equals("void")) {
-            sb.append("V");
+        sb.append(getTypeShort());
+        
+        return sb.toString();
+    }
+    
+    public String getTypeShort(){
+    	if (type.equals("void")) {
+    		return "V";
         } else if (this.type.equals("byte")) {
-            sb.append("B");
+        	return	"B";
         } else if (this.type.equals("char")) {
-            sb.append("C");
+        	return "C";
         } else if (this.type.equals("double")) {
-            sb.append("D");
+        	return "D";
         } else if (this.type.equals("float")) {
-            sb.append("F");
+        	return "F";
         } else if (this.type.equals("int")) {
-            sb.append("I");
+        	return "I";
         } else if (this.type.equals("long")) {
-            sb.append("J");
+        	return "J";
         } else if (this.type.equals("short")) {
-            sb.append("S");
+        	return "S";
         } else if (this.type.equals("boolean")) {
-            sb.append("Z");
+        	return "Z";
         } else {
         	// complex type
-            sb.append("L" + this.type.replace('.', '/') + ";");
-        }
-
-        return sb.toString();
+        	return "L" + this.type.replace('.', '/') + ";";
+        } 
     }
     
     @Override

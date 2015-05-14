@@ -73,7 +73,7 @@ char waitTime()
 }
 #endif
 
-char getDataAddress()
+/*char getDataAddress()
 {
-    return 1;/* ret val is  on Stack !!*/
-}
+ return 1;// ret val is  on Stack !!
+}*/

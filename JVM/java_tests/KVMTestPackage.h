@@ -103,6 +103,12 @@
 #endif
 
 #ifdef ENABLE_KCLASS_FORMAT
+#include "tests_NativeMethodsTest_k.h"
+#else
+#include "tests_NativeMethodsTest.h"
+#endif
+
+#ifdef ENABLE_KCLASS_FORMAT
 #include "tests_MainTests_k.h"
 #else
 #include "tests_MainTests.h"
@@ -126,6 +132,7 @@ static const u1* testBinaries[] =
 	tests_ErathostenesBin,
 	tests_DivByZeroBin,
 	tests_ThreadTestBin,
+	tests_NativeMethodsTestBin,
 	tests_MainTestsBin,
 };
 
@@ -147,6 +154,7 @@ static const u4 testBinariesSize[] =
 	sizeof(tests_ErathostenesBin),
 	sizeof(tests_DivByZeroBin),
 	sizeof(tests_ThreadTestBin),
+	sizeof(tests_NativeMethodsTestBin),
 	sizeof(tests_MainTestsBin),
 };
 
@@ -168,6 +176,7 @@ static const char* testNames[] =
 	"tests/Erathostenes",
 	"tests/DivByZero",
 	"tests/ThreadTest",
+	"tests/NativeMethodsTest",
 	"tests/MainTests",
 };
 
@@ -189,6 +198,7 @@ static const char** testMethodNames[] =
 	tests_ErathostenesMethodNames,
 	tests_DivByZeroMethodNames,
 	tests_ThreadTestMethodNames,
+	tests_NativeMethodsTestMethodNames,
 	tests_MainTestsMethodNames,
 };
 

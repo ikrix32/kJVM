@@ -31,7 +31,7 @@ public class Object {
 
 	public native void waitTime(int timeout);
 
-	private native static int getDataAddress(Object obj);
+	//private native static int getDataAddress(Object obj);
 
 	public Object() {
 	}

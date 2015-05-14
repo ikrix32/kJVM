@@ -37,7 +37,8 @@ public class MainTests
 		DivByZero.runTest();
 		System.out.println("Free Memory:"+runtime.freeMemory());
 		ThreadTest.runTest();
-		System.out.println("Free Memory:"+runtime.freeMemory());/*/
+		System.out.println("Free Memory:"+runtime.freeMemory());
+		NativeMethodsTest.runTest();/*/
 		HeapTest.runTest();
 		System.out.println("Free Memory:"+runtime.freeMemory());*/
 	}

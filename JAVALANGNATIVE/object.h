@@ -12,5 +12,5 @@ char notifyAll(void);
 char nativeWait(void);
 char waitTime(void);
 #endif
-char getDataAddress(void);
+//char getDataAddress(void);
 #endif

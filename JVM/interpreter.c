@@ -983,7 +983,12 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (methodInfo & ACC_NATIVE)
                 {
                     //printf("Invoke native method:%s->%s\n",className,methodName);
-                    //goto nativeVoidReturn;
+                    const u2 classId = getClassID(cN);
+                    if(classId == 46){
+                        nativeDispath(0,classId,mN,methodName, methodDescr);
+
+                        goto nativeVoidReturn;
+                    }else
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
                         //PRINTF("Calling native method %d\n",mN);
@@ -1089,9 +1094,19 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (methodInfo & ACC_NATIVE)
                 {
                     //printf("Invoke native method:%s->%s\n",className,methodName);
+                    const u2 classId = getClassID(cN);
+                    if(classId == 46){
+                        nativeDispath(1,classId,mN,methodName, methodDescr);
+
+                       goto nativeVoidReturn;
+                    }else
                     if ((cs[cN].nativeFunction != NULL)
                     && (cs[cN].nativeFunction[mN] != NULL))
                     {
+                        const u2 classId = getClassID(cN);
+                        if(classId == 46)
+                            nativeDispath(1,classId,mN,methodName, methodDescr);
+
                         //PRINTF("Calling native method %d\n",mN);
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;

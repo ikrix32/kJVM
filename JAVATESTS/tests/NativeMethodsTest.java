@@ -1,10 +1,10 @@
 package tests;
 
 public class NativeMethodsTest {
-	byte b;
-	char c;
-	int  i; 
-	float f;
+	byte b = 10;
+	char c = 99;
+	int  i = 200; 
+	float f= 2.2f;
 	
 	byte[] arrayB = new byte[]{0x3,0x3};
 	char[] arrayC = new char[]{'a','b'};
@@ -12,10 +12,10 @@ public class NativeMethodsTest {
 	float[] arrayF = new float[]{5.2f,5.2f};
 	
 	private native void nativeVoidMetod();
-	private native byte nativeMethod(byte a);
-	private native char nativeMethod(char a);
-	private native int  nativeMethod(int a);
-	private native float nativeMethod(float a);
+	private native void nativeMethod(byte a);
+	private native void nativeMethod(char a);
+	private native void  nativeMethod(int a);
+	private native void nativeMethod(float a);
 	private native void nativeMethod(byte a,char b,int c,float d);
 	
 	private native void nativeMethod(byte[] a);
@@ -23,7 +23,7 @@ public class NativeMethodsTest {
 	private native void nativeMethod(int[] a);
 	private native void nativeMethod(float[] a);
 	
-	private native byte[] nativeMethod();
+	private native void nativeMethod();
 	
 	public static void runTest() {
 		NativeMethodsTest mTest = new NativeMethodsTest();
