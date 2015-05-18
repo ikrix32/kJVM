@@ -621,7 +621,7 @@ void analyzeFields(const u1 classId)//600bytes
 
     cs[classId].classInfo.stackObj.classNumber = classId;
     // allocate on heap places for stackObject fields
-    const u2 heapPos = heapAllocElement(fN,HEAPALLOCATEDSTATICCLASSOBJECT,&cs[classId].classInfo.stackObj,1);
+    const u2 heapPos = heapAllocElement(fN,HEAP_STATIC_CLASS_OBJECT,&cs[classId].classInfo.stackObj);
 
     for (int i = 0; i < fN;i++)// initialize the heap elements
         heapSetElement(toSlot( (u4) 0), heapPos + i);

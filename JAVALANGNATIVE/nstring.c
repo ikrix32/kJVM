@@ -24,7 +24,7 @@ extern classStructure cs[MAXCLASSES];
 char nativeStringLength()
 {
     const slot mySlot = opStackGetValue(local);
-    if (mySlot.stackObj.magic == CPSTRINGMAGIC)
+    if (mySlot.stackObj.magic == MAGIC_CPSTRING)
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);
@@ -42,7 +42,7 @@ char nativeStringLength()
 char nativeCharAt()
 {
     const slot mySlot = opStackGetValue(local);
-    if (mySlot.stackObj.magic == CPSTRINGMAGIC)
+    if (mySlot.stackObj.magic == MAGIC_CPSTRING)
     {
         methodStackPush(cN);
         cN = (u1) (mySlot.stackObj.classNumber);

@@ -1,40 +1,14 @@
 #ifndef __TYPEDEFINITIONS__
 #define __TYPEDEFINITIONS__
 #include "limits.h"
+#include "kvm_type_definitions.h"
 
-typedef char (*functionForNativeMethodType)(void);
-typedef unsigned char u1;
-typedef signed char s1;
-typedef float f4;
-#if (LINUX || AVR32UC3A|| AVR32AP7000||AVR32LINUX)
-#if ( __i386__ || AVR32UC3A|| AVR32AP7000 || AVR32LINUX )
-typedef unsigned short u2;
-typedef unsigned int u4;
-typedef unsigned long long u8;
-typedef signed short s2;
-typedef signed int s4;
-#endif
-#ifdef __x86_64__
-typedef unsigned short u2;
-typedef unsigned int u4;
-typedef unsigned long u8;
-typedef signed short s2;
-typedef signed int s4;
-#endif
-#endif
-#ifdef AVR8
-typedef unsigned int u2;
-typedef unsigned long u4;
-typedef unsigned long long u8;
-typedef signed int s2;                            //mb added "int"
-typedef signed long s4;
-#endif
-
-#define NULL 0
+#include <stdio.h>
 
 typedef struct
 {
-    u4 status :2;                                 // 0 -> free for further use; 1 -> allocated static class object; 2-> allocated other object; 3-> allocated arrays
+    u4 type :2;                                 // 0 -> free for further use; 1 -> allocated static class object; 2-> allocated other object; 3-> allocated arrays
+    //flag used for garbage collecting algorithm
     u4 rootCheck :1;                              // 0 -> 1-> root object (opstack or static) or free or "object in object" !!!
     u4 mutex :1;                                  // mutex for object
     u4 length :16;                                // max 8k 4 byte alloated slots for object!!elements for an object,array on the heap, including heapObjMarker

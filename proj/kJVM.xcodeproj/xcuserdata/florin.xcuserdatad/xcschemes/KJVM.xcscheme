@@ -57,20 +57,6 @@
             ReferencedContainer = "container:kJVM.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld.class"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld$1.class"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "/Volumes/DataHDD/work/git/kJVM/proj/eclipse/bin/HelloWorld$2.class"
-            isEnabled = "NO">
-         </CommandLineArgument>
-      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

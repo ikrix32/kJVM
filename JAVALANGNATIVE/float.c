@@ -41,7 +41,7 @@ char floatToCharArray()//300bytes
     mySlot.stackObj.arrayLength = (u2) 8;// char array length
     //mySlot.stackObj.type=STACKNEWARRAYOBJECT;
 
-    const u2 heapPos = heapAllocElement(8,HEAPALLOCATEDARRAY,&mySlot.stackObj);
+    const u2 heapPos = heapAllocElement(8,HEAP_ARRAY,&mySlot.stackObj);
     opStackPush(mySlot);
 
     for (u1 i = 0; i < 8; i++)

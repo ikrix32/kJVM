@@ -11,12 +11,14 @@
 #define NGW_SDRAM_BASE      0x10000000            // external SDRAM
 #define NGW_SDRAM_JAVA_BASE     (NGW_SDRAM_BASE+0x00600000)
 
-#define HEAPFREESPACE           0
-#define HEAPALLOCATEDSTATICCLASSOBJECT  1
-#define HEAPALLOCATEDNEWOBJECT      2
-#define HEAPALLOCATEDARRAY      3
-#define OBJECTMAGIC         0xA
-#define CPSTRINGMAGIC           (OBJECTMAGIC+1)
+#define HEAP_FREE_SPACE             0
+#define HEAP_STATIC_CLASS_OBJECT    1
+#define HEAP_OBJECT                 2
+#define HEAP_ARRAY                  3
+
+#define MAGIC_OBJECT             0xA
+#define MAGIC_CPSTRING           (MAGIC_OBJECT+1)
+
 #define MUTEXNOTBLOCKED         1
 #define MUTEXBLOCKED            0
 
@@ -30,7 +32,7 @@
 
 #define ERROREXIT(nr, format, ...) {PRINTF(format,  ## __VA_ARGS__);exit(nr);}
 
-#define NULLOBJECT          (toSlot(0x000fffff |  ((u4)OBJECTMAGIC<<28)|((u4)OBJECTMAGIC<<24)|((u4)OBJECTMAGIC<<20)))
+#define NULLOBJECT          (toSlot(0x000fffff |  ((u4)MAGIC_OBJECT<<28)|((u4)MAGIC_OBJECT<<24)|((u4)MAGIC_OBJECT<<20)))
 
 //mb jf
 #ifndef TINYBAJOS_EXCEPTION

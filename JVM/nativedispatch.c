@@ -5,11 +5,13 @@
 
 //#include <stdio.h>
 //#include <stdlib.h>
-#include "definitions.h"
 /* insert and update here functionForNativeMethodType-arrays for classes with native methods*/
 /* array length ->  at least up to last native method < methods_count*/
 /* look at methods in the *.java or *.class file in increasing order */
 /* if method is non native -> insert NULL, otherwise pointer to nativce C-function*/
+
+//krix
+#include "nativedispach.h"
 
 #include <stdlib.h> //malloc
 #include "object.h"
@@ -20,182 +22,341 @@
 #include "float.h"
 
 #include "stack.h"
-
-//krix
-#include "nativedispach.h"
+#include "heap.h"
 
 extern u1 local;
 
-u1 sizeOfType(char type,u1 isPointer)
+u1 methodInvokedStatic = 0;
+u1 methodRetun = 0;
+
+u1 sizeOfNativeTypes[] = {0,sizeof(jboolean),sizeof(jbyte),sizeof(jchar),
+                            sizeof(jshort),sizeof(jint),sizeof(jfloat),
+                            sizeof(jbooleanArray),sizeof(jbyteArray),sizeof(jcharArray),
+                            sizeof(jshortArray),sizeof(jintArray),sizeof(jfloatArray)};
+
+NativeType charToType(const char type[2])
+{
+    const int tIndex = type[0] == '[' ? 1 : 0;
+
+    if(type[tIndex] == 'V') return VOID;
+    if(type[tIndex] == 'B') return tIndex == 0 ? BYTE : BYTEARRAY;
+    if(type[tIndex] == 'Z') return tIndex == 0 ? BOOLEAN : BOOLEANARRAY;
+    if(type[tIndex] == 'C') return tIndex == 0 ? CHAR : CHARARRAY;
+
+    if(type[tIndex] == 'S') return tIndex == 0 ? SHORT: SHORTARRAY;
+    if(type[tIndex] == 'I') return tIndex == 0 ? INT  : INTARRAY;
+    if(type[tIndex] == 'F') return tIndex == 0 ? FLOAT: FLOATARRAY;
+
+    DNOTSUPPORTED;
+
+    return 0;
+}
+
+void paramReadVM(void *out,const NativeType type,const slot val)
+{
+    switch (type)
+    {
+        case BOOLEAN:
+        {
+            jboolean* p = (jboolean*)out;
+            p[0] = val.Int & 0x00000001;
+        }break;
+        case BYTE:
+        {
+            jbyte* p = (jbyte*)out;
+            p[0] = val.Int & 0x000000ff;
+        }break;
+        case CHAR:
+        {
+            jchar* p = (jchar*)out;
+            p[0] = val.UInt & 0x000000ff;
+        }break;
+
+        case SHORT:
+        {
+            jshort* p = (jshort*)out;
+            p[0] = val.Int & 0x0000ffff;
+        }break;
+
+        case INT:
+        {
+            jint* p = (jint*)out;
+            p[0] = val.Int;
+        }break;
+        case FLOAT:
+        {
+            jfloat* p = (jfloat*)out;
+            p[0] = val.Float;
+        }break;
+
+        default:
+        {
+            DNOTSUPPORTED;
+        }break;
+    }
+}
+
+void paramReadArrayVM(void *out,const NativeType type,const slot sl)
+{
+    if(sl.stackObj.magic == MAGIC_OBJECT)
+    {
+        const slot heapObject = HEAPOBJECT(sl.stackObj.pos);
+
+        switch (type) {
+            case BOOLEANARRAY:
+            {
+                jbooleanArray* array = (jbooleanArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jboolean*)malloc(array->length * sizeof(jboolean));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,BOOLEAN,val);
+                }
+            }break;
+            case BYTEARRAY:
+            {
+                jbyteArray* array = (jbyteArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jbyte*)malloc(array->length * sizeof(jbyte));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,BYTE,val);
+                }
+            }break;
+            case CHARARRAY:
+            {
+                jcharArray* array = (jcharArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jchar*)malloc(array->length * sizeof(jchar));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,CHAR,val);
+                }
+            }break;
+            case SHORTARRAY:
+            {
+                jshortArray* array = (jshortArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jshort*)malloc(array->length * sizeof(jshort));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,SHORT,val);
+                }
+            }break;
+            case INTARRAY:
+            {
+                jintArray* array = (jintArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jint*)malloc(array->length * sizeof(jint));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,INT,val);
+                }
+            }break;
+            case FLOATARRAY:
+            {
+                jfloatArray* array = (jfloatArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jfloat*)malloc(array->length * sizeof(jfloat));
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i,FLOAT,val);
+                }
+            }break;
+            default:{
+                DNOTSUPPORTED;
+            }break;
+        }
+    }
+}
+
+void paramWriteVM(void *input,const NativeType type,slot* val)
+{
+    switch (type)
+    {
+        case BOOLEAN:
+        {
+            jboolean* p = (jboolean*)input;
+            val->Int = p[0] & 0x00000001;
+        }break;
+        case BYTE:
+        {
+            jbyte* p = (jbyte*)input;
+            val->Int = p[0] & 0x000000ff;
+        }break;
+        case CHAR:
+        {
+            jchar* p = (jchar*)input;
+            val->UInt = p[0] & 0x000000ff;//todo - create mask from sizeof(jchar)
+        }break;
+
+        case SHORT:
+        {
+            jshort* p = (jshort*)input;
+            val->Int = p[0] & 0x0000ffff;
+        }break;
+
+        case INT:
+        {
+            jint* p = (jint*)input;
+            val->Int = p[0];
+        }break;
+        case FLOAT:
+        {
+            jfloat* p = (jfloat*)input;
+            val->Float = p[0];
+        }break;
+
+        default:
+        {
+            DNOTSUPPORTED;
+        }break;
+    }
+}
+
+void paramWriteArrayVM(void *input,const NativeType type,slot* sl,const u1 alloc)
 {
     switch (type) {
-        case 'B':
+        case BOOLEANARRAY:
         {
-            return isPointer ? sizeof(byteArray*) : sizeof(s1);
+            jbooleanArray* array = (jbooleanArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,BOOLEAN,val);
+
+            }
+            free(array->values);
         }break;
-        case 'C':
+        case BYTEARRAY:
         {
-            return isPointer ? sizeof(charArray*) : sizeof(char);
+            jbyteArray* array = (jbyteArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,BYTE,val);
+            }
+            free(array->values);
         }break;
-        case 'I':
+        case CHARARRAY:
         {
-            return isPointer ? sizeof(intArray*) : sizeof(int);
+            jcharArray* array = (jcharArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,CHAR,val);
+            }
+            free(array->values);
         }break;
-        case 'F':
+        case SHORTARRAY:
         {
-            return isPointer ? sizeof(floatArray*) : sizeof(float);
+            jshortArray* array = (jshortArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,SHORT,val);
+            }
+            free(array->values);
         }break;
-        case 'Z':
-        {//boolean
-            return isPointer ? sizeof(byteArray*) : sizeof(s1);
-        }break;
-        case 'S':
+        case INTARRAY:
         {
-            return isPointer ? sizeof(shortArray*) : sizeof(s2);
+            jintArray* array = (jintArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,INT,val);
+            }
+            free(array->values);
         }break;
-            
-        default:
+        case FLOATARRAY:
         {
+            jfloatArray* array = (jfloatArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
+                sl->stackObj.arrayLength = array->length;
+            }
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
+                paramWriteVM(array->values + i,FLOAT,val);
+            }
+            free(array->values);
+        }
+        default:{
             DNOTSUPPORTED;
         }break;
     }
-    return 0;
 }
 
-void* paramReadArray(void* out,char type){
-    switch (type) {
-        case 'Z':
-        case 'B':
-        {
-            s1* p = (s1*)out;
-            p[0] = opStackGetValue(local + 1).Int & 0x000000ff;
-            return ++p;
-        }break;
-        case 'C':
-        {
-            char* p = (char*)out;
-            p[0] = opStackGetValue(local + 1).UInt & 0x000000ff;
-            return ++p;
-        }break;
-        case 'I':
-        {
-            int* p = (int*)out;
-            p[0] = opStackGetValue(local + 1).Int;
-            return ++p;
-        }break;
-        case 'F':
-        {
-            float* p = (float*)out;
-            p[0] = opStackGetValue(local + 1).Float;
-            return ++p;
-        }break;
-        case 'S':
-        {
-            s2* p = (s2*)out;
-            p[0] = opStackGetValue(local + 1).Int & 0x0000ffff;
-            return ++p;
-        }break;
-            
-        default:
-        {
-            DNOTSUPPORTED;
-        }break;
+void kvmWriteReturn(kvm_mem_pointer in,const NativeType type)
+{
+    slot stackSlot;
+    if(type < BOOLEANARRAY){
+        paramWriteVM(in,type,&stackSlot);
+    }else{
+        paramWriteArrayVM(in,type,&stackSlot,1);
     }
-
-    return 0;
+    opStackPush(stackSlot);
+    methodRetun = 1;
 }
-void* paramRead(void* input,void *output,char type,int isArray){
-    switch (type)
-    {
-        case 'Z':
-        case 'B':
-        {
-            s1* i = (s1*)input;
-            s1* o = (s1*)output;
-            o[0] = i[0] & 0xff;
-            return ++i;
-        }break;
-        case 'C':
-        {
-            char* i = (char*)input;
-            char* o = (char*)output;
-            o[0] = i[0];
-            return ++i;
-        }break;
-        case 'I':
-        {
-            int* i = (int*)input;
-            int* o = (int*)output;
-            o[0] = i[0];
-            return ++i;
-        }break;
-        case 'F':
-        {
-            float* i = (float*)input;
-            float* o = (float*)output;
-            o[0] = i[0];
-            return ++i;
-        }break;
-        case 'S':
-        {
-            s2* i = (s2*)input;
-            s2* o = (s2*)output;
-            o[0] = i[0];
-            return ++i;
-        }break;
 
-        default:
-        {
-            DNOTSUPPORTED;
-        }break;
+void kvmParamRead(kvm_mem_pointer out,const NativeType type,const int paramIndex)
+{
+    const u1 offset = methodInvokedStatic ? 0 : 1;
+    const slot slot = opStackGetValue(local + offset + paramIndex);
+    if (type < BOOLEANARRAY){
+        paramReadVM( out, type,slot);
+    }else {
+        paramReadArrayVM( out, type,slot);
     }
-    return NULL;
 }
-void* paramReadVM(void *out,char type,int paramIndex){
-    const slot val = opStackGetValue(local + paramIndex);
 
-    switch (type)
-    {
-        case 'Z':
-        case 'B':
-        {
-            s1* p = (s1*)out;
-            p[0] = val.Int & 0x000000ff;
-            return ++p;
-        }break;
-        case 'C':
-        {
-            char* p = (char*)out;
-            p[0] = val.UInt & 0x000000ff;
-            return ++p;
-        }break;
-        case 'I':
-        {
-            int* p = (int*)out;
-            p[0] = val.Int;
-            return ++p;
-        }break;
-        case 'F':
-        {
-            float* p = (float*)out;
-            p[0] = val.Float;
-            return ++p;
-        }break;
-        case 'S':
-        {
-            s2* p = (s2*)out;
-            p[0] = val.Int & 0x0000ffff;
-            return ++p;
-        }break;
-            
-        default:
-        {
-            DNOTSUPPORTED;
-        }break;
-    }
-
+void kvmParamWrite(kvm_mem_pointer in,const NativeType type,const int paramIndex){
+    const u1 offset = methodInvokedStatic ? 0 : 1;
+    slot slot = opStackGetValue(local + offset + paramIndex);
+    paramWriteArrayVM(in,type,&slot,0);
 }
-void* nativeDispatch(const u2 classId,const u2 methodId,void* param);
+
+
+extern void microkernelNativeDispatch(const u2 classId,const u2 methodId);
 /*  
  *  The Java Virtual Machine uses local variables to pass parameters on method invocation.
  *  On class method invocation, any parameters are passed in consecutive local variables starting from local variable 0.
@@ -203,48 +364,14 @@ void* nativeDispatch(const u2 classId,const u2 methodId,void* param);
  *  the instance method is being invoked (this in the Java programming language).
  *  Any parameters are subsequently passed in consecutive local variables starting from local variable 1
  */
- u1 nativeDispath(const u1 isInvokeStatic,const u2 classId,const u2 methodId,const char* methodName,const char* methodDescription){
-     // PRINTF("Calling native method:%s with description:%s\n",methodName,methodDescription);
-    
-    void* param = NULL;
-    
-    //coumpute parameters size
-    int i = 0;
-    int pSize = 0;
-    //parse parameters
-    while (methodDescription[i] != ')')
-    {
-        if(methodDescription[i] == '[') {
-            i++;
-            pSize += sizeOfType(methodDescription[i],1);
-        }else if(methodDescription[i] != '(')
-            pSize += sizeOfType(methodDescription[i],0);
-        i++;
-    }
-    param = malloc((size_t) pSize);
+u1 nativeDispath(const u1 isInvokeStatic,const u2 classId,const u2 methodId)
+{
+    methodInvokedStatic = isInvokeStatic;
+    methodRetun = 0;
 
-    void* parameters = param;
+    microkernelNativeDispatch(classId,methodId);
 
-    i = 0;
-    int paramIndex = isInvokeStatic ? 0 : 1;
-    //parse parameters
-    while (methodDescription[i] != ')')
-    {
-        if (methodDescription[i] == '['){
-            i++;
-            param = paramReadArray( param, methodDescription[i]);
-            paramIndex++;
-        }else if(methodDescription[i] != '('){
-            param = paramReadVM(param, methodDescription[i],paramIndex);
-            paramIndex++;
-        }
-        i++;
-    }
-    nativeDispatch(classId,methodId,parameters);
-    return 1;
-}
-
-void nativeCall(const u2 classId,const u2 methodId,void* paramters){
+    return methodRetun;
 }
 
 //end krix
@@ -352,112 +479,4 @@ const functionForNativeMethodType* funcArray[] = {//2288bytes
 #endif
     functionForNativeFloatMethod//844bytes
 };
-
-/* Native method dispatcher - AUTOGENERATED by jvm exporter, DO NOT CHANGE!!!*/
-extern void* paramRead(void* in,void *out,char type,int paramIndex);
-
-void tests_NativeMethodsTest_nativeVoidMetod1(){
-    PRINTF("Void method\n");
-}
-
-byte tests_NativeMethodsTest_nativeMethod2(byte param0){
-    PRINTF("Void method:%d\n",param0);
-    return param0;
-}
-
-char tests_NativeMethodsTest_nativeMethod3(char param0){
-    PRINTF("Void method:%c\n",param0);
-    return param0;
-}
-
-int tests_NativeMethodsTest_nativeMethod4(int param0){
-    PRINTF("Void method:%d\n",param0);
-    return param0;
-}
-
-float tests_NativeMethodsTest_nativeMethod5(float param0){
-    PRINTF("Void method:%f\n",param0);
-    return param0;
-}
-
-void tests_NativeMethodsTest_nativeMethod6(byte param0,char param1,int param2,float param3){
-    PRINTF("Void method:byte:%d,char:%d,int:%d,float:%f\n",param0,param1,param2,param3);
-}
-
-void tests_NativeMethodsTest_nativeMethod7(byteArray param0){
-    PRINTF("Void method\n");
-}
-
-void tests_NativeMethodsTest_nativeMethod8(charArray param0){
-    PRINTF("Void method\n");
-}
-
-void tests_NativeMethodsTest_nativeMethod9(intArray param0){
-    PRINTF("Void method\n");
-}
-
-void tests_NativeMethodsTest_nativeMethod10(floatArray param0){
-    PRINTF("Void method\n");
-}
-
-byteArray tests_NativeMethodsTest_nativeMethod11(){
-    PRINTF("Void method\n");
-    byteArray x;
-    return x;
-}
-
-void* nativeDispatch(const u2 classId,const u2 methodId,void* param){
-    void* ret = NULL;
-
-    if(classId == 46 && methodId == 1){
-        tests_NativeMethodsTest_nativeVoidMetod1();
-    }
-    if(classId == 46 && methodId == 2){
-        byte param0; param = paramRead(param,&param0,'B',0);
-        byte r = tests_NativeMethodsTest_nativeMethod2( param0);
-        ret = &r;
-    }
-    if(classId == 46 && methodId == 3){
-        char param0; param = paramRead(param,&param0,'C',0);
-        char r = tests_NativeMethodsTest_nativeMethod3( param0);
-        ret = &r;
-    }
-    if(classId == 46 && methodId == 4){
-        int param0; param = paramRead(param,&param0,'I',0);
-        int r = tests_NativeMethodsTest_nativeMethod4( param0);
-        ret = &r;
-    }
-    if(classId == 46 && methodId == 5){
-        float param0; param = paramRead(param,&param0,'F',0);
-        float r = tests_NativeMethodsTest_nativeMethod5( param0);
-        ret = &r;
-    }
-    if(classId == 46 && methodId == 6){
-        byte param0; param = paramRead(param,&param0,'B',0);
-        char param1; param = paramRead(param,&param1,'C',0);
-        int param2; param = paramRead(param,&param2,'I',0);
-        float param3; param = paramRead(param,&param3,'F',0);
-        tests_NativeMethodsTest_nativeMethod6( param0, param1, param2, param3);
-    }
-    if(classId == 46 && methodId == 7){
-        byteArray param0; param = paramRead(param,&param0,'B',1);
-        tests_NativeMethodsTest_nativeMethod7( param0);
-    }
-    if(classId == 46 && methodId == 8){
-        charArray param0; param = paramRead(param,&param0,'C',1);
-        tests_NativeMethodsTest_nativeMethod8( param0);
-    }
-    if(classId == 46 && methodId == 9){
-        intArray param0; param = paramRead(param,&param0,'I',1);
-        tests_NativeMethodsTest_nativeMethod9( param0);
-    }
-    if(classId == 46 && methodId == 10){
-        floatArray param0; param = paramRead(param,&param0,'F',1);
-        tests_NativeMethodsTest_nativeMethod10( param0);
-    }
-    if(classId == 46 && methodId == 11){
-        byteArray r = tests_NativeMethodsTest_nativeMethod11();
-        ret = &r;
-    }	return ret;
-}
 

@@ -125,7 +125,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (type == CONSTANT_String)
                 {
                     slot first;
-                    first.stackObj.magic = CPSTRINGMAGIC;
+                    first.stackObj.magic = MAGIC_CPSTRING;
                     first.stackObj.classNumber = cN;
                     first.stackObj.pos = (u2)(byte1);//((u2)cN <<8));
                     opStackPush(first);
@@ -880,7 +880,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 
                 if ((code == INVOKEVIRTUAL) || (code == INVOKEINTERFACE))
                 {
-                    if (opStackGetValue(local).stackObj.magic == CPSTRINGMAGIC)
+                    if (opStackGetValue(local).stackObj.magic == MAGIC_CPSTRING)
                     {
 
 #ifdef ENABLE_KCLASS_FORMAT
@@ -985,9 +985,10 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     //printf("Invoke native method:%s->%s\n",className,methodName);
                     const u2 classId = getClassID(cN);
                     if(classId == 46){
-                        nativeDispath(0,classId,mN,methodName, methodDescr);
-
-                        goto nativeVoidReturn;
+                        if (nativeDispath(0,classId,mN))
+                            goto nativeValueReturn;
+                        else
+                            goto nativeVoidReturn;
                     }else
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
@@ -996,8 +997,6 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                             goto nativeValueReturn;
                         else
                             goto nativeVoidReturn;
-                    //}else if(nativeDispath(methodName,methodDescr)){
-                    //  goto nativeVoidReturn;
                     }else
                     {
                         ERROREXIT(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
@@ -1096,17 +1095,14 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     //printf("Invoke native method:%s->%s\n",className,methodName);
                     const u2 classId = getClassID(cN);
                     if(classId == 46){
-                        nativeDispath(1,classId,mN,methodName, methodDescr);
-
-                       goto nativeVoidReturn;
+                        if (nativeDispath(1,classId,mN))
+                            goto nativeValueReturn;
+                        else
+                            goto nativeVoidReturn;
                     }else
                     if ((cs[cN].nativeFunction != NULL)
                     && (cs[cN].nativeFunction[mN] != NULL))
                     {
-                        const u2 classId = getClassID(cN);
-                        if(classId == 46)
-                            nativeDispath(1,classId,mN,methodName, methodDescr);
-
                         //PRINTF("Calling native method %d\n",mN);
                         if (cs[cN].nativeFunction[mN]())
                             goto nativeValueReturn;
@@ -1216,11 +1212,12 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #endif
                 methodStackPush(cN);
                 fN = 0;
+                u1 isNotObject = 1;
                 do 	{
                     for (int i = 0; i < getU2(cN,cs[cN].fields_count); i++)	// count normal fields
                     {
                         u2 fielddescr = cs[cN].constant_pool[getU2(cN,cs[cN].field_info[i] + 4)];
-                        u1 isNotObject = STRNCMP("L",(const char*) getAddr(cN,fielddescr + 3), 1);
+                        isNotObject = STRNCMP("L",(const char*) getAddr(cN,fielddescr + 3), 1);
 
                         if ( (getU2(cN,cs[cN].field_info[i]) & ACC_FINAL) && isNotObject)
                             continue; // ignore static and non static primitive finals
@@ -1236,7 +1233,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 slot stackSlot;
                 stackSlot.stackObj.classNumber = cN;
                 // allocate on heap places for stackObject fields
-                const u2 heapPos = heapAllocElement(fN,HEAPALLOCATEDNEWOBJECT,&stackSlot.stackObj,0);
+                const u2 heapPos = heapAllocElement(fN,HEAP_OBJECT,&stackSlot.stackObj);
 
                 DEBUGPRINTLN_OPC(" -> push %x\n",heapPos);
                 opStackPush(stackSlot);//reference to.stackObject on opStack
@@ -1269,7 +1266,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 slot stackSlot;
                 stackSlot.stackObj.arrayLength = (u1)count;
                 // + marker
-                const u2 heapPos = heapAllocElement(count,HEAPALLOCATEDARRAY,&stackSlot.stackObj,0);
+                const u2 heapPos = heapAllocElement(count,HEAP_ARRAY,&stackSlot.stackObj);
                 opStackPush(stackSlot);
 
                 const slot zero = byte1 == T_FLOAT ? toSlot(0.f) : toSlot((u4)0);
@@ -1376,7 +1373,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     u2 target = INVALID_CLASS_ID;
 #ifdef ENABLE_KCLASS_FORMAT
                     if(typeTag == CONSTANT_KClass)
-                    {//todo - parse [Ljava.lang.String//this implementation won't work as it is now
+                    {
                         target = getClassIndex(classNameId);
                     }else
 #endif
@@ -1395,8 +1392,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                                 //this only takes the first object in the array,
                                 //yet it could be extended to gathering
                                 //all stored object's typing informations
-                                if( first.stackObj.magic != OBJECTMAGIC || first.UInt == NULLOBJECT.UInt
-                                ||  HEAPOBJECTMARKER(first.stackObj.pos).status != HEAPALLOCATEDARRAY)
+                                if( first.stackObj.magic != MAGIC_OBJECT || first.UInt == NULLOBJECT.UInt
+                                ||  HEAPOBJECTMARKER(first.stackObj.pos).type != HEAP_ARRAY)
                                 {
                                     performcheck = 0;
                                     isInstanceOf = 0;
@@ -1771,9 +1768,8 @@ slot createDims(const u4 dimsLeft, s2 *dimSize)
     {
         act_array.stackObj.arrayLength = *dimSize;
         // + marker
-        const u2 heapPos = heapAllocElement(*dimSize,HEAPALLOCATEDARRAY,&act_array.stackObj,0);
-        //why mutex is missing? why status on heapPos and magic on next element
-        //TODO fix this,it's is fucked
+        const u2 heapPos = heapAllocElement(*dimSize,HEAP_ARRAY,&act_array.stackObj);
+
         s2 *cnt = (s2 *) malloc(sizeof(s2));
         *cnt = 0;
         for (int i = 0; i < *dimSize; ++i)
@@ -1811,7 +1807,7 @@ void raiseExceptionFromIdentifier(const Exception exception)
     slot stackSlot;
     stackSlot.stackObj.classNumber = cN;
 
-    const u2 heapPos = heapAllocElement(fieldsCount,HEAPALLOCATEDNEWOBJECT,&stackSlot.stackObj,0);
+    const u2 heapPos = heapAllocElement(fieldsCount,HEAP_OBJECT,&stackSlot.stackObj);
     opStackPush(stackSlot);// reference to stackObject on opStack
 
     for (int i = 0; i < fieldsCount; i++)
