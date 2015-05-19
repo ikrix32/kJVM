@@ -253,7 +253,7 @@ void heapMemShift(const u2 dest,const u2 src,const u2 size){
 
 u1 heapCompactMemory()
 {
-    PRINTF("Warning: Heap compacting is running,this is proccessor intensive,to avoid this increase heap size.\n");
+    PRINTF("\nWarning: Heap compacting is running,this is proccessor intensive,to avoid this increase heap size.\n");
     u2 crtPosition = 0;
     do
     {//find first free space

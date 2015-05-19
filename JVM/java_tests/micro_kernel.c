@@ -5,14 +5,6 @@
 #include "micro_kernel.h" 
 
 
-jvoid tests_NativeMethodsTest_nativeMethod3(jint param0);
-jvoid tests_NativeMethodsTest_nativeMethod4(jfloat param0);
-jvoid tests_NativeMethodsTest_nativeMethod5(jbyteArray param0);
-jvoid tests_NativeMethodsTest_nativeMethod6(jcharArray param0);
-jvoid tests_NativeMethodsTest_nativeMethod7(jintArray param0);
-jvoid tests_NativeMethodsTest_nativeMethod8(jfloatArray param0);
-jvoid tests_NativeMethodsTest_nativeMethod9();
-
 jint tests_NativeMethodsTest_nativeMethod1(jbyte param0){
     printf("nativeMethod(byte:%d)\n",param0);
     return 10;
@@ -73,6 +65,46 @@ jvoid tests_NativeMethodsTest_nativeMethod8(jfloatArray param0){
 
 jvoid tests_NativeMethodsTest_nativeMethod9(){
     printf("Void method\n");
+}
+
+jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray param1,jintArray param2,jfloatArray param3)
+{
+    printf("STRESS TEST Start\n");
+    jintArray result;
+    result.length = param0.length + param1.length + param2.length + param3.length;
+    result.values = malloc(result.length * sizeof(jint));
+    int n = 0;
+    printf("\nbytes:");
+    for(int i = 0; i < param0.length;i++){
+        printf("%d,",param0.values[i]);
+        result.values[n] = param0.values[i];
+        n++;
+        param0.values[i]++;
+    }
+    printf("\nchars:");
+    for(int i = 0; i < param1.length;i++){
+        printf("%c,",param1.values[i]);
+        result.values[n] = param1.values[i];
+        n++;
+        param1.values[i]++;
+    }
+    printf("\nints:");
+    for(int i = 0; i < param2.length;i++){
+        printf("%d,",param2.values[i]);
+        result.values[n] = param2.values[i];
+        n++;
+        param2.values[i]++;
+    }
+    printf("\nfloats:");
+    for(int i = 0; i < param3.length;i++){
+        printf("%f,",param3.values[i]);
+        result.values[n] = param3.values[i];
+        n++;
+        param3.values[i]++;
+    }
+
+    printf("\nSTRESS TEST End\n");
+    return result;
 }
 
 #endif

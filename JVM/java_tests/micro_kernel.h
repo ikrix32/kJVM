@@ -21,4 +21,6 @@ jvoid tests_NativeMethodsTest_nativeMethod7(jintArray param0);
 jvoid tests_NativeMethodsTest_nativeMethod8(jfloatArray param0);
 
 jvoid tests_NativeMethodsTest_nativeMethod9();
+
+jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray param1,jintArray param2,jfloatArray param3);
 #endif

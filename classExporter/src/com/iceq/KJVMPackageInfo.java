@@ -26,14 +26,14 @@ public class KJVMPackageInfo
 		}
 	}
 	
-	public int getClassId(String classFullName) throws ClassNotFoundException
+	public int getClassId(String classFullName)
 	{
 		for(int i = 0;i < m_classes.size();i++)
 		{
 			if(m_classes.get(i).m_classFileInfo.getFullClassName().equals(classFullName))
 					return i;
 		}
-		throw new ClassNotFoundException("Class " + classFullName + " not found.");
+		return -1;
 	}
 	
 	public KJVMClassInfo getKClassInfo(final int classId)
