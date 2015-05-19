@@ -319,7 +319,7 @@ void paramWriteArrayVM(void *input,const NativeType type,slot* sl,const u1 alloc
                 paramWriteVM(array->values + i,FLOAT,val);
             }
             free(array->values);
-        }
+        }break;
         default:{
             DNOTSUPPORTED;
         }break;
