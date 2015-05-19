@@ -99,7 +99,9 @@ typedef struct
     u2* attribute_info;                           //attribute_info attributes[attributes_count];
     u2 clinitMethodId;
     u2 mainMethodId;
+#ifndef KNATIVE_DISPATCH
     functionForNativeMethodType* nativeFunction;
+#endif
     slot classInfo;
 } classStructure;
 

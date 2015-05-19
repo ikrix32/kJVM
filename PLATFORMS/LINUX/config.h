@@ -25,6 +25,8 @@
 #define ENABLE_TESTS
 //#define TINYBAJOS_MULTITASKING
 
+#define KNATIVE_DISPATCH
+
 #ifdef NRF51
 //#define BLE_CONSOLE
 

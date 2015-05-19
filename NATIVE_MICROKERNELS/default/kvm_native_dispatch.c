@@ -15,7 +15,105 @@ kvm_internal void kvmWriteReturn(kvm_mem_pointer in,const NativeType type);
 
 void microkernelNativeDispatch(const u2 classId,const u2 methodId){
 
-	if(classId == 46){
+	if(classId == 0){
+		if( methodId == 0){
+			java_lang_Object_notify0();
+		}
+		if( methodId == 1){
+			java_lang_Object_notifyAll1();
+		}
+		if( methodId == 2){
+			java_lang_Object_wait2();
+		}
+		if( methodId == 3){
+			jint param0;	kvmParamRead(&param0, INT,0);
+			java_lang_Object_waitTime3( param0);
+		}
+	}
+	if(classId == 1){
+		if( methodId == 0){
+			jchar ret = platform_PlatForm_nativeCharIn0();
+			kvmWriteReturn(&ret,CHAR);
+		}
+		if( methodId == 1){
+			jchar param0;	kvmParamRead(&param0, CHAR,0);
+			platform_PlatForm_nativeCharOut1( param0);
+		}
+		if( methodId == 2){
+			jint param0;	kvmParamRead(&param0, INT,0);
+			platform_PlatForm_exit2( param0);
+		}
+		if( methodId == 3){
+			jint ret = platform_PlatForm_currentTimeMillis3();
+			kvmWriteReturn(&ret,INT);
+		}
+	}
+	if(classId == 7){
+		if( methodId == 0){
+			jfloat param0;	kvmParamRead(&param0, FLOAT,0);
+			jint ret = java_lang_Float_floatToIntBits0( param0);
+			kvmWriteReturn(&ret,INT);
+		}
+		if( methodId == 1){
+			jint param0;	kvmParamRead(&param0, INT,0);
+			jfloat ret = java_lang_Float_intBitsToFloat1( param0);
+			kvmWriteReturn(&ret,FLOAT);
+		}
+	}
+	if(classId == 9){
+		if( methodId == 0){
+			jint ret = java_lang_String_nativeStringLength0();
+			kvmWriteReturn(&ret,INT);
+		}
+		if( methodId == 1){
+			jint param0;	kvmParamRead(&param0, INT,0);
+			jchar ret = java_lang_String_nativeCharAt1( param0);
+			kvmWriteReturn(&ret,CHAR);
+		}
+	}
+	if(classId == 23){
+		if( methodId == 0){
+			java_lang_Thread_start0();
+		}
+		if( methodId == 1){
+			java_lang_Thread_yield1();
+		}
+		if( methodId == 2){
+			jint param0;	kvmParamRead(&param0, INT,0);
+			java_lang_Thread_sleep2( param0);
+		}
+		if( methodId == 3){
+			java_lang_Thread_currentThread3();
+		}
+		if( methodId == 4){
+			java_lang_Thread_interrupt4();
+		}
+		if( methodId == 5){
+			jboolean ret = java_lang_Thread_interrupted5();
+			kvmWriteReturn(&ret,BOOLEAN);
+		}
+		if( methodId == 6){
+			jboolean ret = java_lang_Thread_isInterrupted6();
+			kvmWriteReturn(&ret,BOOLEAN);
+		}
+		if( methodId == 7){
+			java_lang_Thread_join7();
+		}
+	}
+	if(classId == 24){
+		if( methodId == 3){
+			jint ret = java_lang_Runtime_freeMemory3();
+			kvmWriteReturn(&ret,INT);
+		}
+		if( methodId == 4){
+			jint ret = java_lang_Runtime_totalMemory4();
+			kvmWriteReturn(&ret,INT);
+		}
+		if( methodId == 5){
+			java_lang_Runtime_gc5();
+		}
+	}
+	if(classId == 29){
 		if( methodId == 1){
 			jbyte param0;	kvmParamRead(&param0, BYTE,0);
 			jint ret = tests_NativeMethodsTest_nativeMethod1( param0);

@@ -436,7 +436,9 @@ void analyzeMethods(const u1 classId)//2900bytes
 {
     //int i, n, m, a;
     //u2 etl;
+#ifndef KNATIVE_DISPATCH
     cs[classId].nativeFunction = NULL;
+#endif
     const u2 methodsCount = getU2(classId,cs[classId].methods_count);
     for (int n = 0; n < methodsCount; ++n) //methods
     {
@@ -449,6 +451,7 @@ void analyzeMethods(const u1 classId)//2900bytes
         //BHDEBUGPRINTSTRING(METHODDESCRSTR(classId,n),METHODDESCRSTRLENGTH(classId,n));
         const u2 a = getU2(classId,pc + 6);
         pc += 8;
+#ifndef KNATIVE_DISPATCH
         if (a == 0)
         {
             const u2 classInfoId = getU2(classId,cs[classId].this_class);
@@ -462,6 +465,7 @@ void analyzeMethods(const u1 classId)//2900bytes
             const u2 classNameLength = UTF8_GET_LENGTH(classId,classNameId);
             const char* className = UTF8_GET_STRING(classId,classNameId);
 #endif
+
             for (int i = 0; i < numNativeClassNames; i++)
             {
                 if (!STRNCMP(nativeClassNames[i],className,classNameLength))
@@ -472,6 +476,7 @@ void analyzeMethods(const u1 classId)//2900bytes
             }
             continue;//native method
         }
+#endif
         //Code(var), Exception(var),Synthetic (4),Signature,Deprecated(4)
         for (int m = 0; m < a; m++)// attributes of method
         {

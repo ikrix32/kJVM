@@ -983,13 +983,13 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (methodInfo & ACC_NATIVE)
                 {
                     //printf("Invoke native method:%s->%s\n",className,methodName);
+#ifdef KNATIVE_DISPATCH
                     const u2 classId = getClassID(cN);
-                    if(classId == 46){
-                        if (nativeDispath(0,classId,mN))
-                            goto nativeValueReturn;
-                        else
-                            goto nativeVoidReturn;
-                    }else
+                    if (nativeDispath(0,classId,mN))
+                        goto nativeValueReturn;
+                    else
+                        goto nativeVoidReturn;
+#else
                     if ( cs[cN].nativeFunction != NULL && cs[cN].nativeFunction[mN] != NULL)
                     {
                         //PRINTF("Calling native method %d\n",mN);
@@ -1001,6 +1001,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     {
                         ERROREXIT(-3, "native method not found cN: %d mN: %d,%s\n", cN, mN,methodName);
                     }
+#endif
                 }
                 pc = getStartPC(cN,mN);
             }BREAK;
@@ -1093,13 +1094,14 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 if (methodInfo & ACC_NATIVE)
                 {
                     //printf("Invoke native method:%s->%s\n",className,methodName);
+#ifdef KNATIVE_DISPATCH
                     const u2 classId = getClassID(cN);
-                    if(classId == 46){
-                        if (nativeDispath(1,classId,mN))
-                            goto nativeValueReturn;
-                        else
-                            goto nativeVoidReturn;
-                    }else
+
+                    if (nativeDispath(1,classId,mN))
+                        goto nativeValueReturn;
+                    else
+                        goto nativeVoidReturn;
+#else
                     if ((cs[cN].nativeFunction != NULL)
                     && (cs[cN].nativeFunction[mN] != NULL))
                     {
@@ -1113,6 +1115,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                     {
                         ERROREXIT(-3, "native method not found cN: %d mN: %d", cN, mN);
                     }
+#endif
                 }
                 pc = getStartPC(cN,mN);
 

@@ -195,6 +195,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 			fos.write("#endif\n");
 			fos.flush();
 			fos.close();
+			KJVMNativeExporter.exportMicroKernel(folder, cPK, m_microKernelClasses);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -264,9 +265,7 @@ public class KJVMExporter extends KJVMPackageHandler {
 			fos.write("#endif\n");
 			
 			fos.flush();
-			fos.close();
-			KJVMNativeExporter.exportMicroKernel(folder, cPK, m_applicationClasses);
-			
+			fos.close();	
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

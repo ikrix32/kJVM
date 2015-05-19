@@ -14,6 +14,7 @@
 #include "nativedispach.h"
 
 #include <stdlib.h> //malloc
+#include "definitions.h"
 #include "object.h"
 #include "nstring.h"
 #include "thread.h"
@@ -23,8 +24,13 @@
 
 #include "stack.h"
 #include "heap.h"
+#include "scheduler.h"
+#include "classfile.h"
 
 extern u1 local;
+extern u1 cN;
+extern classStructure cs[MAXCLASSES];
+extern ThreadControlBlock* currentThreadCB;
 
 u1 methodInvokedStatic = 0;
 u1 methodRetun = 0;
@@ -374,8 +380,126 @@ u1 nativeDispath(const u1 isInvokeStatic,const u2 classId,const u2 methodId)
     return methodRetun;
 }
 
-//end krix
 
+kvm_internal jvoid java_lang_Object_notify0(){
+#ifdef DEBUG
+    if (HEAPOBJECTMARKER(opStackGetValue(local).stackObj.pos).mutex != MUTEXBLOCKED)
+        ERROREXIT(253,"Notify on not locked mutex");
+#endif
+    notifyThread(opStackGetValue(local));
+}
+
+kvm_internal jvoid java_lang_Object_notifyAll1(){
+    const slot object = opStackGetValue(local);
+#ifdef DEBUG
+    if (HEAPOBJECTMARKER(object.stackObj.pos).mutex != MUTEXBLOCKED)
+        ERROREXIT(249,"Wait without blocked mutex");
+#endif
+    updateThreadState(object, THREADWAITBLOCKED, THREADWAITAWAKENED,0,0,0);
+}
+
+kvm_internal jvoid java_lang_Object_wait2(){
+    const slot object = opStackGetValue(local);
+#ifdef DEBUG
+    if (HEAPOBJECTMARKER(object.stackObj.pos).mutex != MUTEXBLOCKED)
+    {
+        ERROREXIT(254,"Wait without blocked mutex");
+    }
+#endif
+    /*can not be ->IllegalMonitorStateException*/
+    /* free lock for another thread and lock this */
+    HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;
+
+    updateThreadState(object,THREADMUTEXBLOCKED,THREADNOTBLOCKED,1,0,0);
+
+    //its better to change own state after notify, to avoid cycles
+    currentThreadCB->isMutexBlockedOrWaitingForObject = object;
+    currentThreadCB->state = THREADWAITBLOCKED;
+}
+
+kvm_internal jvoid java_lang_Object_waitTime3(jint param0){
+}
+
+kvm_internal jint java_lang_Float_floatToIntBits0(jfloat param0){
+    return (jint)param0;
+}
+
+kvm_internal jfloat java_lang_Float_intBitsToFloat1(jint param0){
+    return (jfloat)param0;
+}
+
+jint nativeStringOp(const u1 len,const u1 index){
+    const slot mySlot = opStackGetValue(local);
+    if (mySlot.stackObj.magic == MAGIC_CPSTRING)
+    {
+        //methodStackPush(cN);
+        const u2 classId = (u2) (mySlot.stackObj.classNumber);
+
+        const u2 strPos = getU2(classId,CP(classId, mySlot.stackObj.pos) + 1);
+        //cN = methodStackPop();
+        if(len != 0){
+            const u2 strLen = UTF8_GET_LENGTH(classId,strPos);
+            return strLen;
+        }else{
+            const u2 strFirstChar = CP(classId,strPos) + 3;
+            const jchar character = getU1(classId, strFirstChar + index);
+            //cN = methodStackPop();
+            return character;
+        }
+    }
+    return len ? 0xffff : 0;
+}
+kvm_internal jint java_lang_String_nativeStringLength0(){
+    return nativeStringOp(1,0);
+}
+
+kvm_internal jchar java_lang_String_nativeCharAt1(jint charIndex){
+    return nativeStringOp(0,charIndex);
+}
+
+kvm_internal jvoid java_lang_Thread_start0(){
+    cN = opStackGetValue(local).stackObj.classNumber;
+    createThread();
+}
+
+kvm_internal jvoid java_lang_Thread_yield1(){
+    //force scheduling!
+    currentThreadCB->numTicks = 0;
+}
+
+kvm_internal jvoid java_lang_Thread_sleep2(jint param0){
+}
+
+kvm_internal jvoid java_lang_Thread_currentThread3(){
+    opStackPush(currentThreadCB->obj);
+}
+
+kvm_internal jvoid java_lang_Thread_interrupt4(){}
+
+kvm_internal jboolean java_lang_Thread_interrupted5(){
+    return 1;
+}
+
+kvm_internal jboolean java_lang_Thread_isInterrupted6(){
+    return 0;
+}
+
+kvm_internal jvoid java_lang_Thread_join7(){
+}
+
+kvm_internal jint java_lang_Runtime_freeMemory3(){
+    return heapGetFreeMemory();
+}
+
+kvm_internal jint java_lang_Runtime_totalMemory4(){
+    return heapGetTotalMemory();
+}
+
+kvm_internal jvoid java_lang_Runtime_gc5(){
+    return heapCollectGarbage();
+}
+
+#ifndef KNATIVE_DISPATCH
 /* fill this array with classes containing native methods*/
 const char* nativeClassNames[] = {
     "platform/PlatForm","java/lang/Runtime","java/lang/Object",
@@ -479,4 +603,6 @@ const functionForNativeMethodType* funcArray[] = {//2288bytes
 #endif
     functionForNativeFloatMethod//844bytes
 };
+#endif
+
 

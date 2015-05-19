@@ -2,7 +2,59 @@
 #define MICROKERNEL_HEARDER 
 
 #include "kvm_type_definitions.h"
-#include "micro_kernel.h" 
+#include "micro_kernel.h"
+
+#ifndef NRF51
+#include <termios.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+#endif
+
+#include "definitions.h"
+#include "stack.h"
+
+extern u1 local;
+// insert and update here arrays for classes with native methods
+// array length ->  at least up to last native method < methods_count
+// lock at methods in the *.java or *.class file in increasing order
+// if method is non native -> insert NULL, otherwise pointer to nativce C-function
+jchar platform_PlatForm_nativeCharIn0(){
+#ifndef NRF51
+    struct termios oldt, newt;
+    int ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    opStackPush(toSlot((u4) ch));
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+jvoid platform_PlatForm_nativeCharOut1(jchar param0){
+    PRINTF("%c", param0);
+}
+
+jvoid platform_PlatForm_exit2(jint param0){
+    exit(param0);
+}
+
+jint platform_PlatForm_currentTimeMillis3(){
+#ifndef NRF51
+    struct timeval timerstart;
+    gettimeofday(&timerstart, NULL);
+    opStackPush(toSlot((u4)((timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000) & 0x7FFFFFFF)));
+    return 1;
+#else
+    return 1;
+#endif
+}
+
 
 
 jint tests_NativeMethodsTest_nativeMethod1(jbyte param0){
@@ -106,5 +158,6 @@ jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray para
     printf("\nSTRESS TEST End\n");
     return result;
 }
+
 
 #endif

@@ -3,7 +3,7 @@ package java.util.concurrent;
 import java.lang.Thread;
 
 /**
- * InterruptThread for realtime behavior of bajos
+ * InterruptThread for realtime behavior of kvm
  */
 public abstract class InterruptThread extends Thread	{
 

@@ -13,6 +13,9 @@
 
 //#include <stdio.h>
 //#include <stdlib.h>
+#include "config.h"
+
+#ifndef KNATIVE_DISPATCH
 #include "kjvm.h"
 #include "stack.h"
 #include "object.h"
@@ -77,3 +80,4 @@ char waitTime()
 {
  return 1;// ret val is  on Stack !!
 }*/
+#endif

@@ -55,7 +55,7 @@ public abstract class Thread {
 	// bh public final native boolean isDaemon();
 	// bh public final native void setDaemon(boolean on);
 
-	private native void nativeSetPriority(int priority);
+	//private native void nativeSetPriority(int priority);
 
 	public final native void join() throws InterruptedException;
 

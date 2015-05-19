@@ -13,6 +13,9 @@
 
 //#include <stdio.h>
 //#include <stdlib.h>
+#include "config.h"
+
+#ifndef KNATIVE_DISPATCH
 #ifndef NRF51
 #include <termios.h>
 #include <unistd.h>
@@ -34,6 +37,7 @@ extern u1 local;
 // array length ->  at least up to last native method < methods_count
 // lock at methods in the *.java or *.class file in increasing order
 // if method is non native -> insert NULL, otherwise pointer to nativce C-function
+
 void conOut(char val)
 {
     PRINTF("%c", val);
@@ -124,4 +128,4 @@ char nativeCollectGarbage(){
     heapCollectGarbage();
     return 1;
 }
-
+#endif

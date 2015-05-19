@@ -174,6 +174,12 @@
 #include "java_lang_System.h"
 #endif
 
+#ifdef ENABLE_KCLASS_FORMAT
+#include "tests_NativeMethodsTest_k.h"
+#else
+#include "tests_NativeMethodsTest.h"
+#endif
+
 static const u1* microkernelBinaries[] =
 {	java_lang_ObjectBin,
 	platform_PlatFormBin,
@@ -204,6 +210,7 @@ static const u1* microkernelBinaries[] =
 	java_io_InputStreamBin,
 	java_io_PrintStreamBin,
 	java_lang_SystemBin,
+	tests_NativeMethodsTestBin,
 };
 
 static const u4 microKernelBinariesSize[] =
@@ -236,6 +243,7 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(java_io_InputStreamBin),
 	sizeof(java_io_PrintStreamBin),
 	sizeof(java_lang_SystemBin),
+	sizeof(tests_NativeMethodsTestBin),
 };
 
 extern const int getNoMicroKernelClasses(){
@@ -282,6 +290,7 @@ static const char* microkernelClassNames[] =
 	"java/io/InputStream",
 	"java/io/PrintStream",
 	"java/lang/System",
+	"tests/NativeMethodsTest",
 };
 
 extern const char* getMicroKernelClassName(const u2 classId){
@@ -317,6 +326,7 @@ static const char** microkernelMethodNames[] =
 	java_io_InputStreamMethodNames,
 	java_io_PrintStreamMethodNames,
 	java_lang_SystemMethodNames,
+	tests_NativeMethodsTestMethodNames,
 };
 
 extern const char* getMicroKernelClassMethodName(const u2 classId,const u2 methodId){

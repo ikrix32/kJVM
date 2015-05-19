@@ -12,6 +12,10 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 //#include <stdio.h>
+#include "config.h"
+
+#ifndef KNATIVE_DISPATCH
+
 #include <stdlib.h>
 #include "definitions.h"
 #include "typedefinitions.h"
@@ -76,4 +80,5 @@ char nativeParseFloat()//500bytes
     opStackPush(toSlot( f ));
     return 1;
 }*/
+#endif
 

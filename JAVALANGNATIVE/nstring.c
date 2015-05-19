@@ -12,10 +12,12 @@
 /* ..., [arg0, [arg1 ...]] -> ...*/
 
 //#include <stdio.h>
+#include "nstring.h"
+
+#ifndef KNATIVE_DISPATCH
 #include "kjvm.h"
 #include "classfile.h"
 #include "stack.h"
-#include "nstring.h"
 
 extern u1 cN;
 extern u1 local;
@@ -58,6 +60,7 @@ char nativeCharAt()
         opStackPush(toSlot((u4) 0));
     return 1;
 }
+#endif
 
 int stringLength(const char* str){
     int len = 0;

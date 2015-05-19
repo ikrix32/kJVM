@@ -11,6 +11,9 @@
 /* invokestatic: Operand Stack*/
 /* ..., [arg0, [arg1 ...]] -> ...*/
 #include "config.h"
+
+#ifndef KNATIVE_DISPATCH
+
 #ifndef TINYBAJOS_MULTITASKING
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -80,4 +83,6 @@ char forceInterrupt()
     interruptThread(interruptVectors[vectorNr]);
     return 0;
 }
+#endif
+
 #endif

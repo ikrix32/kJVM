@@ -11,6 +11,9 @@
 /* invokestatic: Operand Stack*/
 /* ..., [arg0, [arg1 ...]] -> ...*/
 #include "config.h"
+
+#ifndef KNATIVE_DISPATCH
+
 #ifndef TINYBAJOS_MULTITASKING
 //#include <stdio.h>
 //#include <stdlib.h>
@@ -50,4 +53,5 @@ char tryLock()
     }
     return 1;
 }
+#endif
 #endif
