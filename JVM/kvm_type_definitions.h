@@ -89,7 +89,6 @@ typedef struct jfloatArray
 } jfloatArray;
 
 typedef enum NativeTypes{
-    VOID,
     BOOLEAN,
     BYTE,
     CHAR,

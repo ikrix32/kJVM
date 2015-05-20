@@ -35,7 +35,7 @@ extern ThreadControlBlock* currentThreadCB;
 u1 methodInvokedStatic = 0;
 u1 methodRetun = 0;
 
-u1 sizeOfNativeTypes[] = {0,sizeof(jboolean),sizeof(jbyte),sizeof(jchar),
+u1 sizeOfNativeTypes[] = {  sizeof(jboolean),sizeof(jbyte),sizeof(jchar),
                             sizeof(jshort),sizeof(jint),sizeof(jfloat),
                             sizeof(jbooleanArray),sizeof(jbyteArray),sizeof(jcharArray),
                             sizeof(jshortArray),sizeof(jintArray),sizeof(jfloatArray)};
@@ -44,7 +44,6 @@ NativeType charToType(const char type[2])
 {
     const int tIndex = type[0] == '[' ? 1 : 0;
 
-    if(type[tIndex] == 'V') return VOID;
     if(type[tIndex] == 'B') return tIndex == 0 ? BYTE : BYTEARRAY;
     if(type[tIndex] == 'Z') return tIndex == 0 ? BOOLEAN : BOOLEANARRAY;
     if(type[tIndex] == 'C') return tIndex == 0 ? CHAR : CHARARRAY;
@@ -94,7 +93,30 @@ void paramReadVM(void *out,const NativeType type,const slot val)
             jfloat* p = (jfloat*)out;
             p[0] = val.Float;
         }break;
+        case BOOLEANARRAY:
+        case BYTEARRAY:
+        case CHARARRAY:
+        case SHORTARRAY:
+        case INTARRAY:
+        case FLOATARRAY:
+        {
+            if(val.stackObj.magic == MAGIC_OBJECT)
+            {
+                const slot heapObject = HEAPOBJECT(val.stackObj.pos);
 
+                const NativeType elemType = type - BOOLEANARRAY;
+                jbyteArray* array = (jbyteArray*)out;
+
+                array->length = heapObject.heapObjMarker.length - 1;
+                array->values = (jbyte*)malloc(array->length * sizeOfNativeTypes[elemType]);
+
+                for(int i = 0; i < array->length;i++)
+                {
+                    const slot elem = HEAPOBJECT(val.stackObj.pos + 1 + i);
+                    paramReadVM(array->values + i * sizeOfNativeTypes[elemType],elemType,elem);
+                }
+            }
+        }break;
         default:
         {
             DNOTSUPPORTED;
@@ -102,99 +124,7 @@ void paramReadVM(void *out,const NativeType type,const slot val)
     }
 }
 
-void paramReadArrayVM(void *out,const NativeType type,const slot sl)
-{
-    if(sl.stackObj.magic == MAGIC_OBJECT)
-    {
-        const slot heapObject = HEAPOBJECT(sl.stackObj.pos);
-
-        switch (type) {
-            case BOOLEANARRAY:
-            {
-                jbooleanArray* array = (jbooleanArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jboolean*)malloc(array->length * sizeof(jboolean));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,BOOLEAN,val);
-                }
-            }break;
-            case BYTEARRAY:
-            {
-                jbyteArray* array = (jbyteArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jbyte*)malloc(array->length * sizeof(jbyte));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,BYTE,val);
-                }
-            }break;
-            case CHARARRAY:
-            {
-                jcharArray* array = (jcharArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jchar*)malloc(array->length * sizeof(jchar));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,CHAR,val);
-                }
-            }break;
-            case SHORTARRAY:
-            {
-                jshortArray* array = (jshortArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jshort*)malloc(array->length * sizeof(jshort));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,SHORT,val);
-                }
-            }break;
-            case INTARRAY:
-            {
-                jintArray* array = (jintArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jint*)malloc(array->length * sizeof(jint));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,INT,val);
-                }
-            }break;
-            case FLOATARRAY:
-            {
-                jfloatArray* array = (jfloatArray*)out;
-
-                array->length = heapObject.heapObjMarker.length - 1;
-                array->values = (jfloat*)malloc(array->length * sizeof(jfloat));
-
-                for(int i = 0; i < array->length;i++)
-                {
-                    const slot val = HEAPOBJECT(sl.stackObj.pos + 1 + i);
-                    paramReadVM(array->values + i,FLOAT,val);
-                }
-            }break;
-            default:{
-                DNOTSUPPORTED;
-            }break;
-        }
-    }
-}
-
-void paramWriteVM(void *input,const NativeType type,slot* val)
+void paramWriteVM(void *input,const NativeType type,slot* val,const u1 alloc)
 {
     switch (type)
     {
@@ -230,6 +160,27 @@ void paramWriteVM(void *input,const NativeType type,slot* val)
             jfloat* p = (jfloat*)input;
             val->Float = p[0];
         }break;
+        case BOOLEANARRAY:
+        case BYTEARRAY:
+        case CHARARRAY:
+        case SHORTARRAY:
+        case INTARRAY:
+        case FLOATARRAY:
+        {
+            //void paramWriteArrayVM(void *input,const NativeType type,slot* sl,const u1 alloc)
+            jbyteArray* array = (jbyteArray*)input;
+            if(alloc){
+                heapAllocElement(array->length,HEAP_ARRAY,&val->stackObj);
+                val->stackObj.arrayLength = array->length;
+            }
+            const NativeType elemType = type - BOOLEANARRAY;
+            for(int i = 0; i < array->length;i++)
+            {
+                slot* elem = heapGetElementRef(val->stackObj.pos + 1 + i);
+                paramWriteVM(array->values +(i * sizeOfNativeTypes[elemType]),elemType,elem,0);
+            }
+            free(array->values);
+        }break;
 
         default:
         {
@@ -238,108 +189,10 @@ void paramWriteVM(void *input,const NativeType type,slot* val)
     }
 }
 
-void paramWriteArrayVM(void *input,const NativeType type,slot* sl,const u1 alloc)
-{
-    switch (type) {
-        case BOOLEANARRAY:
-        {
-            jbooleanArray* array = (jbooleanArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,BOOLEAN,val);
-
-            }
-            free(array->values);
-        }break;
-        case BYTEARRAY:
-        {
-            jbyteArray* array = (jbyteArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,BYTE,val);
-            }
-            free(array->values);
-        }break;
-        case CHARARRAY:
-        {
-            jcharArray* array = (jcharArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,CHAR,val);
-            }
-            free(array->values);
-        }break;
-        case SHORTARRAY:
-        {
-            jshortArray* array = (jshortArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,SHORT,val);
-            }
-            free(array->values);
-        }break;
-        case INTARRAY:
-        {
-            jintArray* array = (jintArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,INT,val);
-            }
-            free(array->values);
-        }break;
-        case FLOATARRAY:
-        {
-            jfloatArray* array = (jfloatArray*)input;
-            if(alloc){
-                heapAllocElement(array->length,HEAP_ARRAY,&sl->stackObj);
-                sl->stackObj.arrayLength = array->length;
-            }
-            for(int i = 0; i < array->length;i++)
-            {
-                slot* val = heapGetElementRef(sl->stackObj.pos + 1 + i);
-                paramWriteVM(array->values + i,FLOAT,val);
-            }
-            free(array->values);
-        }break;
-        default:{
-            DNOTSUPPORTED;
-        }break;
-    }
-}
-
 void kvmWriteReturn(kvm_mem_pointer in,const NativeType type)
 {
     slot stackSlot;
-    if(type < BOOLEANARRAY){
-        paramWriteVM(in,type,&stackSlot);
-    }else{
-        paramWriteArrayVM(in,type,&stackSlot,1);
-    }
+    paramWriteVM(in,type,&stackSlot,1);
     opStackPush(stackSlot);
     methodRetun = 1;
 }
@@ -348,17 +201,13 @@ void kvmParamRead(kvm_mem_pointer out,const NativeType type,const int paramIndex
 {
     const u1 offset = methodInvokedStatic ? 0 : 1;
     const slot slot = opStackGetValue(local + offset + paramIndex);
-    if (type < BOOLEANARRAY){
-        paramReadVM( out, type,slot);
-    }else {
-        paramReadArrayVM( out, type,slot);
-    }
+    paramReadVM( out, type,slot);
 }
 
 void kvmParamWrite(kvm_mem_pointer in,const NativeType type,const int paramIndex){
     const u1 offset = methodInvokedStatic ? 0 : 1;
     slot slot = opStackGetValue(local + offset + paramIndex);
-    paramWriteArrayVM(in,type,&slot,0);
+    paramWriteVM(in,type,&slot,0);
 }
 
 
