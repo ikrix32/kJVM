@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4E712F171B07B28D0016F3A9 /* kvm_native_dispatch.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E712F151B07B28D0016F3A9 /* kvm_native_dispatch.c */; };
-		4E712F1C1B07BB240016F3A9 /* micro_kernel.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E712F1B1B07BB240016F3A9 /* micro_kernel.c */; };
+		4E712F201B0BB5050016F3A9 /* kvm_native_dispatch.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E712F1D1B0BB5050016F3A9 /* kvm_native_dispatch.c */; };
+		4E712F231B0BCF3F0016F3A9 /* micro_kernel.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E712F221B0BCF3F0016F3A9 /* micro_kernel.c */; };
 		4E86B1E11A92C15800B66AF0 /* kjvm.c in Sources */ = {isa = PBXBuildFile; fileRef = 4E86B1DF1A92C15800B66AF0 /* kjvm.c */; };
 		4EB8F7B81A9128E6001C885A /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7B31A9128E6001C885A /* platform.c */; };
 		4EB8F7BA1A9128E6001C885A /* native.c in Sources */ = {isa = PBXBuildFile; fileRef = 4EB8F7B51A9128E6001C885A /* native.c */; };
@@ -134,10 +134,12 @@
 		4E10364C1AABC61800BF56D5 /* tests_StringAndHeapTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_StringAndHeapTest.h; sourceTree = "<group>"; };
 		4E10364D1AABC61800BF56D5 /* tests_Switch_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_Switch_k.h; sourceTree = "<group>"; };
 		4E10364E1AABC61800BF56D5 /* tests_Switch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_Switch.h; sourceTree = "<group>"; };
-		4E712F151B07B28D0016F3A9 /* kvm_native_dispatch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kvm_native_dispatch.c; sourceTree = "<group>"; };
-		4E712F161B07B28D0016F3A9 /* micro_kernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = micro_kernel.h; sourceTree = "<group>"; };
 		4E712F181B07B3740016F3A9 /* kvm_type_definitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kvm_type_definitions.h; sourceTree = "<group>"; };
-		4E712F1B1B07BB240016F3A9 /* micro_kernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = micro_kernel.c; sourceTree = "<group>"; };
+		4E712F1D1B0BB5050016F3A9 /* kvm_native_dispatch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kvm_native_dispatch.c; sourceTree = "<group>"; };
+		4E712F1F1B0BB5050016F3A9 /* micro_kernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = micro_kernel.h; sourceTree = "<group>"; };
+		4E712F221B0BCF3F0016F3A9 /* micro_kernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = micro_kernel.c; sourceTree = "<group>"; };
+		4E712F241B0BDCBD0016F3A9 /* tests_NativeMethodsTest_k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_NativeMethodsTest_k.h; sourceTree = "<group>"; };
+		4E712F251B0BDCBD0016F3A9 /* tests_NativeMethodsTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tests_NativeMethodsTest.h; sourceTree = "<group>"; };
 		4E86B1DF1A92C15800B66AF0 /* kjvm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kjvm.c; sourceTree = "<group>"; };
 		4E86B1E01A92C15800B66AF0 /* kjvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kjvm.h; sourceTree = "<group>"; };
 		4E86BA741AB789B700F69DE1 /* nativedispach.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nativedispach.h; sourceTree = "<group>"; };
@@ -200,6 +202,9 @@
 		4E1035EF1AAB595000BF56D5 /* default */ = {
 			isa = PBXGroup;
 			children = (
+				4E712F1F1B0BB5050016F3A9 /* micro_kernel.h */,
+				4E712F221B0BCF3F0016F3A9 /* micro_kernel.c */,
+				4E712F1D1B0BB5050016F3A9 /* kvm_native_dispatch.c */,
 				4E1035F01AAB595000BF56D5 /* binaries */,
 				4E10362A1AAB595000BF56D5 /* microkernel.h */,
 			);
@@ -210,6 +215,8 @@
 		4E1035F01AAB595000BF56D5 /* binaries */ = {
 			isa = PBXGroup;
 			children = (
+				4E712F241B0BDCBD0016F3A9 /* tests_NativeMethodsTest_k.h */,
+				4E712F251B0BDCBD0016F3A9 /* tests_NativeMethodsTest.h */,
 				4E10362B1AABBC3900BF56D5 /* java_lang_IllegalMonitorStateException_k.h */,
 				4E10362C1AABBC3900BF56D5 /* platform_PlatForm_k.h */,
 				4E10362D1AABBC3900BF56D5 /* platform_PlatForm.h */,
@@ -358,9 +365,6 @@
 		4EEBF6281A9A52E600FED254 /* java_tests */ = {
 			isa = PBXGroup;
 			children = (
-				4E712F161B07B28D0016F3A9 /* micro_kernel.h */,
-				4E712F1B1B07BB240016F3A9 /* micro_kernel.c */,
-				4E712F151B07B28D0016F3A9 /* kvm_native_dispatch.c */,
 				4E10362E1AABC61800BF56D5 /* KVMTestPackage.h */,
 				4E10362F1AABC61800BF56D5 /* tests_Arithmetic_k.h */,
 				4E1036301AABC61800BF56D5 /* tests_Arithmetic.h */,
@@ -457,9 +461,8 @@
 				4EB8F8011A91290C001C885A /* heap.c in Sources */,
 				4EB8F7FD1A91290C001C885A /* classfile.c in Sources */,
 				4EB8F8021A91290C001C885A /* nativedispatch.c in Sources */,
-				4E712F171B07B28D0016F3A9 /* kvm_native_dispatch.c in Sources */,
 				4EB8F7CD1A9128FF001C885A /* nstring.c in Sources */,
-				4E712F1C1B07BB240016F3A9 /* micro_kernel.c in Sources */,
+				4E712F201B0BB5050016F3A9 /* kvm_native_dispatch.c in Sources */,
 				4EB8F7C81A9128FF001C885A /* float.c in Sources */,
 				4E86B1E11A92C15800B66AF0 /* kjvm.c in Sources */,
 				4EB8F7CC1A9128FF001C885A /* object.c in Sources */,
@@ -467,6 +470,7 @@
 				4EEBF6271A9A2C7500FED254 /* main.c in Sources */,
 				4EB8F8001A91290C001C885A /* stack.c in Sources */,
 				4EB8F7CB1A9128FF001C885A /* lock.c in Sources */,
+				4E712F231B0BCF3F0016F3A9 /* micro_kernel.c in Sources */,
 				4EB8F8031A91290C001C885A /* scheduler.c in Sources */,
 				4EEBF6241A9A203B00FED254 /* classloader.c in Sources */,
 				4EB8F7B81A9128E6001C885A /* platform.c in Sources */,
