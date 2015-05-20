@@ -99,19 +99,19 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < noTests; i++)
     {
-        const u1 classIndex = classLoader_loadClass(testBinaries[i], testBinariesSize[i]);
+        const u1 classIndex = classloaderLoadClass(testBinaries[i], testBinariesSize[i]);
 
-        classLoader_clinitClass(classIndex);
+        classloaderClinitClass(classIndex);
 
         if(vm_run(classIndex) == 0)//run main on last loaded class
-            unloadLastClass();
+            classloaderUnloadLastClass();
     }
 #else
-    const u1 classIndex = classLoader_loadClass(NULL, 10);
+    const u1 classIndex = classloaderLoadClass(NULL, 10);
 
-    classLoader_clinitClass(classIndex);
+    classloaderClinitClass(classIndex);
     if(vm_run(0) == 0)//run main on last loaded class
-        unloadLastClass();
+        classloaderUnloadLastClass();
 #endif
 
 #ifdef NRF51

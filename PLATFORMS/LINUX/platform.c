@@ -25,10 +25,10 @@ extern void loadMicroKernel()
 
     const int  noBins = getNoMicroKernelClasses();
     for (int i = 0; i < noBins; i++)
-        classLoader_loadClass(getMicroKernelBinary(i),getMicroKernelBinarySize(i));
+        classloaderLoadClass(getMicroKernelBinary(i),getMicroKernelBinarySize(i));
 
     for (int i = 0; i < numClasses; i++)
-        classLoader_clinitClass(i);
+        classloaderClinitClass(i);
 }
 #endif
 

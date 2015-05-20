@@ -44,7 +44,7 @@ classStructure cs[MAXCLASSES];	// static allocated !!!
 /* all class files stored for linux in DS (malloc)*/
 void vm_init() /* read, analyze classfiles and fill structures*/
 {
-    classLoader_init();
+    classloaderInit();
 
     heapInit();
 

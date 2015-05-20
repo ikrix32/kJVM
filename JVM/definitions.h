@@ -138,7 +138,7 @@
 
 #define CLASSINFO_GET_NAMEID(classId,classInfoId) getU2(classId,CP(classId, classInfoId) + 1)//1 = sizeof(tag)
 
-#define UTF8_GET_LENGTH(classId,id) getU2(classId,CP(classId, id) + 1);// 1 = sizeof(tag)
+#define UTF8_GET_LENGTH(classId,id) getU2(classId,CP(classId, id) + 1)// 1 = sizeof(tag)
 #define UTF8_GET_STRING(classId,id) (char*)getAddr(classId,CP(classId, id) + 3)//3 = sizeof(tag) + sizeof(classNameLength)
 
 #define  COLOR_BLACK     0                        /* VT102 Color Codes                                  */

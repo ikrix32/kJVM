@@ -13,9 +13,6 @@ extern const functionForNativeMethodType* funcArray[];
 extern functionForNativeMethodType functionForNativePlatFormMethod[];
 
 extern u2 pc;
-extern u1 cN;
-extern u1 fN;
-extern u1 mN;
 
 extern u1 numClasses;
 extern classStructure cs[MAXCLASSES];
@@ -30,9 +27,6 @@ u1 getU1(const u1 classId,const u2 pos)
 
 u2 getU2(const u1 classId,const u2 pos)
 {
-    //if (pos==0) {pc+=2;return (*(CLASSSTA + pc-2))*256+*(CLASSSTA + pc-1);}
-    //else return (*(CLASSSTA + pos)*256)+*(CLASSSTA + pos+1);
-    //}
     return (((u2) getU1(classId,pos) << 8) | (u2) getU1(classId,(pos == 0) ? 0 : pos + 1));
 }
 
@@ -309,9 +303,10 @@ void analyzeClass(const u1 classId)//3956bytes all analyze methods
 
     pc += 2;
     cs[classId].field_info = NULL;
-    if (getU2(classId,cs[classId].fields_count) != 0)
+    const u2 fieldsCount = getU2(classId,cs[classId].fields_count);
+    if (fieldsCount != 0)
     {
-        if ((cs[classId].field_info = (u2*) malloc(sizeof(u2) * getU2(classId,cs[classId].fields_count))) == NULL)
+        if ((cs[classId].field_info = (u2*) malloc(sizeof(u2) * fieldsCount)) == NULL)
             ERROREXIT(3,"malloc error");
         analyzeFields(classId);
     }
@@ -320,9 +315,10 @@ void analyzeClass(const u1 classId)//3956bytes all analyze methods
 
     pc += 2;
     cs[classId].method_info = NULL;
-    if (getU2(classId,cs[classId].methods_count) != 0)
+    const u2 methodsCount = getU2(classId,cs[classId].methods_count);
+    if (methodsCount != 0)
     {
-        if ((cs[classId].method_info = (u2*) malloc( 2 * sizeof(u2) * getU2(classId,cs[classId].methods_count))) == NULL)
+        if ((cs[classId].method_info = (u2*) malloc( 2 * sizeof(u2) * methodsCount)) == NULL)
             ERROREXIT(4,"malloc error");
         analyzeMethods(classId);
     }
@@ -434,8 +430,6 @@ void analyzeConstantPool(const u1 classId)
 
 void analyzeMethods(const u1 classId)//2900bytes
 {
-    //int i, n, m, a;
-    //u2 etl;
 #ifndef KNATIVE_DISPATCH
     cs[classId].nativeFunction = NULL;
 #endif
@@ -480,8 +474,9 @@ void analyzeMethods(const u1 classId)//2900bytes
         //Code(var), Exception(var),Synthetic (4),Signature,Deprecated(4)
         for (int m = 0; m < a; m++)// attributes of method
         {
-            const char* adr = getAddr(classId,CP(classId,getU2(classId,0)) + 1 + 2);
-            if (STRNCMP("Code", adr, 4) == 0)
+            const u2 attributeId = getU2(classId,0);
+            const char* attribute = UTF8_GET_STRING(classId,attributeId);
+            if (STRNCMP("Code", attribute, 4) == 0)
             {
                 DEBUG_CL_PRINTF("\t\tCode: attribute_length: %d\n",getU4(classId,pc));
                 DEBUG_CL_PRINTF("\t\tCode: max_stack: %d\n", getU2(classId,pc + 4));
@@ -511,20 +506,11 @@ void analyzeMethods(const u1 classId)//2900bytes
                 //LineNumberTable(var),LocalVariableTable(var),StackMapTable
                 for (int i = 0; i < h; i++)
                 {
-                    const char* addr = getAddr(classId,CP(classId,getU2(classId,0)) + 3);
-                    if (STRNCMP("LineNumberTable", addr, 15) == 0)
-                    {
-                        pc = getU4(classId,0) + pc;
-                        continue;
-                    }
+                    const char* addr = UTF8_GET_STRING(classId,getU2(classId,0));
 
-                    if (STRNCMP("StackMapTable", addr, 13) == 0)
-                    {
-                        pc = getU4(classId,0) + pc;
-                        continue;
-                    }
-
-                    if (STRNCMP("LocalVariableTable", addr, 18) == 0)
+                    if (STRNCMP("LineNumberTable", addr, 15) == 0
+                    ||  STRNCMP("StackMapTable", addr, 13) == 0
+                    ||  STRNCMP("LocalVariableTable", addr, 18) == 0)
                     {
                         pc = getU4(classId,0) + pc;
                         continue;
@@ -533,11 +519,9 @@ void analyzeMethods(const u1 classId)//2900bytes
                 }                                 // code attributes
                 continue;
             }                                     // code
-            if (STRNCMP("Exceptions", adr, 10) == 0)
+            if (STRNCMP("Exceptions", attribute, 10) == 0)
             {
                 DEBUG_CL_PRINTF("exception object\n");
-                mN = n;
-
                 u4 n2 = getU4(classId,0);
                 //attribute_length. don't need that.
                 n2 = getU2(classId,0);
@@ -549,31 +533,28 @@ void analyzeMethods(const u1 classId)//2900bytes
                 //pc=(u2)getU4(0)+pc;
                 continue;
             }//Exceptions
-            if (STRNCMP("Synthetic", adr, 9) == 0)
+            if (STRNCMP("Synthetic", attribute, 9) == 0
+            ||  STRNCMP("Deprecated", attribute, 10) == 0)
             {
                 pc += 4;
                 continue;
             }
-            if (STRNCMP("Deprecated", adr, 10) == 0)
-            {
-                pc += 4;
-                continue;
-            }
-            if (STRNCMP("Signature", adr, 9) == 0)
+            if (STRNCMP("Signature", attribute, 9) == 0)
             {
                 pc = (u2) getU4(classId,0) + pc;
                 continue;
             }
             ERROREXIT(7, "unsupported method attribute");
-        }                                         // method attributes
-     }                                            // methods_count
+        }// method attributes
+     }   // methods_count
 }
 
 
 void analyzeFields(const u1 classId)//600bytes
 {
-    fN = 0; // count static fields
-    for (int n = 0 ; n < getU2(classId,cs[classId].fields_count); n++)  //num fields
+    u2 fieldId = 0; // count static fields
+    const u2 fieldsCount = getU2(classId,cs[classId].fields_count);
+    for (int n = 0 ; n < fieldsCount; n++)  //num fields
     {
         cs[classId].field_info[n] = pc;// absolute in classfile
         DEBUG_CL_PRINTF("\tfield %x\taccess_flags: %d\n",n,getU2(classId,pc));
@@ -586,10 +567,9 @@ void analyzeFields(const u1 classId)//600bytes
         const u1 isNotObject= STRNCMP("L",fieldDescriptor, 1);
         const u2 crtFieldInfo = getU2(classId,cs[classId].field_info[n]);
 
-        //printf("classId %d n %d A %c fN %d \n",cN,n,*(const char*)getAddr(classId,fielddescr + 3),fN);
+        // count only normal static fields and final static fields in  class object
         if ((ACC_STATIC & crtFieldInfo) && !((ACC_FINAL & crtFieldInfo) && isNotObject))
-            // count only normal static fields and final static fields in  class object
-            fN++;
+            fieldId++;
 
         pc += 6;
         const u2 a = getU2(classId,0);           // num field attribute
@@ -602,15 +582,11 @@ void analyzeFields(const u1 classId)//600bytes
 
             if (STRNCMP("ConstantValue", attributeName, 13) == 0)	// nothing to do for jvm
             {
-                pc += attribute_length;           // continue
-                continue;                         // next attribute test
+                pc += attribute_length; // continue
+                continue;               // next attribute test
             }
-            if (STRNCMP("Synthetic",attributeName, 9) == 0)
-            {
-                pc += 4;
-                continue;
-            }
-            if (STRNCMP("Deprecated",attributeName, 10) == 0)
+            if (STRNCMP("Synthetic",attributeName, 9) == 0
+            ||  STRNCMP("Deprecated",attributeName, 10) == 0)
             {
                 pc += 4;
                 continue;
@@ -621,14 +597,14 @@ void analyzeFields(const u1 classId)//600bytes
                 continue;
             }
             ERROREXIT(8, "unsupported field attribute");
-        }                                         // field attribute count
-    }                                             // numfields
+        }// field attribute count
+    }// numfields
 
     cs[classId].classInfo.stackObj.classNumber = classId;
     // allocate on heap places for stackObject fields
-    const u2 heapPos = heapAllocElement(fN,HEAP_STATIC_CLASS_OBJECT,&cs[classId].classInfo.stackObj);
+    const u2 heapPos = heapAllocElement(fieldId,HEAP_STATIC_CLASS_OBJECT,&cs[classId].classInfo.stackObj);
 
-    for (int i = 0; i < fN;i++)// initialize the heap elements
+    for (int i = 0; i < fieldId;i++)// initialize the heap elements
         heapSetElement(toSlot( (u4) 0), heapPos + i);
 }// end analyze fields
 
@@ -637,12 +613,15 @@ u2 getStartPC(const u1 classId,const u1 methodId)
      u2 attrLength = 0;  
      // search code-position
      // number of attributes
-    for (u2 i = 0; i < getU2(classId,METHODBASE(classId, methodId) + 6); i++)
+    const u2 methodBase = METHODBASE(classId, methodId);
+    const u2 noOfAttributes = getU2(classId,methodBase + 6);
+    for (u2 i = 0; i < noOfAttributes; i++)
     {
-        if (STRNCMP("Code",getAddr(classId,CP(classId,getU2(classId,METHODBASE(classId, methodId) + 8 + attrLength)) + 3), 4) == 0)
-            return (u2) METHODBASE(classId, methodId) + 8 + 14 + attrLength;
-     //+attrLength;		????
-        attrLength = getU4(classId,METHODBASE(classId, methodId) + 8) + 6;
+        const u2 attributeId = getU2(classId,methodBase + 8 + attrLength);
+        if (STRNCMP("Code",UTF8_GET_STRING(classId,attributeId), 4) == 0)
+            return (u2) methodBase + 8 + 14 + attrLength;
+        //+attrLength;		????
+        attrLength = getU4(classId,methodBase + 8) + 6;
      } // < 64K
     return 0;
 }

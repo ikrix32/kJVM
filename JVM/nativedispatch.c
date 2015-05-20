@@ -40,23 +40,6 @@ u1 sizeOfNativeTypes[] = {  sizeof(jboolean),sizeof(jbyte),sizeof(jchar),
                             sizeof(jbooleanArray),sizeof(jbyteArray),sizeof(jcharArray),
                             sizeof(jshortArray),sizeof(jintArray),sizeof(jfloatArray)};
 
-NativeType charToType(const char type[2])
-{
-    const int tIndex = type[0] == '[' ? 1 : 0;
-
-    if(type[tIndex] == 'B') return tIndex == 0 ? BYTE : BYTEARRAY;
-    if(type[tIndex] == 'Z') return tIndex == 0 ? BOOLEAN : BOOLEANARRAY;
-    if(type[tIndex] == 'C') return tIndex == 0 ? CHAR : CHARARRAY;
-
-    if(type[tIndex] == 'S') return tIndex == 0 ? SHORT: SHORTARRAY;
-    if(type[tIndex] == 'I') return tIndex == 0 ? INT  : INTARRAY;
-    if(type[tIndex] == 'F') return tIndex == 0 ? FLOAT: FLOATARRAY;
-
-    DNOTSUPPORTED;
-
-    return 0;
-}
-
 void paramReadVM(void *out,const NativeType type,const slot val)
 {
     switch (type)

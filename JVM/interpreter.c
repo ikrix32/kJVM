@@ -13,21 +13,10 @@
 #include "interpreter.h"
 #include "nativedispach.h"
 
-#define GETSTARTPC(offset)  ((strncmp(  "Code",\
-getAddr(cN, cs[cN].constant_pool[getU2(METHODBASE(cN,mN) + 8 + offset)] + 3),4) == 0)\
-? (u2)METHODBASE(cN,mN) + 8 + 14 + offset \
-: GETSTARTPC(offset + getU4(METHODBASE(cN,mN) + 8) + 6))
-
 
 #ifdef USE_MICROKERNEL
 #include "microkernel.h"
 #endif
-
-//static slot first;
-//static slot second;
-//static slot third;
-//static slot fourth;
-
 
 #ifdef ENABLE_KCLASS_FORMAT
 extern char* getClassName(const u2 classId);
@@ -732,6 +721,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #ifdef DEBUG_KCLASS
                 const char* className = getClassName(classNameId);
                 const u2 classNameLength = stringLength(className);
+#else
+                const char* className = "";
 #endif
 #else
                 const char* className = UTF8_GET_STRING(cN,classNameId);
@@ -790,6 +781,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #ifdef DEBUG_KCLASS
                 const char* className = getClassName(classNameId);
                 const u2 classNameLength = stringLength(className);
+#else
+                const char* className = "";
 #endif
 #else
                 const char* className = UTF8_GET_STRING(cN,classNameId);
@@ -1041,6 +1034,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
 #ifdef DEBUG_KCLASS
                 const char* className = getClassName(classId);
                 const u2 classNameLength = stringLength(className);
+#else
+                const char* className = "";
 #endif
 #else
                 const u2 classNameId = CLASSINFO_GET_NAMEID(cN,classInfo);
@@ -1547,7 +1542,7 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
                 u4 my_addr = getU4(cN,0);
                 opStackPush(toSlot(my_addr));
             }BREAK;
-            CASE(LCONST_0):
+            /*CASE(LCONST_0):
             CASE(LCONST_1):
             CASE(DCONST_0):
             CASE(DCONST_1):
@@ -1605,8 +1600,8 @@ void interpreter_run(const u1 classId,const u1 methodId) // in: classNumber,  me
             CASE(DCMPG):
             CASE(DRETURN):
             CASE(LRETURN):
-            CASE(NOT_SUPPORTED):
-            //default:
+            CASE(NOT_SUPPORTED):*/
+            default:
             {
                 DEBUGPRINT_OPC("code:%d",code);
                 DNOTSUPPORTED;

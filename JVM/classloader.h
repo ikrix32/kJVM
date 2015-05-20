@@ -7,9 +7,9 @@
 
 #ifndef __KJVM_CLASSLOADER__
 #define __KJVM_CLASSLOADER__
-void classLoader_init(void);
-u1 classLoader_loadClass(const u1* bin,const u4 binSize);
-void classLoader_clinitClass(const u1 classId);
+void    classloaderInit(void);
+u1      classloaderLoadClass(const u1* bin,const u4 binSize);
+void    classloaderClinitClass(const u1 classId);
 //todo - unload all and unload to bootstrap
-void unloadLastClass(void);
+void    classloaderUnloadLastClass(void);
 #endif
