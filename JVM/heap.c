@@ -27,7 +27,7 @@ void heapPrintStackReferences(ThreadControlBlock* thread);
 void heapMergeFreeBlocks(void);
 void checkObjects(void);
 u1   canItBeAnObject(const u2);
-u1   heapCompactMemory();
+u1   heapCompactMemory(void);
 
 /* heap */
 void heapInit()

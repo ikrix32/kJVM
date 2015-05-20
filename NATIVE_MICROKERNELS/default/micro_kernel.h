@@ -3,7 +3,6 @@
 
 #include "kvm_type_definitions.h" 
 
-
 kvm_internal jvoid java_lang_Object_notify0();
 
 kvm_internal jvoid java_lang_Object_notifyAll1();
@@ -69,4 +68,5 @@ kvm_internal jvoid java_lang_Runtime_gc5();
  jvoid tests_NativeMethodsTest_nativeMethod9();
 
  jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray param1,jintArray param2,jfloatArray param3);
+
 #endif

@@ -13,8 +13,8 @@ kvm_internal void kvmParamWrite(kvm_mem_pointer out,const NativeType type,const 
 kvm_internal void kvmWriteReturn(kvm_mem_pointer in,const NativeType type);
 
 
-void microkernelNativeDispatch(const u2 classId,const u2 methodId){
-
+void microkernelNativeDispatch(const u2 classId,const u2 methodId)
+{
 	if(classId == 0){
 		if( methodId == 0){
 			java_lang_Object_notify0();

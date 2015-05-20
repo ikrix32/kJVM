@@ -246,7 +246,7 @@ static const u4 microKernelBinariesSize[] =
 	sizeof(tests_NativeMethodsTestBin),
 };
 
-extern const int getNoMicroKernelClasses(){
+extern int getNoMicroKernelClasses(){
 	return sizeof(microKernelBinariesSize) / sizeof(microKernelBinariesSize[0]);
 }
 

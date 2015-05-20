@@ -406,8 +406,8 @@ kvm_internal jvoid java_lang_Object_wait2(){
         ERROREXIT(254,"Wait without blocked mutex");
     }
 #endif
-    /*can not be ->IllegalMonitorStateException*/
-    /* free lock for another thread and lock this */
+    //can not be ->IllegalMonitorStateException
+    // free lock for another thread and lock this
     HEAPOBJECTMARKER(object.stackObj.pos).mutex = MUTEXNOTBLOCKED;
 
     updateThreadState(object,THREADMUTEXBLOCKED,THREADNOTBLOCKED,1,0,0);
@@ -496,7 +496,7 @@ kvm_internal jint java_lang_Runtime_totalMemory4(){
 }
 
 kvm_internal jvoid java_lang_Runtime_gc5(){
-    return heapCollectGarbage();
+    heapCollectGarbage();
 }
 
 #ifndef KNATIVE_DISPATCH

@@ -92,8 +92,8 @@ s1 vm_run(const u1 classId){
     if (mainMethodIndex != INVALID_METHOD_ID)
     {
         //PRINTF("  -> run <main> :\n");
-        opStackPush(toSlot((u4) 0));           /* args parameter to main (should be a string array)*/
-        interpreter_run(classId,mainMethodIndex); /*  run main*/
+        opStackPush(toSlot((u4) 0));                // args parameter to main (should be a string array)
+        interpreter_run(classId,mainMethodIndex);   //  run main
 #ifndef TINYBAJOS
         return 0;
 #endif

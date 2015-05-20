@@ -29,8 +29,7 @@ jchar platform_PlatForm_nativeCharIn0(){
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
     ch = getchar();
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    opStackPush(toSlot((u4) ch));
-    return 1;
+    return ch;
 #else
     return 0;
 #endif
@@ -48,14 +47,11 @@ jint platform_PlatForm_currentTimeMillis3(){
 #ifndef NRF51
     struct timeval timerstart;
     gettimeofday(&timerstart, NULL);
-    opStackPush(toSlot((u4)((timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000) & 0x7FFFFFFF)));
-    return 1;
+    return ((jint)((timerstart.tv_sec * 1000 + timerstart.tv_usec / 1000) & 0x7FFFFFFF));
 #else
     return 1;
 #endif
 }
-
-
 
 jint tests_NativeMethodsTest_nativeMethod1(jbyte param0){
     printf("nativeMethod(byte:%d)\n",param0);
@@ -66,7 +62,7 @@ jcharArray tests_NativeMethodsTest_nativeMethod2(jchar param0){
     printf("nativeMethod(char:%c)\n",param0);
     jcharArray text;
     text.length = 3;
-    text.values = malloc(text.length * sizeof(jchar));
+    text.values = (jchar*)malloc(text.length * sizeof(jchar));
     text.values[0] = 'S';
     text.values[1] = 'T';
     text.values[2] = 'F';
@@ -124,7 +120,7 @@ jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray para
     printf("STRESS TEST Start\n");
     jintArray result;
     result.length = param0.length + param1.length + param2.length + param3.length;
-    result.values = malloc(result.length * sizeof(jint));
+    result.values = (jint*)malloc(result.length * sizeof(jint));
     int n = 0;
     printf("\nbytes:");
     for(int i = 0; i < param0.length;i++){
@@ -158,6 +154,5 @@ jintArray tests_NativeMethodsTest_stressTest10(jbyteArray param0,jcharArray para
     printf("\nSTRESS TEST End\n");
     return result;
 }
-
 
 #endif
