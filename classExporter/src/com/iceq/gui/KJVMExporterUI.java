@@ -28,8 +28,12 @@ import javax.swing.JTable;
 import javax.swing.TransferHandler;
 import javax.swing.table.AbstractTableModel;
 
+import proguard.Configuration;
+import proguard.ProGuard;
+
 import com.iceq.KClassFileInfo;
 import com.iceq.KJVMExporter;
+import com.iceq.KVMProguard;
 
 
 public class KJVMExporterUI extends JPanel 
@@ -285,7 +289,8 @@ public class KJVMExporterUI extends JPanel
 				if (res == JFileChooser.APPROVE_OPTION) {
 					final File selectedFile = fd.getSelectedFile();
 					
-					m_exporter.exportClasses(selectedFile);
+					//m_exporter.exportClasses(selectedFile);
+					m_exporter.exportMicrokernelProguard(selectedFile);
 				}
 			}
 		});
